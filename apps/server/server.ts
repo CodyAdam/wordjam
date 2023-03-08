@@ -1,11 +1,13 @@
 import {WebSocketServer} from "ws";
 import {LoginResponse, LoginResponseType, WSMessage} from "./ws";
 import {Player} from "./player";
+import {BoardLetter, Position} from "./board";
 
 const port = 8080;
 const wss = new WebSocketServer({ port: port });
 
 let players : Player[] = [];
+let board = new Map<Position, BoardLetter>();
 
 console.log("Server started on port " + port);
 
