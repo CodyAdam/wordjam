@@ -26,10 +26,14 @@ export class DictionnaryService {
     }
 
     randomWord(){
-
+        let value = Math.random() * this.words.size
+        return Array.from(this.words)[Math.floor(value)]
     }
     randomSentence(n: number){
-
+        let words = []
+        for(let i=0; i<n; i++)
+            words.push(this.randomWord())
+        return words.join('-')
     }
 
     /**
