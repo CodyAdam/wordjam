@@ -29,7 +29,6 @@ export default function Canvas(props: {}) {
   useEffect(() => {
     console.log('offset', offset);
   }, [offset]);
-    
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -44,7 +43,7 @@ export default function Canvas(props: {}) {
   return (
     <canvas
       ref={canvasRef}
-      className='border h-full w-full'
+      className='h-full w-full border'
       onMouseDown={(e) => {
         setDragStart({ x: e.clientX, y: e.clientY });
         setIsDragging(true);
