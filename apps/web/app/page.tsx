@@ -1,14 +1,19 @@
 'use client';
 import Board from '@/components/Board';
-import { useEffect } from 'react';
+import { useEffect, useState } from "react";
 import useWebSocket, { ReadyState } from 'react-use-websocket';
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
+import { AppState } from "@/lib/AppState";
+import Login from "@/components/Login/Login";
+import { SOCKET_URL } from "@/lib/config";
 
-const SOCKET_URL = 'ws://localhost:8080';
+
 
 export default function Home() {
   const { sendMessage, sendJsonMessage, lastMessage, lastJsonMessage, readyState, getWebSocket } =
-    useWebSocket(SOCKET_URL);
+    useWebSocket(SOCKET_URL, {share: true});
+
+  const [appStage, setAppStage] = useState(AppState.AwaitingLogin);
 
   useEffect(() => {
     if (lastMessage) {
@@ -16,12 +21,8 @@ export default function Home() {
     }
   }, [lastMessage]);
 
-  if (readyState !== ReadyState.OPEN)
-    return (
-      <div className='flex h-full flex-col items-center justify-center'>
-        <h1>Connecting to server...</h1>
-      </div>
-    );
+
+  return <Login></Login>
 
   return (
     <main className='bg-grid flex h-full items-center justify-center bg-slate-100 [&>div]:h-screen [&>div]:w-screen'>
