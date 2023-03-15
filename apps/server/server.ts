@@ -1,15 +1,20 @@
 import { WebSocketServer } from "ws";
+import {DictionaryService} from "./Dictionary";
 
-const port = 8080;
-const wss = new WebSocketServer({ port: port });
 
-console.log("Server started on port " + port);
+export function main(){
+    const port = 8080;
+    const wss = new WebSocketServer({ port: port });
+    const dictionnaryService = new DictionaryService()
 
-wss.on("connection", (ws) => {
+    console.log("Server started on port " + port);
 
-    ws.on("message", (message) => {
-        console.log("Received message => " + message);
+    wss.on("connection", (ws) => {
+
+        ws.on("message", (message) => {
+            console.log("Received message => " + message);
+        });
+
+        ws.send("Successfully connected to Wordjam server!");
     });
-
-    ws.send("Successfully connected to Wordjam server!");
-});
+}
