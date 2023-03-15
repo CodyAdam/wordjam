@@ -1,22 +1,14 @@
 'use client';
 import Board from '@/components/Board';
-import { useEffect } from 'react';
-import useWebSocket, { ReadyState } from 'react-use-websocket';
+import { io } from 'socket.io-client';
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 
 const SOCKET_URL = 'ws://localhost:8080';
 
 export default function Home() {
-  const { sendMessage, sendJsonMessage, lastMessage, lastJsonMessage, readyState, getWebSocket } =
-    useWebSocket(SOCKET_URL);
+  const socket = io(SOCKET_URL);
 
-  useEffect(() => {
-    if (lastMessage) {
-      console.log('lastMessage', lastMessage);
-    }
-  }, [lastMessage]);
-
-  if (readyState !== ReadyState.OPEN)
+  if (socket.connected)
     return (
       <div className='flex h-full flex-col items-center justify-center'>
         <h1>Connecting to server...</h1>
