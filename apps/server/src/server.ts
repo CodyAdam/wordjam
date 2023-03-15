@@ -1,4 +1,3 @@
-import { WebSocketServer } from 'ws';
 import { LoginResponse, LoginResponseType, WSMessage } from './types/ws';
 import { Player } from './types/player';
 import { BoardClient, BoardLetter, Position } from './types/board';
@@ -45,6 +44,9 @@ io.on('connection', (socket) => {
 
     LetterPlacedFromClient(message.data);
   });
+
+  console.log('New connection');
+  
 
   socket.emit("board", JSON.stringify(Array.from(board.values())));
 });

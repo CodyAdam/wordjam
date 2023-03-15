@@ -4,8 +4,8 @@
 
 @layer components {
   .bg-grid {
-    background-color: #e5e5f7;
-    background-image: linear-gradient(#7a7da656 2px, transparent 2px), linear-gradient(to right, #7a7da656 2px, #e5e5f7 2px);
+    background-color: #f6f6fa;
+    background-image: linear-gradient(#7a7da61b 2px, transparent 2px), linear-gradient(to right, #7a7da61b 2px, #f6f6fa 2px);
     /* size */
     background-size: var(--size) var(--size);
     /* offset */
