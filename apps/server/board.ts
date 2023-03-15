@@ -6,5 +6,11 @@ export type Position = {
 export type BoardLetter = {
     placedBy: string,
     timestamp: number,
-    letter: string
+    letter: string,
+    position: Position
+}
+
+export type BoardClient = {
+    position: Position,
+    letter: BoardLetter|undefined
 }
