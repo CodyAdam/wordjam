@@ -1,36 +1,36 @@
 'use client';
-import Board from '@/components/Board';
-import { useEffect, useState } from "react";
-import useWebSocket, { ReadyState } from 'react-use-websocket';
+import Board from '@/src/components/Board';
+import { useSocket } from '@/src/hooks/useSocket';
+import { BoardLetter } from '@/src/types/board';
+import { useEffect, useState } from 'react';
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
-import { AppState } from "@/lib/AppState";
-import Login from "@/components/Login/Login";
-import { SOCKET_URL } from "@/lib/config";
+import { AppState } from '@/src/lib/AppState';
+import Login from '@/src/components/Login';
+import { SOCKET_URL } from '@/src/lib/config';
 
-
-
-export default function Home() {
-  const { sendMessage, sendJsonMessage, lastMessage, lastJsonMessage, readyState, getWebSocket } =
-    useWebSocket(SOCKET_URL, {share: true});
+export default function App() {
+  const [placedLetters, setPlacedLetters] = useState<BoardLetter[]>([]);
 
   const [appStage, setAppStage] = useState(AppState.AwaitingLogin);
-
-  useEffect(() => {
-    if (lastMessage) {
-      console.log('lastMessage', lastMessage);
-    }
-  }, [lastMessage]);
-
-
-  return <Login></Login>
+  const { isConnected } = useSocket(SOCKET_URL, {
+    events: {
+      board: (data) => {
+        setPlacedLetters(JSON.parse(data));
+      },
+    },
+    onAny: (event, data) => {
+      console.info(event, data);
+    },
+  });
 
   return (
-    <main className='bg-grid flex h-full items-center justify-center bg-slate-100 [&>div]:h-screen [&>div]:w-screen'>
+    <main className='bg-grid flex h-full items-center justify-center bg-white [&>div]:h-screen [&>div]:w-screen'>
       <TransformWrapper centerOnInit initialScale={3}>
         <TransformComponent>
-          <Board />
+          <Board placedLetters={placedLetters} />
         </TransformComponent>
       </TransformWrapper>
+      <Login isConnected={isConnected} />
     </main>
   );
 }
