@@ -22,7 +22,7 @@ export class DictionnaryService {
      * @param word
      */
     wordExist(word: String): boolean {
-        return this.words.has(word)
+        return this.words.has(word.toLowerCase())
     }
 
     randomWord(){
@@ -42,6 +42,8 @@ export class DictionnaryService {
      * @param multipliers an optional list of the multiplier of each letter
      */
     getPointsOfWord(word: String, multipliers?: number[]): number {
+        word = word.toLowerCase()
+
         if(multipliers && multipliers.length != word.length)
             throw "Multiplier should have the same length as the word"
 
