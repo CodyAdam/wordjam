@@ -23,7 +23,12 @@ export default function Login({ isConnected, socket, onLogin }: { isConnected: b
     resetField,
   } = useForm<Inputs>();
   const onSubmit: SubmitHandler<Inputs> = (data) => {
-    socket.emit('login', JSON.stringify({ data: {username: data.nicknameOrToken} }))
+    if (loginType === Type.Nickname) {
+      socket.emit('login', JSON.stringify({ data: {username: data.nicknameOrToken} }))
+    } else {
+      localStorage.setItem("token", data.nicknameOrToken);
+      socket.emit('login', JSON.stringify({ token: data.nicknameOrToken }))
+    }
   };
 
   const [loginType, setLoginType] = useState(Type.Nickname);
@@ -67,7 +72,7 @@ export default function Login({ isConnected, socket, onLogin }: { isConnected: b
 
 
   return (
-    <div className='flex h-full flex-col items-center justify-center absolute backdrop-blur-sm bg-black/20'>
+    <div className='flex h-full flex-col items-center justify-center absolute backdrop-blur-sm bg-black/20 w-full'>
       <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-3 rounded-lg bg-white p-10 shadow'>
         <div className='flex'>
           <h1 className='pr-2 text-5xl font-bold text-gray-700'>WordJam</h1>
