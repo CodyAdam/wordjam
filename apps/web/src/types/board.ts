@@ -19,3 +19,9 @@ export type BoardClient = {
     position: Position,
     letter: BoardLetter|undefined
 }
+
+export type Pan = {
+    offset: Position,
+    scale: number
+    origin: Position
+}
