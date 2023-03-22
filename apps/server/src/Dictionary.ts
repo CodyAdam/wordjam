@@ -4,7 +4,9 @@ import wordfile from '../dictionary.json'
 import letterPointsFile from '../letterPoints.json'
 
 let words = new Set<String>(wordfile)
-let letterPoints = new Map<string, number>(JSON.parse(JSON.stringify(letterPointsFile)))
+let letterPoints: number[] = (letterPointsFile)
+
+let chars = "abcdefghijklmnopqrstuvwxyz"
 
 export class DictionaryService {
     /**
@@ -39,7 +41,8 @@ export class DictionaryService {
 
         let points = 0
         for(let i=0; i<word.length; i++){
-            let pointForChar = letterPoints.get(word[i])
+            let pos = chars.indexOf(word[i])
+            let pointForChar = letterPoints[pos]
             if(pointForChar == null)
                 throw "Letter not found"
             let pointWithMultiplier = (multipliers) ? multipliers[i] : 1
