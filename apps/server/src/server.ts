@@ -1,7 +1,8 @@
-import { LoginResponse, LoginResponseType, WSMessage } from './types/ws';
-import { Player } from './types/player';
-import { BoardClient, BoardLetter, Position } from './types/board';
-import { Server } from 'socket.io';
+import {LoginResponse, LoginResponseType, WSMessage} from './types/ws';
+import {Player} from './types/player';
+import {BoardLetter, Direction, PlaceWord, Position} from './types/board';
+import {Server} from 'socket.io';
+import {DictionaryService} from "./Dictionary";
 
 const io = new Server({
   cors: {
@@ -11,7 +12,7 @@ const io = new Server({
 const PORT = 8080;
 io.listen(PORT);
 
-let players: Player[] = [];
+let players = new Map<string, Player>();
 let board = new Map<string, BoardLetter>();
 
 console.log('Server started on port ' + PORT);
@@ -30,7 +31,7 @@ io.on('connection', (socket) => {
 
     const username: string = message.data.username || '';
     const token: string = message.token || '';
-    socket.emit("token",JSON.stringify(Login(username, token)));
+    socket.emit("token", JSON.stringify(Login(username, token)));
   });
 
   socket.on('letterplaced', (rawData) => {
@@ -42,11 +43,10 @@ io.on('connection', (socket) => {
       return;
     }
 
-    LetterPlacedFromClient(message.data);
+    LetterPlacedFromClient(message.data, message.token);
   });
 
   console.log('New connection');
-  
 
   socket.emit("board", JSON.stringify(Array.from(board.values())));
 });
@@ -55,28 +55,49 @@ function Login(username: string, token: string): LoginResponse {
   let result: LoginResponse = { status: LoginResponseType.SUCCESS };
   // Token verification
   if (token !== '') {
-    const playerToken: Player[] = players.filter((p) => p.token == token);
-    if (playerToken.length > 0) {
-      result.username = playerToken[0].username;
+    if(players.has(token)){
+      result.username = players.get(token)?.username || '';
       result.status = LoginResponseType.SUCCESS;
     } else result.status = LoginResponseType.WRONG_TOKEN;
     return result;
   }
   // Player Username verification
-  const playerUsername: Player[] = players.filter((p) => p.username == username);
-  // Check duplicate username
-  if (playerUsername.length > 0) {
-    result.status = LoginResponseType.ALREADY_EXIST;
-  } else {
-    let newPlayer: Player = { username: username, token: generateToken(4) };
-    players.push(newPlayer);
-    result.token = newPlayer.token;
-    console.log('New Player : ' + newPlayer.username);
+  for (let p of players.values()) {
+    if(p.username == username) {
+      result.status = LoginResponseType.ALREADY_EXIST;
+        return result;
+    }
   }
+  let newPlayer : Player = { username: username, token: generateToken(4), score:0, letters: []};
+  players.set(newPlayer.token, newPlayer);
+  result.token = newPlayer.token;
+  console.log('New Player : ' + newPlayer.username);
   return result;
 }
 
-function LetterPlacedFromClient(data: any) {}
+function LetterPlacedFromClient(data: PlaceWord, token: string) {
+  let currentPos: Position = data.startPos;
+  let word: string = "";
+  let playerLeters: string[] = players.get(token)?.letters || [];
+  let lettersToPlaced: string[] = data.letters;
+  while(lettersToPlaced.length > 0){
+    if(hasLetter(currentPos)){
+      word += board.get(currentPos.x + '_' + currentPos.y)?.letter;
+    } else {
+      word += lettersToPlaced.shift();
+    }
+    if(data.direction == Direction.DOWN) currentPos.y--;
+    else currentPos.x++;
+  }
+  if(DictionaryService.wordExist(word)){
+
+  }
+
+}
+
+function hasLetter(position: Position): boolean {
+  return board.has(position.x + '_' + position.y);
+}
 
 function generateToken(len: number): string {
   let text = '';
