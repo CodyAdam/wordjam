@@ -37,7 +37,7 @@ export class DictionaryService {
         word = word.toLowerCase()
 
         if(multipliers && multipliers.length != word.length)
-            throw "Multiplier should have the same length as the word"
+            throw `Multiplier should have the same length as the word : ${word.length} != ${multipliers.length}`
 
         let points = 0
         for(let i=0; i<word.length; i++){
