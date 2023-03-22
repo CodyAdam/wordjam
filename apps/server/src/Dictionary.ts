@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 
-import wordfile from './dictionary.json'
-import letterPointsFile from './letterPoints.json'
+import wordfile from '../dictionary.json'
+import letterPointsFile from '../letterPoints.json'
 
 let words = new Set<String>(wordfile)
 let letterPoints = new Map<string, number>(JSON.parse(JSON.stringify(letterPointsFile)))
