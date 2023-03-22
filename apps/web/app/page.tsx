@@ -24,13 +24,13 @@ export default function App() {
   });
 
   return (
-    <main className='bg-grid flex h-full items-center justify-center bg-white [&>div]:h-screen [&>div]:w-screen'>
+    <main className='bg-grid flex h-full items-center justify-center bg-white [&>div]:h-screen [&>div]:w-screen relative'>
       <TransformWrapper centerOnInit initialScale={3}>
         <TransformComponent>
           <Board placedLetters={placedLetters} />
         </TransformComponent>
       </TransformWrapper>
-      <Login isConnected={isConnected} />
+      {appStage === AppState.AwaitingLogin && <Login isConnected={isConnected} />}
     </main>
   );
 }

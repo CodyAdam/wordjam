@@ -24,7 +24,7 @@ export default function Login({ isConnected }: { isConnected: boolean }) {
   const [loginType, setLoginType] = useState(Type.Nickname);
 
   return (
-    <div className='flex h-full flex-col items-center justify-center border-l border-gray-400'>
+    <div className='flex h-full flex-col items-center justify-center absolute backdrop-blur-sm bg-black/20'>
       <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-3 rounded-lg bg-white p-10 shadow'>
         <div className='flex'>
           <h1 className='pr-2 text-5xl font-bold text-gray-700'>WordJam</h1>
