@@ -10,6 +10,11 @@ export type BoardLetter = {
     position: Position
 }
 
+export type InventoryLetter = {
+    letter: string,
+    position?: Position
+}
+
 export type BoardClient = {
     position: Position,
     letter: BoardLetter|undefined

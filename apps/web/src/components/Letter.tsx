@@ -1,6 +1,6 @@
 import { Position } from '../types/board';
 
-export default function Letter(props: {
+export default function LetterBoard(props: {
   letter: string;
   position: Position;
   mapOffset: Position;
@@ -24,9 +24,17 @@ export default function Letter(props: {
       }}
       key={x + '-' + y}
     >
-      <div className='flex h-full w-full cursor-pointer items-center justify-center rounded-sm text-base text-[.3rem] font-bold text-zinc-700 hover:bg-slate-200 hover:text-zinc-900'>
+      <div className='flex h-full w-full cursor-pointer select-none items-center justify-center rounded-sm text-base  font-bold text-zinc-700 hover:bg-slate-200 hover:text-zinc-900'>
         {content}
       </div>
+    </div>
+  );
+}
+
+export function LetterButton({ letter }: { letter: string }) {
+  return (
+    <div className='flex h-20 w-20 cursor-pointer select-none items-center justify-center rounded-lg border-2 bg-white p-2 border-b-8 text-5xl font-bold text-zinc-700 transition-all hover:-translate-y-3 hover:text-zinc-900 hover:shadow-md duration-75'>
+      {letter}
     </div>
   );
 }

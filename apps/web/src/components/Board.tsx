@@ -1,9 +1,9 @@
 'use client';
 
-import { ReactElement } from 'react';
+import { MouseEventHandler, ReactElement, ReactEventHandler, useCallback, useState } from 'react';
 import { useControls } from 'react-zoom-pan-pinch';
-import { BoardLetter } from '../types/board';
-import Letter from './Letter';
+import { BoardLetter, InventoryLetter } from '../types/board';
+import LetterBoard from './Letter';
 
 const mapWidth = 1000;
 const mapHeight = 1000;
@@ -18,10 +18,16 @@ export default function Board(props: { placedLetters: BoardLetter[] }) {
     document.documentElement.style.setProperty('--off-x', state.instance.transformState.positionX + 'px');
     document.documentElement.style.setProperty('--off-y', state.instance.transformState.positionY + 'px');
   });
+  const onMove = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    const pos = { x: e.clientX, y: e.clientY };
+    console.log('move', pos);
+  }, []);
 
   return (
     <div
       className='relative h-full w-full ring-1 ring-slate-600'
+      onClick={onMove}
+      onMouseMove={onMove}
       style={
         {
           height: mapHeight,
@@ -30,7 +36,7 @@ export default function Board(props: { placedLetters: BoardLetter[] }) {
       }
     >
       {props.placedLetters.map((letter) => (
-        <Letter
+        <LetterBoard
           key={letter.position.x + '-' + letter.position.y}
           letter={letter.letter}
           position={letter.position}
@@ -38,6 +44,13 @@ export default function Board(props: { placedLetters: BoardLetter[] }) {
           tileSize={tileSize}
         />
       ))}
+      <LetterBoard
+        key={'djwaidjowai '}
+        letter={'00'}
+        position={{ x: 0, y: 0 }}
+        mapOffset={{ x: offsetX, y: offsetY }}
+        tileSize={tileSize}
+      />
     </div>
   );
 }
