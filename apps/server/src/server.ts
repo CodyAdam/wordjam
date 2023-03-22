@@ -1,7 +1,8 @@
-import { LoginResponse, LoginResponseType, WSMessage } from './types/ws';
-import { Player } from './types/player';
-import {BoardClient, BoardLetter, PlaceWord, Position} from './types/board';
-import { Server } from 'socket.io';
+import {LoginResponse, LoginResponseType, WSMessage} from './types/ws';
+import {Player} from './types/player';
+import {BoardLetter, Direction, PlaceWord, Position} from './types/board';
+import {Server} from 'socket.io';
+import {DictionaryService} from "./Dictionary";
 
 const io = new Server({
   cors: {
@@ -42,7 +43,7 @@ io.on('connection', (socket) => {
       return;
     }
 
-    LetterPlacedFromClient(message.data);
+    LetterPlacedFromClient(message.data, message.token);
   });
 
   console.log('New connection');
@@ -74,9 +75,23 @@ function Login(username: string, token: string): LoginResponse {
   return result;
 }
 
-function LetterPlacedFromClient(data: PlaceWord) {
-  let lettercount: number = 0;
+function LetterPlacedFromClient(data: PlaceWord, token: string) {
+  let currentPos: Position = data.startPos;
   let word: string = "";
+  let playerLeters: string[] = players.get(token)?.letters || [];
+  let lettersToPlaced: string[] = data.letters;
+  while(lettersToPlaced.length > 0){
+    if(hasLetter(currentPos)){
+      word += board.get(currentPos.x + '_' + currentPos.y)?.letter;
+    } else {
+      word += lettersToPlaced.shift();
+    }
+    if(data.direction == Direction.DOWN) currentPos.y--;
+    else currentPos.x++;
+  }
+  if(DictionaryService.wordExist(word)){
+
+  }
 
 }
 
