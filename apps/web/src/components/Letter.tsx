@@ -1,4 +1,4 @@
-import { TILE_SIZE } from '../lib/config';
+import { TILE_SIZE } from '../lib/constants';
 import { Position } from '../types/board';
 
 export default function LetterBoard({
@@ -32,9 +32,11 @@ export default function LetterBoard({
 
 export function LetterButton({ letter }: { letter: string }) {
   return (
-    <div className='flex h-20 w-20 cursor-pointer select-none items-center justify-center rounded-lg border-gray-400 bg-white p-2 text-5xl font-bold text-zinc-700 transition-all duration-75 hover:-translate-y-3 hover:text-zinc-900 hover:shadow-lg group'>
-      <div className='flex h-20 w-20 cursor-pointer select-none items-center justify-center rounded-lg border-2 border-b-8 border-gray-400 bg-white p-2 text-5xl font-bold text-zinc-700 transition-all duration-75 hover:-translate-y-3 hover:text-zinc-900 hover:shadow-lg'>
-        {letter}
+    <div className='group cursor-pointer select-none'>
+      <div className='flex h-20 w-20 items-center justify-center rounded-lg bg-slate-100 pb-8 text-5xl font-bold text-zinc-700 transition-all duration-75 group-hover:-translate-y-4 group-hover:scale-105 group-hover:shadow-lg'>
+        <div className='flex h-20 w-20 items-center justify-center rounded-lg border-2 border-slate-100 bg-white p-2'>
+          {letter}
+        </div>
       </div>
     </div>
   );

@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 import { AppState } from '@/src/lib/AppState';
 import Login from '@/src/components/Login';
-import { SOCKET_URL } from '@/src/lib/config';
+import { SOCKET_URL } from '@/src/lib/constants';
 import UserUI from '@/src/components/UserUI';
 import Canvas from '@/src/components/Canvas';
 

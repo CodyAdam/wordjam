@@ -2,8 +2,8 @@
 
 import { MouseEventHandler, ReactElement, ReactEventHandler, useCallback, useState } from 'react';
 import { useControls } from 'react-zoom-pan-pinch';
-import { TILE_SIZE } from '../lib/config';
-import { posToInt, screenToWorld } from '../lib/posHelper';
+import { TILE_SIZE } from '../lib/constants';
+import { posFloor, screenToWorld } from '../lib/posHelper';
 import { BoardLetter, InventoryLetter, Pan, Position } from '../types/board';
 import LetterBoard from './Letter';
 
@@ -38,7 +38,7 @@ export default function Board({
   const onMove = useCallback(
     (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
       const pos = { x: e.clientX, y: e.clientY };
-      setHoverPos(posToInt(screenToWorld(pos, pan)));
+      setHoverPos(posFloor(screenToWorld(pos, pan)));
     },
     [pan],
   );
