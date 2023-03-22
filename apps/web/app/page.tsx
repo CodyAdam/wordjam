@@ -12,6 +12,8 @@ export default function App() {
   const [placedLetters, setPlacedLetters] = useState<BoardLetter[]>([]);
 
   const [appStage, setAppStage] = useState(AppState.AwaitingLogin);
+
+  const [playerToken, setPlayerToken] = useState("");
   const { isConnected, socket } = useSocket(SOCKET_URL, {
     events: {
       board: (data) => {
@@ -19,9 +21,17 @@ export default function App() {
       },
     },
     onAny: (event, data) => {
-      console.info(event, data);
+      // console.info(event, data);
     },
   });
+
+
+  function onLogin(token: string) {
+    setPlayerToken(token);
+    // store the token in local storage
+    localStorage.setItem("token", token);
+    setAppStage(AppState.InGame);
+  }
 
   return (
     <main className='bg-grid flex h-full items-center justify-center bg-white [&>div]:h-screen [&>div]:w-screen relative'>
@@ -30,7 +40,7 @@ export default function App() {
           <Board placedLetters={placedLetters} />
         </TransformComponent>
       </TransformWrapper>
-      {appStage === AppState.AwaitingLogin && <Login socket={socket} isConnected={isConnected} />}
+      {appStage === AppState.AwaitingLogin && <Login onLogin={onLogin} socket={socket} isConnected={isConnected} />}
     </main>
   );
 }

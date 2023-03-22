@@ -1,9 +1,10 @@
 'use client';
 import Image from 'next/image';
 import jamIcon from '../../public/jam.png';
-import { useState } from 'react';
+import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { Socket } from "socket.io-client";
+import { AppState } from "@/src/lib/AppState";
 
 enum Type {
   Nickname,
@@ -14,7 +15,7 @@ type Inputs = {
   nicknameOrToken: string;
 };
 
-export default function Login({ isConnected, socket }: { isConnected: boolean, socket: Socket }) {
+export default function Login({ isConnected, socket, onLogin }: { isConnected: boolean, socket: Socket, onLogin: (token: string) => void }) {
   const {
     register,
     handleSubmit,
@@ -27,7 +28,41 @@ export default function Login({ isConnected, socket }: { isConnected: boolean, s
 
   const [loginType, setLoginType] = useState(Type.Nickname);
 
-  socket.on('token', (data) => { console.log(data) });
+
+
+  useEffect(() => {
+
+
+    const tokenEvent = (data: any) => {
+      const dataParsed = JSON.parse(data);
+
+      if (dataParsed.status && dataParsed.status === "ALREADY_EXIST") {
+        alert("Nickname already exist, please choose another one");
+        return;
+      }
+      if (dataParsed.status && dataParsed.status === "SUCCESS") {
+        onLogin(dataParsed.token);
+      }
+    };
+    socket.on('token', tokenEvent);
+
+
+    const onConnect = () => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        socket.emit('login', JSON.stringify({ token: token }))
+      }
+    };
+    socket.on('connect', onConnect);
+
+
+
+    return () => {
+      socket.off('token',tokenEvent)
+      socket.off('connect', onConnect);
+    }
+
+  }, [socket]);
 
 
 
