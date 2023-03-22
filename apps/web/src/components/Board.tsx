@@ -3,7 +3,7 @@
 import { MouseEventHandler, ReactElement, ReactEventHandler, useCallback, useState } from 'react';
 import { useControls } from 'react-zoom-pan-pinch';
 import { TILE_SIZE } from '../lib/constants';
-import { posFloor, screenToWorld } from '../lib/posHelper';
+import { posFloor, screenToWorld } from '../utils/posHelper';
 import { BoardLetter, InventoryLetter, Pan, Position } from '../types/board';
 import LetterBoard from './Letter';
 

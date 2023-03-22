@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import useWindowSize from '../hooks/useWindowSize';
 import { SCROLL_SPEED, TILE_SIZE } from '../lib/constants';
-import { posCeil, posCentered, posFloor, screenToWorld, worldToScreen } from '../lib/posHelper';
+import { posCeil, posCentered, posFloor, screenToWorld, worldToScreen } from '../utils/posHelper';
 import { BoardLetter, Pan, Position } from '../types/board';
 
 function drawGrid(ctx: CanvasRenderingContext2D, pan: Pan, width: number, height: number) {
