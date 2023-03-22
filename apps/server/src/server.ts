@@ -30,7 +30,7 @@ io.on('connection', (socket) => {
 
     const username: string = message.data.username || '';
     const token: string = message.token || '';
-    socket.emit("token",JSON.stringify(Login(username, token)));
+    socket.emit("token", JSON.stringify(Login(username, token)));
   });
 
   socket.on('letterplaced', (rawData) => {
@@ -46,7 +46,6 @@ io.on('connection', (socket) => {
   });
 
   console.log('New connection');
-  
 
   socket.emit("board", JSON.stringify(Array.from(board.values())));
 });
