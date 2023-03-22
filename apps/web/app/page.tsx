@@ -12,7 +12,7 @@ export default function App() {
   const [placedLetters, setPlacedLetters] = useState<BoardLetter[]>([]);
 
   const [appStage, setAppStage] = useState(AppState.AwaitingLogin);
-  const { isConnected } = useSocket(SOCKET_URL, {
+  const { isConnected, socket } = useSocket(SOCKET_URL, {
     events: {
       board: (data) => {
         setPlacedLetters(JSON.parse(data));
@@ -30,7 +30,7 @@ export default function App() {
           <Board placedLetters={placedLetters} />
         </TransformComponent>
       </TransformWrapper>
-      {appStage === AppState.AwaitingLogin && <Login isConnected={isConnected} />}
+      {appStage === AppState.AwaitingLogin && <Login socket={socket} isConnected={isConnected} />}
     </main>
   );
 }

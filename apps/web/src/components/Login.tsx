@@ -3,6 +3,7 @@ import Image from 'next/image';
 import jamIcon from '../../public/jam.png';
 import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
+import { Socket } from "socket.io-client";
 
 enum Type {
   Nickname,
@@ -13,15 +14,22 @@ type Inputs = {
   nicknameOrToken: string;
 };
 
-export default function Login({ isConnected }: { isConnected: boolean }) {
+export default function Login({ isConnected, socket }: { isConnected: boolean, socket: Socket }) {
   const {
     register,
     handleSubmit,
     formState: { errors },
     resetField,
   } = useForm<Inputs>();
-  const onSubmit: SubmitHandler<Inputs> = (data) => {};
+  const onSubmit: SubmitHandler<Inputs> = (data) => {
+    socket.emit('login', JSON.stringify({ data: {username: data.nicknameOrToken} }))
+  };
+
   const [loginType, setLoginType] = useState(Type.Nickname);
+
+  socket.on('token', (data) => { console.log(data) });
+
+
 
   return (
     <div className='flex h-full flex-col items-center justify-center absolute backdrop-blur-sm bg-black/20'>
