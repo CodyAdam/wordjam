@@ -13,11 +13,8 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
-    "@types/jest": "^29.4.2",
     "eslint-config-custom": "*",
-    "jest": "^29.5.0",
     "prettier": "latest",
-    "ts-jest": "^29.0.5",
     "turbo": "latest"
   },
   "engines": {
