@@ -8,11 +8,12 @@ import { AppState } from '@/src/lib/AppState';
 import Login from '@/src/components/Login';
 import { SOCKET_URL } from '@/src/lib/config';
 import UserUI from '@/src/components/UserUI';
+import Canvas from '@/src/components/Canvas';
 
 export default function App() {
   const [placedLetters, setPlacedLetters] = useState<BoardLetter[]>([]);
   const [appStage, setAppStage] = useState(AppState.AwaitingLogin);
-  const [pan, setPan] = useState<Pan>({ offset: { x: 0, y: 0 }, scale: 1, origin: { x: 13, y: 13 } });
+  const [pan, setPan] = useState<Pan>({ offset: { x: 0, y: 0 }, scale: 20, origin: { x: 0, y: 0 } });
   const { isConnected } = useSocket(SOCKET_URL, {
     events: {
       board: (data) => {
@@ -27,11 +28,12 @@ export default function App() {
   return (
     <div className='h-full'>
       <main className='bg-grid relative flex h-full bg-white [&>div]:h-screen [&>div]:w-screen'>
-        <TransformWrapper centerOnInit initialScale={3}>
+        {/* <TransformWrapper centerOnInit initialScale={3}>
           <TransformComponent>
             <Board placedLetters={placedLetters} pan={pan} setPan={(p)=> setPan(p)}/>
           </TransformComponent>
-        </TransformWrapper>
+        </TransformWrapper> */}
+        <Canvas placedLetters={placedLetters} pan={pan} setPan={(p) => setPan(p)} />
         {/* <Login isConnected={isConnected} /> */}
       </main>
       <UserUI />
