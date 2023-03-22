@@ -27,6 +27,9 @@ export default function App() {
 
 
   function onLogin(token: string) {
+    if (!token) {
+      token = localStorage.getItem("token") || "";
+    }
     setPlayerToken(token);
     // store the token in local storage
     localStorage.setItem("token", token);
