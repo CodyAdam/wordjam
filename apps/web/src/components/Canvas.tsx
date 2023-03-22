@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import useWindowSize from '../hooks/useWindowSize';
 import { SCROLL_SPEED, TILE_SIZE } from '../lib/constants';
 import { posCeil, posCentered, posFloor, screenToWorld, worldToScreen } from '../utils/posHelper';
@@ -69,49 +69,94 @@ export default function Canvas({
     if (hoverPos) drawDebug(ctx, posCentered(posFloor(hoverPos)), 'cursor', 'green', pan);
   }, [height, pan, width, hoverPos]);
 
+  const onDown = useCallback((e: React.TouchEvent | React.MouseEvent) => {
+    let x = 0;
+    let y = 0;
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.nativeEvent instanceof TouchEvent) {
+      x = e.nativeEvent.touches[0].clientX;
+      y = e.nativeEvent.touches[0].clientY;
+    } else if (e.nativeEvent instanceof MouseEvent) {
+      x = e.nativeEvent.clientX;
+      y = e.nativeEvent.clientY;
+    } else {
+      return;
+    }
+    setDragStart({ x, y });
+    setIsDragging(true);
+  }, []);
+
+  const onUp = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  const onMove = useCallback(
+    (e: React.TouchEvent | React.MouseEvent) => {
+      let x = 0;
+      let y = 0;
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.nativeEvent instanceof TouchEvent) {
+        x = e.nativeEvent.touches[0].clientX;
+        y = e.nativeEvent.touches[0].clientY;
+      } else if (e.nativeEvent instanceof MouseEvent) {
+        x = e.nativeEvent.clientX;
+        y = e.nativeEvent.clientY;
+      } else {
+        return;
+      }
+
+      if (isDragging) {
+        setPan({
+          ...pan,
+          offset: {
+            x: pan.offset.x + x - dragStart.x,
+            y: pan.offset.y + y - dragStart.y,
+          },
+        });
+        setDragStart({ x, y });
+      } else {
+        setHoverPos(screenToWorld({ x, y }, pan));
+      }
+    },
+    [dragStart, isDragging, pan, setHoverPos, setPan],
+  );
+
+  const onLeave = useCallback(() => {
+    setHoverPos(null);
+  }, []);
+
+  const onWheel = useCallback(
+    (e: React.WheelEvent<HTMLCanvasElement>) => {
+      let multiplier = 1;
+      if (e.deltaY < 0) {
+        multiplier += SCROLL_SPEED;
+      } else {
+        multiplier -= SCROLL_SPEED;
+      }
+      setPan({
+        ...pan,
+        scale: Math.max(Math.min(pan.scale * multiplier, 400), 10),
+      });
+    },
+    [pan, setPan],
+  );
+
   return (
     <canvas
       ref={canvasRef}
+      className='h-full w-full'
       height={height}
       width={width}
-      className='h-full w-full'
-      onMouseDown={(e) => {
-        setDragStart({ x: e.clientX, y: e.clientY });
-        setIsDragging(true);
-      }}
-      onMouseUp={() => {
-        setIsDragging(false);
-      }}
-      onMouseMove={(e) => {
-        if (isDragging) {
-          setPan({
-            ...pan,
-            offset: {
-              x: pan.offset.x + e.clientX - dragStart.x,
-              y: pan.offset.y + e.clientY - dragStart.y,
-            },
-          });
-          setDragStart({ x: e.clientX, y: e.clientY });
-          setHoverPos(null);
-        } else {
-          setHoverPos(screenToWorld({ x: e.clientX, y: e.clientY }, pan));
-        }
-      }}
-      onMouseLeave={() => {
-        setHoverPos(null);
-      }}
-      onWheel={(e) => {
-        let multiplier = 1;
-        if (e.deltaY < 0) {
-          multiplier += SCROLL_SPEED;
-        } else {
-          multiplier -= SCROLL_SPEED;
-        }
-        setPan({
-          ...pan,
-          scale: Math.max(Math.min(pan.scale * multiplier, 400), 10),
-        });
-      }}
+      onMouseDown={onDown}
+      onMouseUp={onUp}
+      onMouseMove={onMove}
+      onMouseLeave={onLeave}
+      onWheel={onWheel}
+      onTouchStart={onDown}
+      onTouchEnd={onUp}
+      onTouchMove={onMove}
     ></canvas>
   );
 }
