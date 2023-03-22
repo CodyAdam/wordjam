@@ -7,10 +7,10 @@ function drawGrid(ctx: CanvasRenderingContext2D, pan: Pan) {
   ctx.strokeStyle = 'lightgrey';
   ctx.lineWidth = 1;
   for (let i = 0; i < 100; i++) {
-    ctx.moveTo(i * pan.scale + pan.offset.x, 0 + pan.offset.y);
-    ctx.lineTo(i * pan.scale + pan.offset.x, 1000 * pan.scale + pan.offset.y);
-    ctx.moveTo(0 + pan.offset.x, i * pan.scale + pan.offset.y);
-    ctx.lineTo(1000 * pan.scale + pan.offset.x, i * pan.scale + pan.offset.y);
+    ctx.moveTo(i * pan.scale + pan.offset.x + 1, 0 + pan.offset.y + 1);
+    ctx.lineTo(i * pan.scale + pan.offset.x + 1, 1000 * pan.scale + pan.offset.y + 1);
+    ctx.moveTo(0 + pan.offset.x + 1, i * pan.scale + pan.offset.y + 1);
+    ctx.lineTo(1000 * pan.scale + pan.offset.x + 1, i * pan.scale + pan.offset.y + 1);
   }
   ctx.stroke();
 }
@@ -20,7 +20,7 @@ function drawOrigin(ctx: CanvasRenderingContext2D, pan: Pan) {
   ctx.beginPath();
   ctx.strokeStyle = 'red';
   ctx.lineWidth = 1;
-  ctx.arc(pan.offset.x + pan.scale, pan.offset.y + pan.scale, pan.scale / 2, 0, 2 * Math.PI);
+  ctx.arc(pan.offset.x + pan.scale, pan.offset.y + pan.scale, 10, 0, 2 * Math.PI);
   ctx.stroke();
 }
 
@@ -42,9 +42,10 @@ export default function Canvas({
   useEffect(() => {
     const ctx = canvasRef.current?.getContext('2d');
     if (!ctx) return;
+    ctx.clearRect(0, 0, width, height);
     drawGrid(ctx, pan);
     drawOrigin(ctx, pan);
-  }, [pan]);
+  }, [height, pan, width]);
 
   return (
     <canvas
@@ -74,7 +75,7 @@ export default function Canvas({
       onWheel={(e) => {
         setPan({
           ...pan,
-          scale: pan.scale * (1 + -e.deltaY / 1000),
+          scale: Math.max(Math.min(pan.scale * (1 + -e.deltaY / 1000), 400), 20),
         });
       }}
     ></canvas>

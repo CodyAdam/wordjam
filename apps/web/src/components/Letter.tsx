@@ -32,8 +32,10 @@ export default function LetterBoard({
 
 export function LetterButton({ letter }: { letter: string }) {
   return (
-    <div className='flex h-20 w-20 cursor-pointer select-none items-center justify-center rounded-lg border-2 border-b-8 bg-white p-2 text-5xl font-bold text-zinc-700 transition-all duration-75 hover:-translate-y-3 hover:text-zinc-900 hover:shadow-md'>
-      {letter}
+    <div className='flex h-20 w-20 cursor-pointer select-none items-center justify-center rounded-lg border-gray-400 bg-white p-2 text-5xl font-bold text-zinc-700 transition-all duration-75 hover:-translate-y-3 hover:text-zinc-900 hover:shadow-lg group'>
+      <div className='flex h-20 w-20 cursor-pointer select-none items-center justify-center rounded-lg border-2 border-b-8 border-gray-400 bg-white p-2 text-5xl font-bold text-zinc-700 transition-all duration-75 hover:-translate-y-3 hover:text-zinc-900 hover:shadow-lg'>
+        {letter}
+      </div>
     </div>
   );
 }
