@@ -1,6 +1,6 @@
 import {LoginResponse, LoginResponseType, WSMessage} from './types/ws';
 import {Player} from './types/player';
-import {BoardLetter, Direction, PlaceWord, Position} from './types/board';
+import {BoardLetter, Direction, PlacedResponse, PlaceWord, Position} from './types/board';
 import {Server} from 'socket.io';
 import {DictionaryService} from "./Dictionary";
 
@@ -75,24 +75,52 @@ function Login(username: string, token: string): LoginResponse {
   return result;
 }
 
-function LetterPlacedFromClient(data: PlaceWord, token: string) {
+function LetterPlacedFromClient(data: PlaceWord, token: string) : PlacedResponse {
   let currentPos: Position = data.startPos;
   let word: string = "";
-  let playerLeters: string[] = players.get(token)?.letters || [];
+  let additionalWords: string[] = [];
+  let playerLetters: string[] = players.get(token)?.letters || [];
   let lettersToPlaced: string[] = data.letters;
   while(lettersToPlaced.length > 0){
     if(hasLetter(currentPos)){
       word += board.get(currentPos.x + '_' + currentPos.y)?.letter;
     } else {
-      word += lettersToPlaced.shift();
+      let newLetter = lettersToPlaced.shift() || "";
+      if(!playerLetters.includes(newLetter)){
+        return PlacedResponse.PLAYER_DONT_HAVE_LETTERS;
+      }
+      let concurrentWord = detectWordFromInside(currentPos, (data.direction == Direction.DOWN ? Direction.RIGHT : Direction.DOWN));
+
+      if(DictionaryService.wordExist(concurrentWord)) additionalWords.push(concurrentWord);
+      else return PlacedResponse.INVALID_POSITION;
+
+      playerLetters.splice(playerLetters.indexOf(newLetter, 0), 1);
+      word += newLetter;
     }
     if(data.direction == Direction.DOWN) currentPos.y--;
     else currentPos.x++;
   }
-  if(DictionaryService.wordExist(word)){
+  if(!DictionaryService.wordExist(word)) return PlacedResponse.WORD_NOT_EXIST;
+  return PlacedResponse.OK;
+}
 
+function detectWordFromInside(position: Position, direction: Direction): string {
+  let word = '';
+  let currentPos: Position = position;
+  while (hasLetter(currentPos)) {
+    if (direction == Direction.DOWN) currentPos.y++;
+    else currentPos.x--;
   }
 
+  if (direction == Direction.DOWN) currentPos.y--;
+  else currentPos.x++;
+  while (hasLetter(currentPos)) {
+    word += board.get(currentPos.x + '_' + currentPos.y)?.letter;
+    if (direction == Direction.DOWN) currentPos.y--;
+    else currentPos.x++;
+  }
+
+  return word;
 }
 
 function hasLetter(position: Position): boolean {
