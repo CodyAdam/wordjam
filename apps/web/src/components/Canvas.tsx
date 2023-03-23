@@ -68,6 +68,8 @@ export default function Canvas({
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [hoverPos, setHoverPos] = useState<Position | null>(null);
+  const [cursorPos, setCursorPos] = useState<Position | null>(null);
+  const [cursorDirection, setCursorDirection] = useState<boolean>(true); // true = right, false = down
 
   const [width, height] = useWindowSize();
 
@@ -77,11 +79,14 @@ export default function Canvas({
     ctx.clearRect(0, 0, width, height);
 
     drawGrid(ctx, pan, width, height);
+    drawPlacedLetters(ctx, placedLetters, pan);
+
+    // DEBUG
     drawDebug(ctx, posCentered({ x: 0, y: 0 }), 'origin', 'red', pan);
     drawDebug(ctx, posCentered({ x: 10, y: 10 }), '10, 10', 'blue', pan);
-    if (hoverPos) drawDebug(ctx, posCentered(posFloor(hoverPos)), 'cursor', 'green', pan);
-    drawPlacedLetters(ctx, placedLetters, pan);
-  }, [height, pan, width, hoverPos, placedLetters]);
+    if (hoverPos) drawDebug(ctx, posCentered(posFloor(hoverPos)), 'hover', 'green', pan);
+    if (cursorPos) drawDebug(ctx, posCentered(posFloor(cursorPos)), cursorDirection ? ">": "v", 'purple', pan);
+  }, [height, pan, width, hoverPos, placedLetters, cursorPos, cursorDirection]);
 
   const onDown = useCallback((e: React.TouchEvent | React.MouseEvent) => {
     let x = 0;
@@ -166,12 +171,21 @@ export default function Canvas({
     [pan, setPan],
   );
 
+  const onClick = useCallback(
+    (e: React.MouseEvent<HTMLCanvasElement>) => {
+      setCursorPos(screenToWorld({ x: e.clientX, y: e.clientY }, pan));
+      setCursorDirection(!e.shiftKey);
+    },
+    [pan, setCursorPos, setCursorDirection],
+  );
+
   return (
     <canvas
       ref={canvasRef}
       className='h-full w-full'
       height={height}
       width={width}
+      onClick={onClick}
       onMouseDown={onDown}
       onMouseUp={onUp}
       onMouseMove={onMove}
@@ -180,6 +194,7 @@ export default function Canvas({
       onTouchStart={onDown}
       onTouchEnd={onUp}
       onTouchMove={onMove}
+      onTouchCancel={onLeave}
     ></canvas>
   );
 }
