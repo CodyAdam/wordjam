@@ -3,3 +3,5 @@ export const SOCKET_URL = process.env.NODE_ENV === 'production' ? 'ws://localhos
 export const TILE_SIZE = 20;
 
 export const SCROLL_SPEED = 0.2;
+export const SCROLL_MIN_TILE_SIZE = 10;
+export const SCROLL_MAX_TILE_SIZE = 400;

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import useWindowSize from '../hooks/useWindowSize';
-import { SCROLL_SPEED, TILE_SIZE } from '../lib/constants';
+import { SCROLL_MAX_TILE_SIZE, SCROLL_MIN_TILE_SIZE, SCROLL_SPEED, TILE_SIZE } from '../lib/constants';
 import { posCeil, posCentered, posFloor, screenToWorld, worldToScreen } from '../utils/posHelper';
 import { BoardLetter, Pan, Position } from '../types/board';
 
@@ -149,9 +149,18 @@ export default function Canvas({
       } else {
         multiplier -= SCROLL_SPEED;
       }
+      const x = e.clientX;
+      const y = e.clientY;
+      const newScale = Math.max(Math.min(pan.scale * multiplier, SCROLL_MAX_TILE_SIZE), SCROLL_MIN_TILE_SIZE);
+      const before = worldToScreen(screenToWorld({ x, y }, pan), { ...pan, scale: newScale });
+      const after = { x, y };
       setPan({
         ...pan,
-        scale: Math.max(Math.min(pan.scale * multiplier, 400), 10),
+        scale: newScale,
+        offset: {
+          x: pan.offset.x - (before.x - after.x),
+          y: pan.offset.y - (before.y - after.y),
+        },
       });
     },
     [pan, setPan],
