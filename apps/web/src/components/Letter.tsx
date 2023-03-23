@@ -1,3 +1,4 @@
+'use client';
 import { TILE_SIZE } from '../lib/constants';
 import { Position } from '../types/board';
 
