@@ -65,6 +65,7 @@ export default function Canvas({
   setPan: (pan: Pan) => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isDown, setIsDown] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [hoverPos, setHoverPos] = useState<Position | null>(null);
@@ -84,8 +85,8 @@ export default function Canvas({
     // DEBUG
     drawDebug(ctx, posCentered({ x: 0, y: 0 }), 'origin', 'red', pan);
     drawDebug(ctx, posCentered({ x: 10, y: 10 }), '10, 10', 'blue', pan);
-    if (hoverPos) drawDebug(ctx, posCentered(posFloor(hoverPos)), 'hover', 'green', pan);
-    if (cursorPos) drawDebug(ctx, posCentered(posFloor(cursorPos)), cursorDirection ? ">": "v", 'purple', pan);
+    if (hoverPos) drawDebug(ctx, posCentered(posFloor(hoverPos)), 'hover', '#00ff0055', pan);
+    if (cursorPos) drawDebug(ctx, posCentered(posFloor(cursorPos)), cursorDirection ? '>' : 'v', 'purple', pan);
   }, [height, pan, width, hoverPos, placedLetters, cursorPos, cursorDirection]);
 
   const onDown = useCallback((e: React.TouchEvent | React.MouseEvent) => {
@@ -103,12 +104,39 @@ export default function Canvas({
       return;
     }
     setDragStart({ x, y });
-    setIsDragging(true);
+    setIsDown(true);
   }, []);
 
-  const onUp = useCallback(() => {
-    setIsDragging(false);
-  }, []);
+  const onUp = useCallback(
+    (e: React.TouchEvent | React.MouseEvent) => {
+      let x = 0;
+      let y = 0;
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.nativeEvent instanceof TouchEvent) {
+        x = e.nativeEvent.touches[0].clientX;
+        y = e.nativeEvent.touches[0].clientY;
+      } else if (e.nativeEvent instanceof MouseEvent) {
+        x = e.nativeEvent.clientX;
+        y = e.nativeEvent.clientY;
+      } else {
+        return;
+      }
+      if (!isDragging) {
+        const pos = posFloor(screenToWorld({ x, y }, pan));
+        if (pos.x === cursorPos?.x && pos.y === cursorPos?.y) {
+          setCursorDirection(!cursorDirection);
+        } else {
+          setCursorPos(pos);
+          setCursorDirection(!e.shiftKey);
+        }
+      } else {
+        setIsDragging(false);
+      }
+      setIsDown(false);
+    },
+    [cursorDirection, cursorPos, isDragging, pan],
+  );
 
   const onMove = useCallback(
     (e: React.TouchEvent | React.MouseEvent) => {
@@ -126,7 +154,8 @@ export default function Canvas({
         return;
       }
 
-      if (isDragging) {
+      if (isDown) {
+        setIsDragging(true);
         setPan({
           ...pan,
           offset: {
@@ -139,11 +168,13 @@ export default function Canvas({
         setHoverPos(screenToWorld({ x, y }, pan));
       }
     },
-    [dragStart, isDragging, pan, setHoverPos, setPan],
+    [dragStart.x, dragStart.y, isDown, pan, setPan],
   );
 
   const onLeave = useCallback(() => {
     setHoverPos(null);
+    setIsDragging(false);
+    setIsDown(false);
   }, []);
 
   const onWheel = useCallback(
@@ -171,21 +202,12 @@ export default function Canvas({
     [pan, setPan],
   );
 
-  const onClick = useCallback(
-    (e: React.MouseEvent<HTMLCanvasElement>) => {
-      setCursorPos(screenToWorld({ x: e.clientX, y: e.clientY }, pan));
-      setCursorDirection(!e.shiftKey);
-    },
-    [pan, setCursorPos, setCursorDirection],
-  );
-
   return (
     <canvas
       ref={canvasRef}
       className='h-full w-full'
       height={height}
       width={width}
-      onClick={onClick}
       onMouseDown={onDown}
       onMouseUp={onUp}
       onMouseMove={onMove}
