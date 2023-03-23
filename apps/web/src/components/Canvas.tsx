@@ -73,12 +73,11 @@ export default function Canvas({
   const [hoverPos, setHoverPos] = useState<Position | null>(null);
   const [cursorPos, setCursorPos] = useState<Position | null>(null);
   const [cursorDirection, setCursorDirection] = useState<boolean>(true); // true = right, false = down
-
-  const [width, height] = useWindowSize();
+  const { width, height } = useWindowSize();
 
   useEffect(() => {
     const ctx = canvasRef.current?.getContext('2d');
-    if (!ctx) return;
+    if (!ctx || !width || !height) return;
     ctx.clearRect(0, 0, width, height);
 
     drawGrid(ctx, pan, width, height);
