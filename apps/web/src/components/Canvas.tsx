@@ -43,6 +43,18 @@ function drawDebug(ctx: CanvasRenderingContext2D, pos: Position, text: string, c
   ctx.fillText(text, pos.x, pos.y - 20);
 }
 
+function drawPlacedLetters(ctx: CanvasRenderingContext2D, placedLetters: BoardLetter[], pan: Pan) {
+  placedLetters.forEach((letter) => {
+    const pos = worldToScreen(posCentered(letter.position), pan);
+    ctx.fillStyle = 'black';
+    // use scaled font size
+    const fontSize = pan.scale * TILE_SIZE * 0.025;
+    ctx.font = `${fontSize}px Arial`;
+    const letterOffset = pan.scale * TILE_SIZE * 0.01;
+    ctx.fillText(letter.letter, pos.x - letterOffset, pos.y + letterOffset);
+  });
+}
+
 export default function Canvas({
   placedLetters,
   pan,
@@ -63,11 +75,13 @@ export default function Canvas({
     const ctx = canvasRef.current?.getContext('2d');
     if (!ctx) return;
     ctx.clearRect(0, 0, width, height);
+
     drawGrid(ctx, pan, width, height);
     drawDebug(ctx, posCentered({ x: 0, y: 0 }), 'origin', 'red', pan);
     drawDebug(ctx, posCentered({ x: 10, y: 10 }), '10, 10', 'blue', pan);
     if (hoverPos) drawDebug(ctx, posCentered(posFloor(hoverPos)), 'cursor', 'green', pan);
-  }, [height, pan, width, hoverPos]);
+    drawPlacedLetters(ctx, placedLetters, pan);
+  }, [height, pan, width, hoverPos, placedLetters]);
 
   const onDown = useCallback((e: React.TouchEvent | React.MouseEvent) => {
     let x = 0;
