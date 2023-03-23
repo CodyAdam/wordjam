@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { InventoryLetter } from '../types/board';
-import LetterBoard, { LetterButton } from './Letter';
+import { LetterButton } from './Letter';
 
 export default function UserUI() {
   const [inventory, setInventory] = useState<InventoryLetter[]>([
