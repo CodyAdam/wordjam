@@ -31,7 +31,10 @@ io.on('connection', (socket) => {
 
     const username: string = message.data?.username || '';
     const token: string = message.token || '';
-    socket.emit("onToken", JSON.stringify(Login(username, token)));
+
+    const loginResponse = Login(username, token)
+    socket.emit("onToken", JSON.stringify(loginResponse));
+    socket.emit("onInventory", JSON.stringify(players.get(loginResponse.token!)!.letters))
   });
 
   socket.on('onSubmit', (rawData) => {
@@ -61,6 +64,13 @@ function sendBoardToAll() {
   io.emit("onBoard", JSON.stringify(Array.from(board.values())));
 }
 
+function generateLetters(number: number) {
+  let letters = []
+  for(let i=0; i<number; i++)
+    letters.push(DictionaryService.getRandomLetter())
+  return letters
+}
+
 function Login(username: string, token: string): LoginResponse {
   let result: LoginResponse = { status: LoginResponseType.SUCCESS };
   // Token verification
@@ -78,7 +88,7 @@ function Login(username: string, token: string): LoginResponse {
         return result;
     }
   }
-  let newPlayer : Player = { username: username, token: generateToken(4), score:0, letters: []};
+  let newPlayer : Player = { username: username, token: generateToken(4), score:0, letters: generateLetters(7)};
   players.set(newPlayer.token, newPlayer);
   result.token = newPlayer.token;
   console.log('New Player : ' + newPlayer.username);

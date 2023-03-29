@@ -32,4 +32,7 @@ describe("Dictionnary", ()=>{
         expect(DictionaryService.getPointsOfWord("hello", [1, 1, 3, 1, 1])).toEqual(10)
 
     })
+    test("random letter", () => {
+        expect(() => DictionaryService.getRandomLetter())
+    })
 })
