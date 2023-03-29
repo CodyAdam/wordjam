@@ -67,7 +67,7 @@ export default function App() {
     console.log('submitting');
   }, []);
 
-  function onLogin(token: string) {
+  const onLogin = useCallback((token: string) => {
     if (!token) {
       token = localStorage.getItem('token') || '';
     }
@@ -75,7 +75,7 @@ export default function App() {
     // store the token in local storage
     localStorage.setItem('token', token);
     setAppStage(AppState.InGame);
-  }
+  }, []);
 
   return (
     <>
