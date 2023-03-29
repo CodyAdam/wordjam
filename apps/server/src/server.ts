@@ -25,54 +25,55 @@ io.on('connection', (socket) => {
     let message: WSMessage;
     try {
       message = JSON.parse(rawData.toString());
+
+      const username: string = message.data?.username || '';
+      const token: string = message.token || '';
+
+      const loginResponse = Login(username, token)
+      socket.emit('onLoginResponse', JSON.stringify(loginResponse));
+      socket.emit("onToken", JSON.stringify(loginResponse));
+      if(loginResponse.status != LoginResponseType.SUCCESS)
+        return
+      let player = getPlayer(loginResponse.token)
+      socket.emit("onInventory", JSON.stringify(player.letters))
+      socket.emit("onCooldown", JSON.stringify({
+        timer: Config.LETTER_COOLDOWN
+      }))
     } catch (e: any) {
-      console.log(e);
-      return;
+      socket.emit("onError", e.message)
     }
-
-    const username: string = message.data?.username || '';
-    const token: string = message.token || '';
-
-    const loginResponse = Login(username, token)
-    let player = getPlayer(loginResponse.token)
-    socket.emit('onLoginResponse', JSON.stringify(loginResponse));
-    socket.emit('onToken', loginResponse.token);
-    socket.emit("onInventory", JSON.stringify(player.letters))
-    socket.emit("onCooldown", JSON.stringify({
-      timer: Config.LETTER_COOLDOWN
-    }))
   });
 
   socket.on('onAskLetter', (rawData)=>{
     let message: WSMessage;
     try {
       message = JSON.parse(rawData.toString());
-    } catch (e: any) {
-      socket.emit("error", e.toString());
-      return;
-    }
 
-    let player = getPlayer(message.token)
-    addLetter(player)
-    socket.emit("setInventory", JSON.stringify(player.letters))
+      let player = getPlayer(message.token)
+      addLetter(player)
+      socket.emit("setInventory", JSON.stringify(player.letters))
+    } catch (e: any){
+      socket.emit("onError", e.message)
+    }
   })
 
   socket.on('onSubmit', (rawData) => {
     let message: WSMessage;
     try {
       message = JSON.parse(rawData.toString());
+
+      let response = checkLetterPlacedFromClient(message.data, message.token);
+      if (response == PlacedResponse.OK) {
+        putLettersOnBoard(message.data, message.token);
+        sendBoardToAll();
+      } else {
+        socket.emit('onError', response);
+      }
     } catch (e: any) {
-      console.log(e);
-      return;
+      socket.emit("onError", e.message)
     }
 
-    let response = checkLetterPlacedFromClient(message.data, message.token);
-    if (response == PlacedResponse.OK) {
-      putLettersOnBoard(message.data, message.token);
-      sendBoardToAll();
-    } else {
-      socket.emit('onError', response);
-    }
+
   });
 
   console.log('New connection');
