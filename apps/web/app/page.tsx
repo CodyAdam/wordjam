@@ -41,6 +41,18 @@ export default function App() {
         });
         setPlacedLetters(newPlacedLetters);
       },
+      onToken: (token) => {
+        // store the token in local storage
+        setPlayerToken(token);
+        localStorage.setItem('token', token);
+        setAppStage(AppState.InGame);
+      },
+      connect: () => {
+        const token = localStorage.getItem('token');
+        if (token) {
+          socket.emit('onLogin', JSON.stringify({ token: token }));
+        }
+      },
     },
     onAny: (event, data) => {
       // console.info(event, data);
@@ -67,16 +79,6 @@ export default function App() {
     console.log('submitting');
   }, []);
 
-  const onLogin = useCallback((token: string) => {
-    if (!token) {
-      token = localStorage.getItem('token') || '';
-    }
-    setPlayerToken(token);
-    // store the token in local storage
-    localStorage.setItem('token', token);
-    setAppStage(AppState.InGame);
-  }, []);
-
   return (
     <>
       <main className='relative flex h-full bg-white'>
@@ -90,16 +92,13 @@ export default function App() {
           cursorDirection={cursorDirection}
           setCursorDirection={setCursorDirection}
         />
-
         {showTokenModal && <TokenModal value={playerToken} onClick={() => setShowTokenModal(false)} />}
-
         {appStage === AppState.InGame && (
           <div className='absolute top-0 right-0 p-2'>
             <LinkDeviceButton onClick={() => setShowTokenModal(true)}></LinkDeviceButton>
           </div>
         )}
-
-        {appStage === AppState.AwaitingLogin && <Login onLogin={onLogin} socket={socket} isConnected={isConnected} />}
+        {appStage === AppState.AwaitingLogin && <Login socket={socket} isConnected={isConnected} />}
       </main>
       {appStage === AppState.InGame && (
         <UserUI

@@ -33,9 +33,10 @@ io.on('connection', (socket) => {
     const token: string = message.token || '';
 
     const loginResponse = Login(username, token);
-    socket.emit('onToken', JSON.stringify(loginResponse));
+    socket.emit('onLoginResponse', JSON.stringify(loginResponse));
     if (loginResponse.token) {
       const player = players.get(loginResponse.token);
+      socket.emit('onToken', loginResponse.token);
       if (player) socket.emit('onInventory', JSON.stringify(player.letters));
     }
   });
