@@ -5,6 +5,7 @@ import { useCallback, useState } from 'react';
 import { AppState } from '@/src/lib/AppState';
 import { SOCKET_URL } from '@/src/lib/constants';
 import UserUI from '@/src/components/UserUI';
+import Login from '@/src/components/Login';
 import Canvas from '@/src/components/Canvas';
 import { useCursor } from '@/src/hooks/useCursor';
 import { keyFromPos } from '@/src/utils/posHelper';
@@ -12,6 +13,8 @@ import { keyFromPos } from '@/src/utils/posHelper';
 export default function App() {
   const [placedLetters, setPlacedLetters] = useState<BoardLetters>(new Map());
   const [appStage, setAppStage] = useState(AppState.AwaitingLogin);
+
+  const [playerToken, setPlayerToken] = useState('');
   const [pan, setPan] = useState<Pan>({ offset: { x: 0, y: 0 }, scale: 20, origin: { x: 0, y: 0 } });
   const { cursorDirection, cursorPos, setCursorDirection, setCursorPos, goToNextCursorPos } = useCursor(placedLetters);
   const [inventory, setInventory] = useState<InventoryLetter[]>([
@@ -26,7 +29,7 @@ export default function App() {
       position: { x: 5, y: 5 },
     },
   ]);
-  const { isConnected } = useSocket(SOCKET_URL, {
+  const { isConnected, socket } = useSocket(SOCKET_URL, {
     events: {
       board: (data) => {
         const letters: BoardLetter[] = JSON.parse(data);
@@ -38,7 +41,7 @@ export default function App() {
       },
     },
     onAny: (event, data) => {
-      console.info(event, data);
+      // console.info(event, data);
     },
   });
 
@@ -61,8 +64,18 @@ export default function App() {
     console.log('submitting');
   }, []);
 
+  function onLogin(token: string) {
+    if (!token) {
+      token = localStorage.getItem('token') || '';
+    }
+    setPlayerToken(token);
+    // store the token in local storage
+    localStorage.setItem('token', token);
+    setAppStage(AppState.InGame);
+  }
+
   return (
-    <div className='h-full'>
+    <>
       <main className='relative flex h-full bg-white [&>div]:h-screen [&>div]:w-screen'>
         <Canvas
           placedLetters={placedLetters}
@@ -74,9 +87,14 @@ export default function App() {
           cursorDirection={cursorDirection}
           setCursorDirection={setCursorDirection}
         />
-        {/* <Login isConnected={isConnected} /> */}
+        {appStage === AppState.AwaitingLogin && <Login onLogin={onLogin} socket={socket} isConnected={isConnected} />}
       </main>
-      <UserUI inventory={inventory} onPlace={placeInventoryLetter} onReset={onResetInventoryPlacement} onSubmit={onSubmit} />
-    </div>
+     {appStage === AppState.InGame && <UserUI
+        inventory={inventory}
+        onPlace={placeInventoryLetter}
+        onReset={onResetInventoryPlacement}
+        onSubmit={onSubmit}
+      />}
+    </>
   );
 }
