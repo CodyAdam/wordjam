@@ -25,13 +25,13 @@ io.on('connection', (socket) => {
     try {
       message = JSON.parse(rawData.toString());
     } catch (e: any) {
-      socket.emit("error", e.toString());
+      console.log(e);
       return;
     }
 
     const username: string = message.data?.username || '';
     const token: string = message.token || '';
-    socket.emit("token", JSON.stringify(Login(username, token)));
+    socket.emit("onToken", JSON.stringify(Login(username, token)));
   });
 
   socket.on('onSubmit', (rawData) => {
@@ -39,7 +39,7 @@ io.on('connection', (socket) => {
     try {
       message = JSON.parse(rawData.toString());
     } catch (e: any) {
-      socket.emit("error",e.toString());
+      console.log(e);
       return;
     }
 
@@ -54,11 +54,11 @@ io.on('connection', (socket) => {
 
   console.log('New connection');
 
-  socket.emit("board", JSON.stringify(Array.from(board.values())));
+  socket.emit("onBoard", JSON.stringify(Array.from(board.values())));
 });
 
 function sendBoardToAll() {
-  io.emit("board", JSON.stringify(Array.from(board.values())));
+  io.emit("onBoard", JSON.stringify(Array.from(board.values())));
 }
 
 function Login(username: string, token: string): LoginResponse {
