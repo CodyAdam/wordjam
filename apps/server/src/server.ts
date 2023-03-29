@@ -20,7 +20,7 @@ console.log('Server started on port ' + PORT);
 defaultBoardSetup();
 
 io.on('connection', (socket) => {
-  socket.on('login', (rawData) => {
+  socket.on('onLogin', (rawData) => {
     let message: WSMessage;
     try {
       message = JSON.parse(rawData.toString());
@@ -34,7 +34,7 @@ io.on('connection', (socket) => {
     socket.emit("token", JSON.stringify(Login(username, token)));
   });
 
-  socket.on('letterplaced', (rawData) => {
+  socket.on('onSubmit', (rawData) => {
     let message: WSMessage;
     try {
       message = JSON.parse(rawData.toString());
@@ -43,13 +43,23 @@ io.on('connection', (socket) => {
       return;
     }
 
-    LetterPlacedFromClient(message.data, message.token);
+    let response = checkLetterPlacedFromClient(message.data, message.token);
+    if(response == PlacedResponse.OK) {
+      putLettersOnBoard(message.data, message.token);
+      sendBoardToAll();
+    } else {
+      socket.emit("onError", response);
+    }
   });
 
   console.log('New connection');
 
   socket.emit("board", JSON.stringify(Array.from(board.values())));
 });
+
+function sendBoardToAll() {
+  io.emit("board", JSON.stringify(Array.from(board.values())));
+}
 
 function Login(username: string, token: string): LoginResponse {
   let result: LoginResponse = { status: LoginResponseType.SUCCESS };
@@ -75,7 +85,20 @@ function Login(username: string, token: string): LoginResponse {
   return result;
 }
 
-function LetterPlacedFromClient(data: PlaceWord, token: string) : PlacedResponse {
+function putLettersOnBoard(data: PlaceWord, token: string){
+    let currentPos: Position = data.startPos;
+    let lettersToPlaced: string[] = data.letters;
+    while(lettersToPlaced.length > 0){
+        if(!hasLetter(currentPos)) {
+          let newLetter = lettersToPlaced.shift() || "";
+          board.set(currentPos.x + '_' + currentPos.y, {placedBy: players.get(token)?.username || "", timestamp: Date.now(), letter: newLetter, position: currentPos});
+        }
+        if(data.direction == Direction.DOWN) currentPos.y--;
+        else currentPos.x++;
+    }
+}
+
+function checkLetterPlacedFromClient(data: PlaceWord, token: string) : PlacedResponse {
   let currentPos: Position = data.startPos;
   let word: string = "";
   let additionalWords: string[] = [];
