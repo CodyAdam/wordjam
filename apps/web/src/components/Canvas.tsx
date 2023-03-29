@@ -162,6 +162,26 @@ export default function Canvas({
     [pan, setPan],
   );
 
+  const onScroll = useCallback(
+    (e: React.UIEvent<HTMLCanvasElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const scrollX = e.currentTarget.scrollLeft;
+      const scrollY = e.currentTarget.scrollTop;
+
+      const newOffset : Position= {
+        x: pan.offset.x + scrollX,
+        y: pan.offset.y + scrollY,
+      }
+
+      setPan({
+        ...pan,
+        offset: newOffset,
+      });
+    },
+    [pan, setPan],
+  );
+
   return (
     <canvas
       ref={canvasRef}
@@ -173,6 +193,7 @@ export default function Canvas({
       onMouseMove={onMove}
       onMouseLeave={onLeave}
       onWheel={onWheel}
+      onScroll={onScroll}
       onTouchStart={onDown}
       onTouchEnd={onUp}
       onTouchMove={onMove}
