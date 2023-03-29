@@ -29,7 +29,7 @@ io.on('connection', (socket) => {
     }
     socket.emit('onLoginResponse', 'SUCCESS');
     socket.emit('onToken', player.token);
-    socket.emit('onInventory', JSON.stringify(player.letters));
+    socket.emit('onInventory', player.letters);
     socket.emit('onCooldown', 0); // TODO : Calculate cooldown time
   });
 
@@ -54,7 +54,7 @@ io.on('connection', (socket) => {
 
     socket.emit('onLoginResponse', 'SUCCESS');
     socket.emit('onToken', newPlayer.token);
-    socket.emit('onInventory', JSON.stringify(newPlayer.letters));
+    socket.emit('onInventory', newPlayer.letters);
     socket.emit('onCooldown', 0); // TODO : Calculate cooldown time
 
     console.log('New Player : ' + newPlayer.username);
@@ -68,7 +68,7 @@ io.on('connection', (socket) => {
     }
 
     addLetter(player);
-    socket.emit('setInventory', JSON.stringify(player.letters));
+    socket.emit('setInventory', player.letters);
   });
 
   socket.on('onSubmit', ({ submittedLetters, token }: { submittedLetters: PlaceWord; token: string }) => {
@@ -90,11 +90,11 @@ io.on('connection', (socket) => {
 
   console.log('New connection');
 
-  socket.emit('onBoard', JSON.stringify(Array.from(board.values())));
+  socket.emit('onBoard', Array.from(board.values()));
 });
 
 function sendBoardToAll() {
-  io.emit('onBoard', JSON.stringify(Array.from(board.values())));
+  io.emit('onBoard', Array.from(board.values()));
 }
 
 function generateLetters(number: number) {
