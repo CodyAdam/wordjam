@@ -1,6 +1,6 @@
 import {LoginResponse, LoginResponseType, WSMessage} from './types/ws';
 import {Player} from './types/player';
-import {BoardLetter, Direction, PlaceWord, Position} from './types/board';
+import {BoardLetter, Direction, PlacedResponse, PlaceWord, Position} from './types/board';
 import {Server} from 'socket.io';
 import {DictionaryService} from "./Dictionary";
 import {Config} from "./config";
