@@ -1,8 +1,8 @@
-import {LoginResponse, LoginResponseType, WSMessage} from './types/ws';
-import {Player} from './types/player';
-import {BoardLetter, Direction, PlaceWord, Position} from './types/board';
-import {Server} from 'socket.io';
-import {DictionaryService} from "./Dictionary";
+import { LoginResponse, LoginResponseType, WSMessage } from './types/ws';
+import { Player } from './types/player';
+import { BoardLetter, Direction, PlaceWord, Position } from './types/board';
+import { Server } from 'socket.io';
+import { DictionaryService } from './Dictionary';
 
 const io = new Server({
   cors: {
@@ -25,16 +25,20 @@ io.on('connection', (socket) => {
     try {
       message = JSON.parse(rawData.toString());
     } catch (e: any) {
-      socket.emit("error", e.toString());
+      socket.emit('error', e.toString());
       return;
     }
 
     const username: string = message.data?.username || '';
     const token: string = message.token || '';
 
-    const loginResponse = Login(username, token)
-    socket.emit("token", JSON.stringify(loginResponse));
-    socket.emit("setInventory", JSON.stringify(players.get(loginResponse.token!)!.letters))
+    const loginResponse = Login(username, token);
+    socket.emit('token', JSON.stringify(loginResponse));
+    if (loginResponse.token)
+    {
+      const player = players.get(loginResponse.token);
+      if (player) socket.emit('setInventory', JSON.stringify(player.letters));
+    }
   });
 
   socket.on('letterplaced', (rawData) => {
@@ -42,7 +46,7 @@ io.on('connection', (socket) => {
     try {
       message = JSON.parse(rawData.toString());
     } catch (e: any) {
-      socket.emit("error",e.toString());
+      socket.emit('error', e.toString());
       return;
     }
 
@@ -51,21 +55,20 @@ io.on('connection', (socket) => {
 
   console.log('New connection');
 
-  socket.emit("board", JSON.stringify(Array.from(board.values())));
+  socket.emit('board', JSON.stringify(Array.from(board.values())));
 });
 
 function generateLetters(number: number) {
-  let letters = []
-  for(let i=0; i<number; i++)
-    letters.push(DictionaryService.getRandomLetter())
-  return letters
+  let letters = [];
+  for (let i = 0; i < number; i++) letters.push(DictionaryService.getRandomLetter());
+  return letters;
 }
 
 function Login(username: string, token: string): LoginResponse {
   let result: LoginResponse = { status: LoginResponseType.SUCCESS };
   // Token verification
   if (token !== '') {
-    if(players.has(token)){
+    if (players.has(token)) {
       result.username = players.get(token)?.username || '';
       result.status = LoginResponseType.SUCCESS;
     } else result.status = LoginResponseType.WRONG_TOKEN;
@@ -73,12 +76,12 @@ function Login(username: string, token: string): LoginResponse {
   }
   // Player Username verification
   for (let p of players.values()) {
-    if(p.username == username) {
+    if (p.username == username) {
       result.status = LoginResponseType.ALREADY_EXIST;
-        return result;
+      return result;
     }
   }
-  let newPlayer : Player = { username: username, token: generateToken(4), score:0, letters: generateLetters(7)};
+  let newPlayer: Player = { username: username, token: generateToken(4), score: 0, letters: generateLetters(7) };
   players.set(newPlayer.token, newPlayer);
   result.token = newPlayer.token;
   console.log('New Player : ' + newPlayer.username);
@@ -87,22 +90,20 @@ function Login(username: string, token: string): LoginResponse {
 
 function LetterPlacedFromClient(data: PlaceWord, token: string) {
   let currentPos: Position = data.startPos;
-  let word: string = "";
+  let word: string = '';
   let playerLeters: string[] = players.get(token)?.letters || [];
   let lettersToPlaced: string[] = data.letters;
-  while(lettersToPlaced.length > 0){
-    if(hasLetter(currentPos)){
+  while (lettersToPlaced.length > 0) {
+    if (hasLetter(currentPos)) {
       word += board.get(currentPos.x + '_' + currentPos.y)?.letter;
     } else {
       word += lettersToPlaced.shift();
     }
-    if(data.direction == Direction.DOWN) currentPos.y--;
+    if (data.direction == Direction.DOWN) currentPos.y--;
     else currentPos.x++;
   }
-  if(DictionaryService.wordExist(word)){
-
+  if (DictionaryService.wordExist(word)) {
   }
-
 }
 
 function hasLetter(position: Position): boolean {

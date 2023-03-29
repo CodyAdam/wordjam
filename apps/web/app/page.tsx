@@ -9,6 +9,8 @@ import Login from '@/src/components/Login';
 import Canvas from '@/src/components/Canvas';
 import { useCursor } from '@/src/hooks/useCursor';
 import { keyFromPos } from '@/src/utils/posHelper';
+import LinkDeviceButton from '@/src/components/LinkDeviceButton';
+import TokenModal from '@/src/components/TokenModal';
 
 export default function App() {
   const [placedLetters, setPlacedLetters] = useState<BoardLetters>(new Map());
@@ -45,6 +47,7 @@ export default function App() {
     },
   });
 
+  const [showTokenModal, setShowTokenModal] = useState(false);
   const placeInventoryLetter = useCallback(
     (index: number) => {
       if (!cursorPos) return;
@@ -76,7 +79,7 @@ export default function App() {
 
   return (
     <>
-      <main className='relative flex h-full bg-white [&>div]:h-screen [&>div]:w-screen'>
+      <main className='relative flex h-full bg-white'>
         <Canvas
           placedLetters={placedLetters}
           pan={pan}
@@ -87,14 +90,25 @@ export default function App() {
           cursorDirection={cursorDirection}
           setCursorDirection={setCursorDirection}
         />
+
+        {showTokenModal && <TokenModal value={playerToken} onClick={() => setShowTokenModal(false)} />}
+
+        {appStage === AppState.InGame && (
+          <div className='absolute top-0 right-0 p-2'>
+            <LinkDeviceButton onClick={() => setShowTokenModal(true)}></LinkDeviceButton>
+          </div>
+        )}
+
         {appStage === AppState.AwaitingLogin && <Login onLogin={onLogin} socket={socket} isConnected={isConnected} />}
       </main>
-     {appStage === AppState.InGame && <UserUI
-        inventory={inventory}
-        onPlace={placeInventoryLetter}
-        onReset={onResetInventoryPlacement}
-        onSubmit={onSubmit}
-      />}
+      {appStage === AppState.InGame && (
+        <UserUI
+          inventory={inventory}
+          onPlace={placeInventoryLetter}
+          onReset={onResetInventoryPlacement}
+          onSubmit={onSubmit}
+        />
+      )}
     </>
   );
 }
