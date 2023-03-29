@@ -1,8 +1,8 @@
-import {LoginResponse, LoginResponseType, WSMessage} from './types/ws';
-import {Player} from './types/player';
-import {BoardLetter, Direction, PlacedResponse, PlaceWord, Position} from './types/board';
-import {Server} from 'socket.io';
-import {DictionaryService} from "./Dictionary";
+import { LoginResponse, LoginResponseType, WSMessage } from './types/ws';
+import { Player } from './types/player';
+import { BoardLetter, Direction, PlacedResponse, PlaceWord, Position } from './types/board';
+import { Server } from 'socket.io';
+import { DictionaryService } from './Dictionary';
 
 const io = new Server({
   cors: {
@@ -32,9 +32,12 @@ io.on('connection', (socket) => {
     const username: string = message.data?.username || '';
     const token: string = message.token || '';
 
-    const loginResponse = Login(username, token)
-    socket.emit("onToken", JSON.stringify(loginResponse));
-    socket.emit("onInventory", JSON.stringify(players.get(loginResponse.token!)!.letters))
+    const loginResponse = Login(username, token);
+    socket.emit('onToken', JSON.stringify(loginResponse));
+    if (loginResponse.token) {
+      const player = players.get(loginResponse.token);
+      if (player) socket.emit('onInventory', JSON.stringify(player.letters));
+    }
   });
 
   socket.on('onSubmit', (rawData) => {
@@ -47,35 +50,34 @@ io.on('connection', (socket) => {
     }
 
     let response = checkLetterPlacedFromClient(message.data, message.token);
-    if(response == PlacedResponse.OK) {
+    if (response == PlacedResponse.OK) {
       putLettersOnBoard(message.data, message.token);
       sendBoardToAll();
     } else {
-      socket.emit("onError", response);
+      socket.emit('onError', response);
     }
   });
 
   console.log('New connection');
 
-  socket.emit("onBoard", JSON.stringify(Array.from(board.values())));
+  socket.emit('onBoard', JSON.stringify(Array.from(board.values())));
 });
 
 function sendBoardToAll() {
-  io.emit("onBoard", JSON.stringify(Array.from(board.values())));
+  io.emit('onBoard', JSON.stringify(Array.from(board.values())));
 }
 
 function generateLetters(number: number) {
-  let letters = []
-  for(let i=0; i<number; i++)
-    letters.push(DictionaryService.getRandomLetter())
-  return letters
+  let letters = [];
+  for (let i = 0; i < number; i++) letters.push(DictionaryService.getRandomLetter());
+  return letters;
 }
 
 function Login(username: string, token: string): LoginResponse {
   let result: LoginResponse = { status: LoginResponseType.SUCCESS };
   // Token verification
   if (token !== '') {
-    if(players.has(token)){
+    if (players.has(token)) {
       result.username = players.get(token)?.username || '';
       result.status = LoginResponseType.SUCCESS;
     } else result.status = LoginResponseType.WRONG_TOKEN;
@@ -83,57 +85,65 @@ function Login(username: string, token: string): LoginResponse {
   }
   // Player Username verification
   for (let p of players.values()) {
-    if(p.username == username) {
+    if (p.username == username) {
       result.status = LoginResponseType.ALREADY_EXIST;
-        return result;
+      return result;
     }
   }
-  let newPlayer : Player = { username: username, token: generateToken(4), score:0, letters: generateLetters(7)};
+  let newPlayer: Player = { username: username, token: generateToken(4), score: 0, letters: generateLetters(7) };
   players.set(newPlayer.token, newPlayer);
   result.token = newPlayer.token;
   console.log('New Player : ' + newPlayer.username);
   return result;
 }
 
-function putLettersOnBoard(data: PlaceWord, token: string){
-    let currentPos: Position = data.startPos;
-    let lettersToPlaced: string[] = data.letters;
-    while(lettersToPlaced.length > 0){
-        if(!hasLetter(currentPos)) {
-          let newLetter = lettersToPlaced.shift() || "";
-          board.set(currentPos.x + '_' + currentPos.y, {placedBy: players.get(token)?.username || "", timestamp: Date.now(), letter: newLetter, position: currentPos});
-        }
-        if(data.direction == Direction.DOWN) currentPos.y--;
-        else currentPos.x++;
+function putLettersOnBoard(data: PlaceWord, token: string) {
+  let currentPos: Position = data.startPos;
+  let lettersToPlaced: string[] = data.letters;
+  while (lettersToPlaced.length > 0) {
+    if (!hasLetter(currentPos)) {
+      let newLetter = lettersToPlaced.shift() || '';
+      board.set(currentPos.x + '_' + currentPos.y, {
+        placedBy: players.get(token)?.username || '',
+        timestamp: Date.now(),
+        letter: newLetter,
+        position: currentPos,
+      });
     }
+    if (data.direction == Direction.DOWN) currentPos.y--;
+    else currentPos.x++;
+  }
 }
 
-export function checkLetterPlacedFromClient(data: PlaceWord, token: string) : PlacedResponse {
+export function checkLetterPlacedFromClient(data: PlaceWord, token: string): PlacedResponse {
   let currentPos: Position = data.startPos;
-  let word: string = "";
+  let word: string = '';
   let additionalWords: string[] = [];
   let playerLetters: string[] = players.get(token)?.letters || [];
   let lettersToPlaced: string[] = data.letters;
-  while(lettersToPlaced.length > 0){
-    if(hasLetter(currentPos)){
+  while (lettersToPlaced.length > 0) {
+    if (hasLetter(currentPos)) {
       word += board.get(currentPos.x + '_' + currentPos.y)?.letter;
     } else {
-      let newLetter = lettersToPlaced.shift() || "";
-      if(!playerLetters.includes(newLetter)){
+      let newLetter = lettersToPlaced.shift() || '';
+      if (!playerLetters.includes(newLetter)) {
         return PlacedResponse.PLAYER_DONT_HAVE_LETTERS;
       }
-      let concurrentWord = detectWordFromInside(currentPos, (data.direction == Direction.DOWN ? Direction.RIGHT : Direction.DOWN));
+      let concurrentWord = detectWordFromInside(
+        currentPos,
+        data.direction == Direction.DOWN ? Direction.RIGHT : Direction.DOWN,
+      );
 
-      if(DictionaryService.wordExist(concurrentWord)) additionalWords.push(concurrentWord);
+      if (DictionaryService.wordExist(concurrentWord)) additionalWords.push(concurrentWord);
       else return PlacedResponse.INVALID_POSITION;
 
       playerLetters.splice(playerLetters.indexOf(newLetter, 0), 1);
       word += newLetter;
     }
-    if(data.direction == Direction.DOWN) currentPos.y--;
+    if (data.direction == Direction.DOWN) currentPos.y--;
     else currentPos.x++;
   }
-  if(!DictionaryService.wordExist(word)) return PlacedResponse.WORD_NOT_EXIST;
+  if (!DictionaryService.wordExist(word)) return PlacedResponse.WORD_NOT_EXIST;
   return PlacedResponse.OK;
 }
 

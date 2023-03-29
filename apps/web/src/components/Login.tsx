@@ -1,10 +1,10 @@
 'use client';
 import Image from 'next/image';
 import jamIcon from '../../public/jam.png';
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { Socket } from "socket.io-client";
-import { AppState } from "@/src/lib/AppState";
+import { Socket } from 'socket.io-client';
+import { AppState } from '@/src/lib/AppState';
 
 enum Type {
   Nickname,
@@ -15,7 +15,15 @@ type Inputs = {
   nicknameOrToken: string;
 };
 
-export default function Login({ isConnected, socket, onLogin }: { isConnected: boolean, socket: Socket, onLogin: (token: string) => void }) {
+export default function Login({
+  isConnected,
+  socket,
+  onLogin,
+}: {
+  isConnected: boolean;
+  socket: Socket;
+  onLogin: (token: string) => void;
+}) {
   const {
     register,
     handleSubmit,
@@ -24,61 +32,51 @@ export default function Login({ isConnected, socket, onLogin }: { isConnected: b
   } = useForm<Inputs>();
   const onSubmit: SubmitHandler<Inputs> = (data) => {
     if (loginType === Type.Nickname) {
-      socket.emit('login', JSON.stringify({ data: {username: data.nicknameOrToken} }))
+      socket.emit('login', JSON.stringify({ data: { username: data.nicknameOrToken } }));
     } else {
-      localStorage.setItem("token", data.nicknameOrToken);
-      socket.emit('login', JSON.stringify({ token: data.nicknameOrToken }))
+      localStorage.setItem('token', data.nicknameOrToken);
+      socket.emit('login', JSON.stringify({ token: data.nicknameOrToken }));
     }
   };
 
   const [loginType, setLoginType] = useState(Type.Nickname);
 
-
-
   useEffect(() => {
-
-
     const tokenEvent = (data: any) => {
       const dataParsed = JSON.parse(data);
 
-      if (dataParsed.status && dataParsed.status === "ALREADY_EXIST") {
-        alert("Nickname already exist, please choose another one");
+      if (dataParsed.status && dataParsed.status === 'ALREADY_EXIST') {
+        alert('Nickname already exist, please choose another one');
         return;
       }
-      if (dataParsed.status && dataParsed.status === "SUCCESS") {
+      if (dataParsed.status && dataParsed.status === 'SUCCESS') {
         onLogin(dataParsed.token);
       }
     };
-    socket.on('token', tokenEvent);
-
+    socket.on('onToken', tokenEvent);
 
     const onConnect = () => {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem('token');
       if (token) {
-        socket.emit('login', JSON.stringify({ token: token }))
+        socket.emit('onLogin', JSON.stringify({ token: token }));
       }
     };
     socket.on('connect', onConnect);
 
-
-
     return () => {
-      socket.off('token',tokenEvent)
+      socket.off('onToken', tokenEvent);
       socket.off('connect', onConnect);
-    }
-
-  }, [socket]);
-
-
+    };
+  }, [onLogin, socket]);
 
   return (
-    <div className='flex h-full flex-col items-center justify-center absolute backdrop-blur-sm bg-black/20 w-full'>
+    <div className='absolute flex h-full w-full flex-col items-center justify-center bg-black/20 backdrop-blur-sm'>
       <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-3 rounded-lg bg-white p-10 shadow'>
         <div className='flex'>
           <h1 className='pr-2 text-5xl font-bold text-gray-700'>WordJam</h1>
           <Image className='animate-wiggle' height={40} src={jamIcon} alt='jam'></Image>
         </div>
-        <p className='text-gray-300 -mt-3'>A multiplayer word game</p>
+        <p className='-mt-3 text-gray-300'>A multiplayer word game</p>
         <div className='mt-4'></div>
         {!isConnected ? (
           <div className='flex flex-col items-center justify-center gap-4 pt-6'>

@@ -1,32 +1,21 @@
-import { Position } from '../types/board';
+'use client';
 
-export default function Letter(props: {
+export function LetterButton({
+  letter,
+  onClick,
+  disabled,
+}: {
   letter: string;
-  position: Position;
-  mapOffset: Position;
-  tileSize: number;
-  value?: number;
+  onClick?: () => void;
+  disabled?: boolean;
 }) {
-  const { letter, position, mapOffset, tileSize, value } = props;
-  const x = position.x;
-  const y = position.y;
-  const content = letter;
-  const offsetX = mapOffset.x;
-  const offsetY = mapOffset.y;
   return (
-    <div
-      className='absolute z-10 p-[.1rem]'
-      style={{
-        left: x * tileSize + offsetX,
-        top: y * tileSize + offsetY,
-        height: tileSize,
-        width: tileSize,
-      }}
-      key={x + '-' + y}
-    >
-      <div className='flex h-full w-full cursor-pointer items-center justify-center rounded-sm text-base text-[.3rem] font-bold text-zinc-700 hover:bg-slate-200 hover:text-zinc-900'>
-        {content}
+    <button className='group cursor-pointer select-none disabled:opacity-50' onClick={onClick} disabled={disabled}>
+      <div className='flex h-20 w-20 items-center justify-center rounded-lg bg-slate-100 pb-8 text-5xl font-bold text-zinc-700 transition-all duration-75 group-hover:-translate-y-4 group-hover:scale-105 group-hover:shadow-lg'>
+        <div className='flex h-20 w-20 items-center justify-center rounded-lg border-2 border-slate-100 bg-white p-2'>
+          {letter}
+        </div>
       </div>
-    </div>
+    </button>
   );
 }
