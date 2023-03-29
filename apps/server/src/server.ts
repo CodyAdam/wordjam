@@ -29,7 +29,7 @@ io.on('connection', (socket) => {
       return;
     }
 
-    const username: string = message.data.username || '';
+    const username: string = message.data?.username || '';
     const token: string = message.token || '';
 
     const loginResponse = Login(username, token)
