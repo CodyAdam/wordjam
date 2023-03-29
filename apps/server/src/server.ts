@@ -98,7 +98,7 @@ function putLettersOnBoard(data: PlaceWord, token: string){
     }
 }
 
-function checkLetterPlacedFromClient(data: PlaceWord, token: string) : PlacedResponse {
+export function checkLetterPlacedFromClient(data: PlaceWord, token: string) : PlacedResponse {
   let currentPos: Position = data.startPos;
   let word: string = "";
   let additionalWords: string[] = [];
@@ -159,9 +159,11 @@ function generateToken(len: number): string {
 }
 
 function defaultBoardSetup() {
-  board.set('0_0', { placedBy: 'Server', timestamp: Date.now(), letter: 'M', position: { x: 0, y: 0 } });
-  board.set('0_1', { placedBy: 'Server', timestamp: Date.now(), letter: 'A', position: { x: 0, y: 1 } });
-  board.set('0_2', { placedBy: 'Server', timestamp: Date.now(), letter: 'E', position: { x: 0, y: 2 } });
-  board.set('0_3', { placedBy: 'Server', timestamp: Date.now(), letter: 'L', position: { x: 0, y: 3 } });
-  board.set('0_4', { placedBy: 'Server', timestamp: Date.now(), letter: 'O', position: { x: 0, y: 4 } });
+  board.set('0_0', { placedBy: 'Server', timestamp: Date.now(), letter: 'W', position: { x: 0, y: 0 } });
+  board.set('1_0', { placedBy: 'Server', timestamp: Date.now(), letter: 'O', position: { x: 1, y: 0 } });
+  board.set('2_0', { placedBy: 'Server', timestamp: Date.now(), letter: 'R', position: { x: 2, y: 0 } });
+  board.set('3_0', { placedBy: 'Server', timestamp: Date.now(), letter: 'D', position: { x: 3, y: 0 } });
+  board.set('4_0', { placedBy: 'Server', timestamp: Date.now(), letter: 'J', position: { x: 4, y: 0 } });
+  board.set('5_0', { placedBy: 'Server', timestamp: Date.now(), letter: 'A', position: { x: 5, y: 0 } });
+  board.set('6_0', { placedBy: 'Server', timestamp: Date.now(), letter: 'M', position: { x: 6, y: 0 } });
 }
