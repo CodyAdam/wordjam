@@ -1,14 +1,3 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@layer components {
-  .bg-grid {
-    background-color: #f6f6fa;
-    background-image: linear-gradient(#7a7da61b 2px, transparent 2px), linear-gradient(to right, #7a7da61b 2px, #f6f6fa 2px);
-    /* size */
-    background-size: var(--size) var(--size);
-    /* offset */
-    background-position: left var(--off-x) top var(--off-y);
-  }
-}
