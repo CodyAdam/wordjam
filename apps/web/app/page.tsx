@@ -11,11 +11,11 @@ import { useCursor } from '@/src/hooks/useCursor';
 import { keyFromPos } from '@/src/utils/posHelper';
 import LinkDeviceButton from '@/src/components/LinkDeviceButton';
 import TokenModal from '@/src/components/TokenModal';
+import { LoginResponseType } from '@/src/types/ws';
 
 export default function App() {
   // login related
   const [appStage, setAppStage] = useState(AppState.AwaitingLogin);
-  const [playerToken, setPlayerToken] = useState('');
   const [showTokenModal, setShowTokenModal] = useState(false);
 
   const [placedLetters, setPlacedLetters] = useState<BoardLetters>(new Map());
@@ -44,20 +44,20 @@ export default function App() {
         setPlacedLetters(newPlacedLetters);
       },
       onToken: (token) => {
-        // store the token in local storage
-        setPlayerToken(token);
         localStorage.setItem('token', token);
-        setAppStage(AppState.InGame);
+      },
+      onLoginResponse: (response: LoginResponseType) => {
+        if (response === LoginResponseType.SUCCESS) setAppStage(AppState.InGame);
       },
       connect: () => {
         const token = localStorage.getItem('token');
         if (token) {
-          socket.emit('onLogin', JSON.stringify({ token: token }));
+          socket.emit('onLogin', token);
         }
       },
     },
     onAny: (event, data) => {
-      // console.info(event, data);
+      console.info(event, data);
     },
   });
 
@@ -78,6 +78,11 @@ export default function App() {
 
   const onSubmit = useCallback(() => {
     console.log('submitting');
+  }, []);
+
+  const onLogout = useCallback(() => {
+    setAppStage(AppState.AwaitingLogin);
+    localStorage.removeItem('token');
   }, []);
 
   if (appStage === AppState.AwaitingLogin)
@@ -113,7 +118,7 @@ export default function App() {
             cursorDirection={cursorDirection}
             setCursorDirection={setCursorDirection}
           />
-          {showTokenModal && <TokenModal value={playerToken} onClick={() => setShowTokenModal(false)} />}
+          {showTokenModal && <TokenModal onClick={() => setShowTokenModal(false)} />}
           <div className='absolute top-0 right-0 p-2'>
             <LinkDeviceButton onClick={() => setShowTokenModal(true)}></LinkDeviceButton>
           </div>
@@ -124,6 +129,9 @@ export default function App() {
           onReset={onResetInventoryPlacement}
           onSubmit={onSubmit}
         />
+        <button className='absolute bottom-0 left-0 m-3 p-3 rounded-md bg-purple-200 text-purple-800 ' onClick={() => onLogout()}>
+          (Debug) Logout
+        </button>
       </>
     );
 
