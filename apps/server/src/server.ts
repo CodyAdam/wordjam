@@ -35,7 +35,8 @@ io.on('connection', (socket) => {
 
     const loginResponse = Login(username, token)
     let player = getPlayer(loginResponse.token)
-    socket.emit("onToken", JSON.stringify(loginResponse));
+    socket.emit('onLoginResponse', JSON.stringify(loginResponse));
+    socket.emit('onToken', loginResponse.token);
     socket.emit("onInventory", JSON.stringify(player.letters))
     socket.emit("onCooldown", JSON.stringify({
       timer: Config.LETTER_COOLDOWN
