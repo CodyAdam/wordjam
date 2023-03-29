@@ -1,8 +1,9 @@
-import { LoginResponse, LoginResponseType, WSMessage } from './types/ws';
-import { Player } from './types/player';
-import { BoardLetter, Direction, PlacedResponse, PlaceWord, Position } from './types/board';
-import { Server } from 'socket.io';
-import { DictionaryService } from './Dictionary';
+import {LoginResponse, LoginResponseType, WSMessage} from './types/ws';
+import {Player} from './types/player';
+import {BoardLetter, Direction, PlacedResponse, PlaceWord, Position} from './types/board';
+import {Server} from 'socket.io';
+import {DictionaryService} from "./Dictionary";
+import {Config} from "./config";
 
 const io = new Server({
   cors: {
@@ -32,14 +33,29 @@ io.on('connection', (socket) => {
     const username: string = message.data?.username || '';
     const token: string = message.token || '';
 
-    const loginResponse = Login(username, token);
+    const loginResponse = Login(username, token)
+    let player = getPlayer(loginResponse.token)
     socket.emit('onLoginResponse', JSON.stringify(loginResponse));
-    if (loginResponse.token) {
-      const player = players.get(loginResponse.token);
-      socket.emit('onToken', loginResponse.token);
-      if (player) socket.emit('onInventory', JSON.stringify(player.letters));
-    }
+    socket.emit('onToken', loginResponse.token);
+    socket.emit("onInventory", JSON.stringify(player.letters))
+    socket.emit("onCooldown", JSON.stringify({
+      timer: Config.LETTER_COOLDOWN
+    }))
   });
+
+  socket.on('onAskLetter', (rawData)=>{
+    let message: WSMessage;
+    try {
+      message = JSON.parse(rawData.toString());
+    } catch (e: any) {
+      socket.emit("error", e.toString());
+      return;
+    }
+
+    let player = getPlayer(message.token)
+    addLetter(player)
+    socket.emit("setInventory", JSON.stringify(player.letters))
+  })
 
   socket.on('onSubmit', (rawData) => {
     let message: WSMessage;
@@ -64,14 +80,30 @@ io.on('connection', (socket) => {
   socket.emit('onBoard', JSON.stringify(Array.from(board.values())));
 });
 
+function getPlayer(token: string | null | undefined): Player {
+  if(token == null)
+    throw new Error("Token not defined")
+  let player = players.get(token)
+  if(player == null)
+    throw new Error("Player not found for this token")
+  return player
+}
+
 function sendBoardToAll() {
   io.emit('onBoard', JSON.stringify(Array.from(board.values())));
 }
 
 function generateLetters(number: number) {
-  let letters = [];
-  for (let i = 0; i < number; i++) letters.push(DictionaryService.getRandomLetter());
-  return letters;
+  let letters = []
+  for(let i=0; i<number; i++)
+    letters.push(DictionaryService.getRandomLetter())
+  return letters
+}
+function addLetter(player: Player){
+  if(player.cooldownTarget > new Date())
+    throw new Error("The cooldown is not over")
+  player.letters.push(generateLetters(1)[0])
+  player.cooldownTarget = getDatePlusCooldown()
 }
 
 function Login(username: string, token: string): LoginResponse {
@@ -91,11 +123,21 @@ function Login(username: string, token: string): LoginResponse {
       return result;
     }
   }
-  let newPlayer: Player = { username: username, token: generateToken(4), score: 0, letters: generateLetters(7) };
+  let newPlayer : Player = {
+    username: username,
+    token: generateToken(4),
+    score:0,
+    letters: generateLetters(7),
+    cooldownTarget: getDatePlusCooldown()
+  };
   players.set(newPlayer.token, newPlayer);
   result.token = newPlayer.token;
   console.log('New Player : ' + newPlayer.username);
   return result;
+}
+
+function getDatePlusCooldown(){
+  return new Date(new Date().getTime() + Config.LETTER_COOLDOWN*1000)
 }
 
 function putLettersOnBoard(data: PlaceWord, token: string) {
