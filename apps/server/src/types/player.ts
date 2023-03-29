@@ -3,4 +3,5 @@ export type Player = {
     token: string
     letters: string[]
     score: number
+    cooldownTarget: Date
 }

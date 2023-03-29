@@ -3,6 +3,7 @@ import {Player} from './types/player';
 import {BoardLetter, Direction, PlaceWord, Position} from './types/board';
 import {Server} from 'socket.io';
 import {DictionaryService} from "./Dictionary";
+import {Config} from "./config";
 
 const io = new Server({
   cors: {
@@ -33,9 +34,27 @@ io.on('connection', (socket) => {
     const token: string = message.token || '';
 
     const loginResponse = Login(username, token)
+    let player = getPlayer(loginResponse.token)
     socket.emit("token", JSON.stringify(loginResponse));
-    socket.emit("setInventory", JSON.stringify(players.get(loginResponse.token!)!.letters))
+    socket.emit("setInventory", JSON.stringify(player.letters))
+    socket.emit("onCooldown", JSON.stringify({
+      timer: Config.LETTER_COOLDOWN
+    }))
   });
+
+  socket.on('onAskLetter', (rawData)=>{
+    let message: WSMessage;
+    try {
+      message = JSON.parse(rawData.toString());
+    } catch (e: any) {
+      socket.emit("error", e.toString());
+      return;
+    }
+
+    let player = getPlayer(message.token)
+    addLetter(player)
+    socket.emit("setInventory", JSON.stringify(player.letters))
+  })
 
   socket.on('letterplaced', (rawData) => {
     let message: WSMessage;
@@ -53,12 +72,25 @@ io.on('connection', (socket) => {
 
   socket.emit("board", JSON.stringify(Array.from(board.values())));
 });
-
-function generateLetters(number: number) {
+function getPlayer(token: string | null | undefined): Player {
+  if(token == null)
+    throw new Error("Token not defined")
+  let player = players.get(token)
+  if(player == null)
+    throw new Error("Player not found for this token")
+  return player
+}
+function generateLetters(number: number): string[] {
   let letters = []
   for(let i=0; i<number; i++)
     letters.push(DictionaryService.getRandomLetter())
   return letters
+}
+function addLetter(player: Player){
+  if(player.cooldownTarget > new Date())
+    throw new Error("The cooldown is not over")
+  player.letters.push(generateLetters(1)[0])
+  player.cooldownTarget = getDatePlusCooldown()
 }
 
 function Login(username: string, token: string): LoginResponse {
@@ -78,11 +110,21 @@ function Login(username: string, token: string): LoginResponse {
         return result;
     }
   }
-  let newPlayer : Player = { username: username, token: generateToken(4), score:0, letters: generateLetters(7)};
+  let newPlayer : Player = {
+    username: username,
+    token: generateToken(4),
+    score:0,
+    letters: generateLetters(7),
+    cooldownTarget: getDatePlusCooldown()
+  };
   players.set(newPlayer.token, newPlayer);
   result.token = newPlayer.token;
   console.log('New Player : ' + newPlayer.username);
   return result;
+}
+
+function getDatePlusCooldown(){
+  return new Date(new Date().getTime() + Config.LETTER_COOLDOWN*1000)
 }
 
 function LetterPlacedFromClient(data: PlaceWord, token: string) {
