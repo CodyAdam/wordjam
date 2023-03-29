@@ -32,10 +32,10 @@ export default function Login({
   } = useForm<Inputs>();
   const onSubmit: SubmitHandler<Inputs> = (data) => {
     if (loginType === Type.Nickname) {
-      socket.emit('login', JSON.stringify({ data: { username: data.nicknameOrToken } }));
+      socket.emit('onLogin', JSON.stringify({ data: { username: data.nicknameOrToken } }));
     } else {
       localStorage.setItem('token', data.nicknameOrToken);
-      socket.emit('login', JSON.stringify({ token: data.nicknameOrToken }));
+      socket.emit('onLogin', JSON.stringify({ token: data.nicknameOrToken }));
     }
   };
 
