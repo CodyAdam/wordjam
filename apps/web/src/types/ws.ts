@@ -12,6 +12,4 @@ export enum LoginResponseType {
 export type LoginResponse = {
     status: LoginResponseType,
     username?: string,
-    letters?: string,
-    token?: string
 }

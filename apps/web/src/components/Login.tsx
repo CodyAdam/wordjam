@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { Socket } from 'socket.io-client';
 import { AppState } from '@/src/lib/AppState';
+import { LoginResponseType } from '../types/ws';
 
 enum Type {
   Nickname,
@@ -15,15 +16,7 @@ type Inputs = {
   nicknameOrToken: string;
 };
 
-export default function Login({
-  isConnected,
-  socket,
-  onLogin,
-}: {
-  isConnected: boolean;
-  socket: Socket;
-  onLogin: (token: string) => void;
-}) {
+export default function Login({ isConnected, socket }: { isConnected: boolean; socket: Socket }) {
   const {
     register,
     handleSubmit,
@@ -42,32 +35,29 @@ export default function Login({
   const [loginType, setLoginType] = useState(Type.Nickname);
 
   useEffect(() => {
-    const tokenEvent = (data: any) => {
-      const dataParsed = JSON.parse(data);
+    const loginResponseEvent = (data: any) => {
+      const dataParsed: {
+        status: LoginResponseType;
+        username?: string;
+      } = JSON.parse(data);
 
-      if (dataParsed.status && dataParsed.status === 'ALREADY_EXIST') {
-        alert('Nickname already exist, please choose another one');
-        return;
-      }
-      if (dataParsed.status && dataParsed.status === 'SUCCESS') {
-        onLogin(dataParsed.token);
+      switch (dataParsed.status) {
+        case LoginResponseType.ALREADY_EXIST:
+          alert(`Nickname ${dataParsed.username ?? 'not found'} already exist, please choose another one`);
+          break;
+        case LoginResponseType.SUCCESS:
+          break;
+        case LoginResponseType.WRONG_TOKEN:
+          alert('Wrong token, please try again');
+          break;
       }
     };
-    socket.on('onToken', tokenEvent);
-
-    const onConnect = () => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        socket.emit('onLogin', JSON.stringify({ token: token }));
-      }
-    };
-    socket.on('connect', onConnect);
+    socket.on('onLoginResponse', loginResponseEvent);
 
     return () => {
-      socket.off('onToken', tokenEvent);
-      socket.off('connect', onConnect);
+      socket.off('onLoginResponse', loginResponseEvent);
     };
-  }, [onLogin, socket]);
+  }, [socket]);
 
   return (
     <div className='absolute flex h-full w-full flex-col items-center justify-center bg-black/20 backdrop-blur-sm'>

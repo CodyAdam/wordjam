@@ -30,7 +30,8 @@ io.on('connection', (socket) => {
       const token: string = message.token || '';
 
       const loginResponse = Login(username, token)
-        socket.emit("onToken", JSON.stringify(loginResponse));
+      socket.emit('onLoginResponse', JSON.stringify(loginResponse));
+      socket.emit("onToken", JSON.stringify(loginResponse));
       if(loginResponse.status != LoginResponseType.SUCCESS)
         return
       let player = getPlayer(loginResponse.token)
