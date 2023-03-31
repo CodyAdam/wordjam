@@ -7,7 +7,7 @@ import {PlacedResponse} from "./types/responses/PlacedResponse";
 import {Direction} from "./types/Direction";
 
 export class BoardManager {
-    private _board: Map<string, BoardLetter>;
+    private readonly _board: Map<string, BoardLetter>;
 
     constructor(initialWord: string = 'WORDJAM') {
         this._board = new Map<string, BoardLetter>();
