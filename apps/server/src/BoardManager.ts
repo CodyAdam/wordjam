@@ -1,6 +1,10 @@
-import {BoardLetter, Direction, PlacedResponse, PlaceWord, Position} from "./types/board";
-import {Player} from "./types/player";
+import {Player} from "./types/Player";
 import {DictionaryService} from "./Dictionary";
+import {BoardLetter} from "./types/BoardLetter";
+import {Position} from "./types/Position";
+import {PlaceWord} from "./types/PlaceWord";
+import {PlacedResponse} from "./types/responses/PlacedResponse";
+import {Direction} from "./types/Direction";
 
 export class BoardManager {
     private _board: Map<string, BoardLetter>;

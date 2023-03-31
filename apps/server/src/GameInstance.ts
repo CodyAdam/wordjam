@@ -1,11 +1,10 @@
-import {Player} from "./types/player";
+import {Player} from "./types/Player";
 import {BoardManager} from "./BoardManager";
-import {Config} from "./config";
 import {generateLetters, getDatePlusCooldown} from "./Utils";
 
 export class GameInstance {
-    private _players: Map<string, Player>;
-    private _board: BoardManager;
+    private readonly _players: Map<string, Player>;
+    private readonly _board: BoardManager;
 
     constructor() {
         this._players = new Map<string, Player>();

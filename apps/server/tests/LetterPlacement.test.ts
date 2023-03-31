@@ -1,7 +1,5 @@
 import { beforeEach, describe } from 'node:test';
-import { PlacedResponse, PlaceWord, Direction } from '../src/types/board';
-import { checkLetterPlacedFromClient } from '../src/server';
-import { Player } from '../src/types/player';
+import { Player } from '../src/types/Player';
 
 describe('LetterPlacement', () => {
   beforeEach(() => {

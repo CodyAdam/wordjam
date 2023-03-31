@@ -1,8 +1,10 @@
-import { Player } from './types/player';
-import { PlacedResponse, PlaceWord } from './types/board';
+import { Player } from './types/Player';
 import { Server } from 'socket.io';
 import {GameInstance} from "./GameInstance";
 import {generateLetters, generateToken, getDatePlusCooldown} from "./Utils";
+import {LoginResponseType} from "./types/responses/LoginResponseType";
+import {PlaceWord} from "./types/PlaceWord";
+import {PlacedResponse} from "./types/responses/PlacedResponse";
 
 const io = new Server({
   cors: {
@@ -27,9 +29,9 @@ io.on('connection', (socket) => {
    */
   socket.on('onLogin', (token: string) => {
     const player = gameInstance.players.get(token);
-    if (player === undefined) return socket.emit('onLoginResponse', 'WRONG_TOKEN');
+    if (player === undefined) return socket.emit('onLoginResponse', LoginResponseType.WRONG_TOKEN);
 
-    socket.emit('onLoginResponse', 'SUCCESS');
+    socket.emit('onLoginResponse', LoginResponseType.SUCCESS);
     socket.emit('onToken', player.token);
     socket.emit('onInventory', player.letters);
     socket.emit('onCooldown', gameInstance.playerCooldown(player.token));
@@ -42,7 +44,7 @@ io.on('connection', (socket) => {
    */
   socket.on('onRegister', (username: string) => {
     // Player Username verification
-    if(!gameInstance.checkUsernameAvailability(username)) return socket.emit('onLoginResponse', 'ALREADY_EXIST');
+    if(!gameInstance.checkUsernameAvailability(username)) return socket.emit('onLoginResponse', LoginResponseType.ALREADY_EXIST);
 
     // Create new player
     let newPlayer: Player = {
@@ -54,7 +56,7 @@ io.on('connection', (socket) => {
     };
     gameInstance.addPlayer(newPlayer);
 
-    socket.emit('onLoginResponse', 'SUCCESS');
+    socket.emit('onLoginResponse', LoginResponseType.SUCCESS);
     socket.emit('onToken', newPlayer.token);
     socket.emit('onInventory', newPlayer.letters);
     socket.emit('onCooldown', gameInstance.playerCooldown(newPlayer.token));
