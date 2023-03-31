@@ -4,7 +4,6 @@ import {Player} from "../src/types/Player";
 import {PlaceWord} from "../src/types/PlaceWord";
 import {Direction} from "../src/types/Direction";
 import {PlacedResponse} from "../src/types/responses/PlacedResponse";
-import {DictionaryService} from "../src/Dictionary";
 
 describe("Board", ()=>{
 
