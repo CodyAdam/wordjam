@@ -1,9 +1,9 @@
-import {LoginResponse, LoginResponseType, WSMessage} from './types/ws';
-import {Player} from './types/player';
-import {BoardLetter, Direction, PlacedResponse, PlaceWord, Position} from './types/board';
-import {Server} from 'socket.io';
-import {DictionaryService} from "./Dictionary";
-import {Config} from "./config";
+import { LoginResponse, LoginResponseType, WSMessage } from './types/ws';
+import { Player } from './types/player';
+import { BoardLetter, Direction, PlacedResponse, PlaceWord, Position } from './types/board';
+import { Server } from 'socket.io';
+import { DictionaryService } from './Dictionary';
+import { Config } from './config';
 
 const io = new Server({
   cors: {
@@ -21,134 +21,105 @@ console.log('Server started on port ' + PORT);
 defaultBoardSetup();
 
 io.on('connection', (socket) => {
-  socket.on('onLogin', (rawData) => {
-    let message: WSMessage;
-    try {
-      message = JSON.parse(rawData.toString());
-
-      const username: string = message.data?.username || '';
-      const token: string = message.token || '';
-
-      const loginResponse = Login(username, token)
-      socket.emit('onLoginResponse', JSON.stringify(loginResponse));
-      socket.emit("onToken", JSON.stringify(loginResponse));
-      if(loginResponse.status != LoginResponseType.SUCCESS)
-        return
-      let player = getPlayer(loginResponse.token)
-      socket.emit("onInventory", JSON.stringify(player.letters))
-      socket.emit("onCooldown", JSON.stringify({
-        timer: Config.LETTER_COOLDOWN
-      }))
-    } catch (e: any) {
-      socket.emit("onError", e.message)
+  socket.on('onLogin', (token: string) => {
+    const player = players.get(token);
+    if (player === undefined) {
+      socket.emit('onLoginResponse', 'WRONG_TOKEN');
+      return;
     }
+    socket.emit('onLoginResponse', 'SUCCESS');
+    socket.emit('onToken', player.token);
+    socket.emit('onInventory', player.letters);
+    socket.emit('onCooldown', 0); // TODO : Calculate cooldown time
   });
 
-  socket.on('onAskLetter', (rawData)=>{
-    let message: WSMessage;
-    try {
-      message = JSON.parse(rawData.toString());
-
-      let player = getPlayer(message.token)
-      addLetter(player)
-      socket.emit("setInventory", JSON.stringify(player.letters))
-    } catch (e: any){
-      socket.emit("onError", e.message)
-    }
-  })
-
-  socket.on('onSubmit', (rawData) => {
-    let message: WSMessage;
-    try {
-      message = JSON.parse(rawData.toString());
-
-      let response = checkLetterPlacedFromClient(message.data, message.token);
-      if (response == PlacedResponse.OK) {
-        putLettersOnBoard(message.data, message.token);
-        sendBoardToAll();
-      } else {
-        socket.emit('onError', response);
+  socket.on('onRegister', (username: string) => {
+    // Player Username verification
+    for (let p of players.values()) {
+      if (p.username == username) {
+        socket.emit('onLoginResponse', 'ALREADY_EXIST');
+        return;
       }
-    } catch (e: any) {
-      socket.emit("onError", e.message)
     }
 
+    // Create new player
+    let newPlayer: Player = {
+      username: username,
+      token: generateToken(4),
+      score: 0,
+      letters: generateLetters(7),
+      cooldownTarget: getDatePlusCooldown(),
+    };
+    players.set(newPlayer.token, newPlayer);
 
+    socket.emit('onLoginResponse', 'SUCCESS');
+    socket.emit('onToken', newPlayer.token);
+    socket.emit('onInventory', newPlayer.letters);
+    socket.emit('onCooldown', 0); // TODO : Calculate cooldown time
+
+    console.log('New Player : ' + newPlayer.username);
+  });
+
+  socket.on('onAskLetter', (token: string) => {
+    const player = players.get(token);
+    if (player === undefined) {
+      socket.emit('onError', 'Player not found');
+      return;
+    }
+
+    addLetter(player);
+    socket.emit('setInventory', player.letters);
+  });
+
+  socket.on('onSubmit', ({ submittedLetters, token }: { submittedLetters: PlaceWord; token: string }) => {
+    const player = players.get(token);
+    if (player === undefined) {
+      socket.emit('onError', 'Player not found');
+      return;
+    }
+
+    let response = checkLetterPlacedFromClient(submittedLetters, player);
+    if (response !== PlacedResponse.OK) {
+      socket.emit('onError', response);
+      return;
+    }
+
+    putLettersOnBoard(submittedLetters, player);
+    sendBoardToAll();
   });
 
   console.log('New connection');
 
-  socket.emit('onBoard', JSON.stringify(Array.from(board.values())));
+  socket.emit('onBoard', Array.from(board.values()));
 });
 
-function getPlayer(token: string | null | undefined): Player {
-  if(token == null)
-    throw new Error("Token not defined")
-  let player = players.get(token)
-  if(player == null)
-    throw new Error("Player not found for this token")
-  return player
-}
-
 function sendBoardToAll() {
-  io.emit('onBoard', JSON.stringify(Array.from(board.values())));
+  io.emit('onBoard', Array.from(board.values()));
 }
 
 function generateLetters(number: number) {
-  let letters = []
-  for(let i=0; i<number; i++)
-    letters.push(DictionaryService.getRandomLetter())
-  return letters
+  let letters = [];
+  for (let i = 0; i < number; i++) letters.push(DictionaryService.getRandomLetter());
+  return letters;
 }
-function addLetter(player: Player){
-  if(player.cooldownTarget > new Date())
-    throw new Error("The cooldown is not over")
-  player.letters.push(generateLetters(1)[0])
-  player.cooldownTarget = getDatePlusCooldown()
+function addLetter(player: Player) {
+  if (player.cooldownTarget > new Date()) throw new Error('The cooldown is not over');
+  player.letters.push(generateLetters(1)[0]);
+  player.cooldownTarget = getDatePlusCooldown();
 }
 
-function Login(username: string, token: string): LoginResponse {
-  let result: LoginResponse = { status: LoginResponseType.SUCCESS };
-  // Token verification
-  if (token !== '') {
-    if (players.has(token)) {
-      result.username = players.get(token)?.username || '';
-      result.status = LoginResponseType.SUCCESS;
-    } else result.status = LoginResponseType.WRONG_TOKEN;
-    return result;
-  }
-  // Player Username verification
-  for (let p of players.values()) {
-    if (p.username == username) {
-      result.status = LoginResponseType.ALREADY_EXIST;
-      return result;
-    }
-  }
-  let newPlayer : Player = {
-    username: username,
-    token: generateToken(4),
-    score:0,
-    letters: generateLetters(7),
-    cooldownTarget: getDatePlusCooldown()
-  };
-  players.set(newPlayer.token, newPlayer);
-  result.token = newPlayer.token;
-  console.log('New Player : ' + newPlayer.username);
-  return result;
+function getDatePlusCooldown() {
+  return new Date(new Date().getTime() + Config.LETTER_COOLDOWN * 1000);
 }
 
-function getDatePlusCooldown(){
-  return new Date(new Date().getTime() + Config.LETTER_COOLDOWN*1000)
-}
-
-function putLettersOnBoard(data: PlaceWord, token: string) {
+function putLettersOnBoard(data: PlaceWord, player: Player) {
   let currentPos: Position = data.startPos;
   let lettersToPlaced: string[] = data.letters;
   while (lettersToPlaced.length > 0) {
     if (!hasLetter(currentPos)) {
       let newLetter = lettersToPlaced.shift() || '';
       board.set(currentPos.x + '_' + currentPos.y, {
-        placedBy: players.get(token)?.username || '',
+        placedBy: player.username,
         timestamp: Date.now(),
         letter: newLetter,
         position: currentPos,
@@ -159,11 +130,11 @@ function putLettersOnBoard(data: PlaceWord, token: string) {
   }
 }
 
-export function checkLetterPlacedFromClient(data: PlaceWord, token: string): PlacedResponse {
+export function checkLetterPlacedFromClient(data: PlaceWord, player: Player): PlacedResponse {
   let currentPos: Position = data.startPos;
   let word: string = '';
   let additionalWords: string[] = [];
-  let playerLetters: string[] = players.get(token)?.letters || [];
+  let playerLetters: string[] = player.letters;
   let lettersToPlaced: string[] = data.letters;
   while (lettersToPlaced.length > 0) {
     if (hasLetter(currentPos)) {

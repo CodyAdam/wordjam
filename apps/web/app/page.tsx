@@ -11,12 +11,14 @@ import { useCursor } from '@/src/hooks/useCursor';
 import { keyFromPos } from '@/src/utils/posHelper';
 import LinkDeviceButton from '@/src/components/LinkDeviceButton';
 import TokenModal from '@/src/components/TokenModal';
+import { LoginResponseType } from '@/src/types/ws';
 
 export default function App() {
-  const [placedLetters, setPlacedLetters] = useState<BoardLetters>(new Map());
+  // login related
   const [appStage, setAppStage] = useState(AppState.AwaitingLogin);
+  const [showTokenModal, setShowTokenModal] = useState(false);
 
-  const [playerToken, setPlayerToken] = useState('');
+  const [placedLetters, setPlacedLetters] = useState<BoardLetters>(new Map());
   const [pan, setPan] = useState<Pan>({ offset: { x: 0, y: 0 }, scale: 20, origin: { x: 0, y: 0 } });
   const { cursorDirection, cursorPos, setCursorDirection, setCursorPos, goToNextCursorPos } = useCursor(placedLetters);
   const [inventory, setInventory] = useState<InventoryLetter[]>([
@@ -42,24 +44,23 @@ export default function App() {
         setPlacedLetters(newPlacedLetters);
       },
       onToken: (token) => {
-        // store the token in local storage
-        setPlayerToken(token);
         localStorage.setItem('token', token);
-        setAppStage(AppState.InGame);
+      },
+      onLoginResponse: (response: LoginResponseType) => {
+        if (response === LoginResponseType.SUCCESS) setAppStage(AppState.InGame);
       },
       connect: () => {
         const token = localStorage.getItem('token');
         if (token) {
-          socket.emit('onLogin', JSON.stringify({ token: token }));
+          socket.emit('onLogin', token);
         }
       },
     },
     onAny: (event, data) => {
-      // console.info(event, data);
+      console.info(event, data);
     },
   });
 
-  const [showTokenModal, setShowTokenModal] = useState(false);
   const placeInventoryLetter = useCallback(
     (index: number) => {
       if (!cursorPos) return;
@@ -79,35 +80,60 @@ export default function App() {
     console.log('submitting');
   }, []);
 
-  return (
-    <>
-      <main className='relative flex h-full bg-white'>
-        <Canvas
-          placedLetters={placedLetters}
-          pan={pan}
-          setPan={(p) => setPan(p)}
-          inventory={inventory}
-          cursorPos={cursorPos}
-          setCursorPos={setCursorPos}
-          cursorDirection={cursorDirection}
-          setCursorDirection={setCursorDirection}
-        />
-        {showTokenModal && <TokenModal value={playerToken} onClick={() => setShowTokenModal(false)} />}
-        {appStage === AppState.InGame && (
+  const onLogout = useCallback(() => {
+    setAppStage(AppState.AwaitingLogin);
+    localStorage.removeItem('token');
+  }, []);
+
+  if (appStage === AppState.AwaitingLogin)
+    return (
+      <>
+        <main className='relative flex h-full bg-white'>
+          <Canvas
+            placedLetters={placedLetters}
+            pan={pan}
+            setPan={(p) => setPan(p)}
+            inventory={inventory}
+            cursorPos={cursorPos}
+            setCursorPos={setCursorPos}
+            cursorDirection={cursorDirection}
+            setCursorDirection={setCursorDirection}
+          />
+          <Login socket={socket} isConnected={isConnected} />
+        </main>
+      </>
+    );
+
+  if (appStage === AppState.InGame)
+    return (
+      <>
+        <main className='relative flex h-full bg-white'>
+          <Canvas
+            placedLetters={placedLetters}
+            pan={pan}
+            setPan={(p) => setPan(p)}
+            inventory={inventory}
+            cursorPos={cursorPos}
+            setCursorPos={setCursorPos}
+            cursorDirection={cursorDirection}
+            setCursorDirection={setCursorDirection}
+          />
+          {showTokenModal && <TokenModal onClick={() => setShowTokenModal(false)} />}
           <div className='absolute top-0 right-0 p-2'>
             <LinkDeviceButton onClick={() => setShowTokenModal(true)}></LinkDeviceButton>
           </div>
-        )}
-        {appStage === AppState.AwaitingLogin && <Login socket={socket} isConnected={isConnected} />}
-      </main>
-      {appStage === AppState.InGame && (
+        </main>
         <UserUI
           inventory={inventory}
           onPlace={placeInventoryLetter}
           onReset={onResetInventoryPlacement}
           onSubmit={onSubmit}
         />
-      )}
-    </>
-  );
+        <button className='absolute bottom-0 left-0 m-3 p-3 rounded-md bg-purple-200 text-purple-800 ' onClick={() => onLogout()}>
+          (Debug) Logout
+        </button>
+      </>
+    );
+
+  return null;
 }

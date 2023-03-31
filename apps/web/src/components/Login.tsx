@@ -25,30 +25,27 @@ export default function Login({ isConnected, socket }: { isConnected: boolean; s
   } = useForm<Inputs>();
   const onSubmit: SubmitHandler<Inputs> = (data) => {
     if (loginType === Type.Nickname) {
-      socket.emit('onLogin', JSON.stringify({ data: { username: data.nicknameOrToken } }));
+      const username = data.nicknameOrToken;
+      socket.emit('onRegister', username);
     } else {
-      localStorage.setItem('token', data.nicknameOrToken);
-      socket.emit('onLogin', JSON.stringify({ token: data.nicknameOrToken }));
+      const token = data.nicknameOrToken;
+      socket.emit('onLogin', token);
     }
   };
 
   const [loginType, setLoginType] = useState(Type.Nickname);
 
   useEffect(() => {
-    const loginResponseEvent = (data: any) => {
-      const dataParsed: {
-        status: LoginResponseType;
-        username?: string;
-      } = JSON.parse(data);
-
-      switch (dataParsed.status) {
+    const loginResponseEvent = (response: LoginResponseType) => {
+      switch (response) {
         case LoginResponseType.ALREADY_EXIST:
-          alert(`Nickname ${dataParsed.username ?? 'not found'} already exist, please choose another one`);
-          break;
-        case LoginResponseType.SUCCESS:
+          alert(`Nickname already exist, please choose another one`);
           break;
         case LoginResponseType.WRONG_TOKEN:
           alert('Wrong token, please try again');
+          break;
+        case LoginResponseType.SUCCESS:
+          // handled by the parent component
           break;
       }
     };
@@ -62,9 +59,9 @@ export default function Login({ isConnected, socket }: { isConnected: boolean; s
   return (
     <div className='absolute flex h-full w-full flex-col items-center justify-center bg-black/20 backdrop-blur-sm'>
       <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-3 rounded-lg bg-white p-10 shadow'>
-        <div className='flex'>
+        <div className='flex gap-3'>
           <h1 className='pr-2 text-5xl font-bold text-gray-700'>WordJam</h1>
-          <Image className='animate-wiggle' height={40} src={jamIcon} alt='jam'></Image>
+          <Image className='animate-wiggle' height={40} width={40} src={jamIcon} alt='jam'></Image>
         </div>
         <p className='-mt-3 text-gray-300'>A multiplayer word game</p>
         <div className='mt-4'></div>
