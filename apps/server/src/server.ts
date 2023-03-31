@@ -96,6 +96,9 @@ io.on('connection', (socket) => {
   socket.emit('onBoard', Array.from(gameInstance.board.board.values()));
 });
 
+/**
+ * Send the letters displayed on the board to all the players connected
+ */
 function sendBoardToAll() {
   io.emit('onBoard', Array.from(gameInstance.board.board.values()));
 }
