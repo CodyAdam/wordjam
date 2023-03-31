@@ -28,6 +28,10 @@ export class DictionaryService {
         return words.join('-')
     }
 
+    static addCustomWord(word: string){
+        words.add(word.toLowerCase());
+    }
+
     /**
      * Calculate the points of the word
      * @param word the word

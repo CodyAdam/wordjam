@@ -1,46 +1,50 @@
-import { LoginResponse, LoginResponseType, WSMessage } from './types/ws';
-import { Player } from './types/player';
-import { BoardLetter, Direction, PlacedResponse, PlaceWord, Position } from './types/board';
+import { Player } from './types/Player';
 import { Server } from 'socket.io';
-import { DictionaryService } from './Dictionary';
-import { Config } from './config';
+import {GameInstance} from "./GameInstance";
+import {generateLetters, generateToken, getDatePlusCooldown} from "./Utils";
+import {LoginResponseType} from "./types/responses/LoginResponseType";
+import {PlaceWord} from "./types/PlaceWord";
+import {PlacedResponse} from "./types/responses/PlacedResponse";
 
 const io = new Server({
   cors: {
     origin: '*',
   },
 });
+
 const PORT = 8080;
 io.listen(PORT);
 
-let players = new Map<string, Player>();
-let board = new Map<string, BoardLetter>();
-
 console.log('Server started on port ' + PORT);
 
-defaultBoardSetup();
+let gameInstance = new GameInstance();
+
+console.log('GameInstance created');
 
 io.on('connection', (socket) => {
+  /**
+   * ####  EVENT ON LOGIN ####
+   * Call when a player want to log in with his token
+   * @param token : string, token of the player
+   */
   socket.on('onLogin', (token: string) => {
-    const player = players.get(token);
-    if (player === undefined) {
-      socket.emit('onLoginResponse', 'WRONG_TOKEN');
-      return;
-    }
-    socket.emit('onLoginResponse', 'SUCCESS');
+    const player = gameInstance.players.get(token);
+    if (player === undefined) return socket.emit('onLoginResponse', LoginResponseType.WRONG_TOKEN);
+
+    socket.emit('onLoginResponse', LoginResponseType.SUCCESS);
     socket.emit('onToken', player.token);
     socket.emit('onInventory', player.letters);
-    socket.emit('onCooldown', 0); // TODO : Calculate cooldown time
+    socket.emit('onCooldown', gameInstance.playerCooldown(player.token));
   });
 
+  /**
+   * ####  EVENT ON REGISTER ####
+   * Call when a player want to register with his username
+   * @param username : string, username of the player
+   */
   socket.on('onRegister', (username: string) => {
     // Player Username verification
-    for (let p of players.values()) {
-      if (p.username == username) {
-        socket.emit('onLoginResponse', 'ALREADY_EXIST');
-        return;
-      }
-    }
+    if(!gameInstance.checkUsernameAvailability(username)) return socket.emit('onLoginResponse', LoginResponseType.ALREADY_EXIST);
 
     // Create new player
     let newPlayer: Player = {
@@ -50,155 +54,56 @@ io.on('connection', (socket) => {
       letters: generateLetters(7),
       cooldownTarget: getDatePlusCooldown(),
     };
-    players.set(newPlayer.token, newPlayer);
+    gameInstance.addPlayer(newPlayer);
 
-    socket.emit('onLoginResponse', 'SUCCESS');
+    socket.emit('onLoginResponse', LoginResponseType.SUCCESS);
     socket.emit('onToken', newPlayer.token);
     socket.emit('onInventory', newPlayer.letters);
-    socket.emit('onCooldown', 0); // TODO : Calculate cooldown time
+    socket.emit('onCooldown', gameInstance.playerCooldown(newPlayer.token));
 
     console.log('New Player : ' + newPlayer.username);
   });
 
+  /**
+   * ####  EVENT ON ASK LETTER ####
+   * Call when a player want to get a new letter in his inventory
+   * @param token : string, token of the player
+   */
   socket.on('onAskLetter', (token: string) => {
-    const player = players.get(token);
-    if (player === undefined) {
-      socket.emit('onError', 'Player not found');
-      return;
-    }
+    const player = gameInstance.players.get(token);
+    if (player === undefined) return socket.emit('onError', 'Player not found');
 
-    addLetter(player);
+    gameInstance.addLetterToPlayer(player);
     socket.emit('setInventory', player.letters);
   });
 
+  /**
+   * ####  EVENT ON SUBMIT ####
+   * Call when a player want to submit his word to the board
+   * @param submittedLetters : PlaceWord, array of letters to place on the board
+   * @param token : string, token of the player
+   */
   socket.on('onSubmit', ({ submittedLetters, token }: { submittedLetters: PlaceWord; token: string }) => {
-    const player = players.get(token);
-    if (player === undefined) {
-      socket.emit('onError', 'Player not found');
-      return;
-    }
+    const player = gameInstance.players.get(token);
+    if (player === undefined) return socket.emit('onError', 'Player not found');
+    if(Object.prototype.toString.call(submittedLetters.letters) !== Object.prototype.toString.call( [] )
+        || submittedLetters.letters.length === 0) return socket.emit('onError', PlacedResponse.NO_LETTER_IN_REQUEST);
 
-    let response = checkLetterPlacedFromClient(submittedLetters, player);
-    if (response !== PlacedResponse.OK) {
-      socket.emit('onError', response);
-      return;
-    }
+    let response = gameInstance.board.checkLetterPlacedFromClient(submittedLetters, player);
+    if (response !== PlacedResponse.OK) return socket.emit('onError', response);
 
-    putLettersOnBoard(submittedLetters, player);
+    gameInstance.board.putLettersOnBoard(submittedLetters, player);
     sendBoardToAll();
+    socket.emit('setInventory', player.letters);
   });
 
-  console.log('New connection');
-
-  socket.emit('onBoard', Array.from(board.values()));
+  console.log('New web socket connection');
+  socket.emit('onBoard', Array.from(gameInstance.board.board.values()));
 });
 
+/**
+ * Send the letters displayed on the board to all the players connected
+ */
 function sendBoardToAll() {
-  io.emit('onBoard', Array.from(board.values()));
-}
-
-function generateLetters(number: number) {
-  let letters = [];
-  for (let i = 0; i < number; i++) letters.push(DictionaryService.getRandomLetter());
-  return letters;
-}
-function addLetter(player: Player) {
-  if (player.cooldownTarget > new Date()) throw new Error('The cooldown is not over');
-  player.letters.push(generateLetters(1)[0]);
-  player.cooldownTarget = getDatePlusCooldown();
-}
-
-function getDatePlusCooldown() {
-  return new Date(new Date().getTime() + Config.LETTER_COOLDOWN * 1000);
-}
-
-function putLettersOnBoard(data: PlaceWord, player: Player) {
-  let currentPos: Position = data.startPos;
-  let lettersToPlaced: string[] = data.letters;
-  while (lettersToPlaced.length > 0) {
-    if (!hasLetter(currentPos)) {
-      let newLetter = lettersToPlaced.shift() || '';
-      board.set(currentPos.x + '_' + currentPos.y, {
-        placedBy: player.username,
-        timestamp: Date.now(),
-        letter: newLetter,
-        position: currentPos,
-      });
-    }
-    if (data.direction == Direction.DOWN) currentPos.y--;
-    else currentPos.x++;
-  }
-}
-
-export function checkLetterPlacedFromClient(data: PlaceWord, player: Player): PlacedResponse {
-  let currentPos: Position = data.startPos;
-  let word: string = '';
-  let additionalWords: string[] = [];
-  let playerLetters: string[] = player.letters;
-  let lettersToPlaced: string[] = data.letters;
-  while (lettersToPlaced.length > 0) {
-    if (hasLetter(currentPos)) {
-      word += board.get(currentPos.x + '_' + currentPos.y)?.letter;
-    } else {
-      let newLetter = lettersToPlaced.shift() || '';
-      if (!playerLetters.includes(newLetter)) {
-        return PlacedResponse.PLAYER_DONT_HAVE_LETTERS;
-      }
-      let concurrentWord = detectWordFromInside(
-        currentPos,
-        data.direction == Direction.DOWN ? Direction.RIGHT : Direction.DOWN,
-      );
-
-      if (DictionaryService.wordExist(concurrentWord)) additionalWords.push(concurrentWord);
-      else return PlacedResponse.INVALID_POSITION;
-
-      playerLetters.splice(playerLetters.indexOf(newLetter, 0), 1);
-      word += newLetter;
-    }
-    if (data.direction == Direction.DOWN) currentPos.y--;
-    else currentPos.x++;
-  }
-  if (!DictionaryService.wordExist(word)) return PlacedResponse.WORD_NOT_EXIST;
-  return PlacedResponse.OK;
-}
-
-function detectWordFromInside(position: Position, direction: Direction): string {
-  let word = '';
-  let currentPos: Position = position;
-  while (hasLetter(currentPos)) {
-    if (direction == Direction.DOWN) currentPos.y++;
-    else currentPos.x--;
-  }
-
-  if (direction == Direction.DOWN) currentPos.y--;
-  else currentPos.x++;
-  while (hasLetter(currentPos)) {
-    word += board.get(currentPos.x + '_' + currentPos.y)?.letter;
-    if (direction == Direction.DOWN) currentPos.y--;
-    else currentPos.x++;
-  }
-
-  return word;
-}
-
-function hasLetter(position: Position): boolean {
-  return board.has(position.x + '_' + position.y);
-}
-
-function generateToken(len: number): string {
-  let text = '';
-  const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  for (let i = 0; i < len; i++) text += charset.charAt(Math.floor(Math.random() * charset.length));
-
-  return text;
-}
-
-function defaultBoardSetup() {
-  board.set('0_0', { placedBy: 'Server', timestamp: Date.now(), letter: 'W', position: { x: 0, y: 0 } });
-  board.set('1_0', { placedBy: 'Server', timestamp: Date.now(), letter: 'O', position: { x: 1, y: 0 } });
-  board.set('2_0', { placedBy: 'Server', timestamp: Date.now(), letter: 'R', position: { x: 2, y: 0 } });
-  board.set('3_0', { placedBy: 'Server', timestamp: Date.now(), letter: 'D', position: { x: 3, y: 0 } });
-  board.set('4_0', { placedBy: 'Server', timestamp: Date.now(), letter: 'J', position: { x: 4, y: 0 } });
-  board.set('5_0', { placedBy: 'Server', timestamp: Date.now(), letter: 'A', position: { x: 5, y: 0 } });
-  board.set('6_0', { placedBy: 'Server', timestamp: Date.now(), letter: 'M', position: { x: 6, y: 0 } });
+  io.emit('onBoard', Array.from(gameInstance.board.board.values()));
 }
