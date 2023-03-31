@@ -16,6 +16,7 @@ export class BoardManager {
     constructor(initialWord: string = 'WORDJAM') {
         this._board = new Map<string, BoardLetter>();
         this.defaultBoardSetup(initialWord);
+        DictionaryService.addCustomWord(initialWord);
     }
 
     /**
@@ -52,16 +53,19 @@ export class BoardManager {
      * @returns A PlacedResponse
      */
     checkLetterPlacedFromClient(data: PlaceWord, player: Player): PlacedResponse {
-        let currentPos: Position = data.startPos;
+        let currentPos: Position = Object.assign({}, data.startPos);
         let word: string = '';
         let additionalWords: string[] = [];
+        let validPosition: boolean = false;
         let playerLetters: string[] = player.letters;
         let lettersToPlaced: string[] = data.letters;
-        while (lettersToPlaced.length > 0) {
+        while (lettersToPlaced.length > 0 || this.hasLetter(currentPos)) {
             if (this.hasLetter(currentPos)) {
-                word += this.board.get(currentPos.x + '_' + currentPos.y)?.letter;
+                let letter = this.board.get(currentPos.x + '_' + currentPos.y)?.letter;
+                word += letter;
+                validPosition = true;
             } else {
-                let newLetter = lettersToPlaced.shift() || '';
+                let newLetter : string = lettersToPlaced.shift() || '';
                 if (!playerLetters.includes(newLetter)) {
                     return PlacedResponse.PLAYER_DONT_HAVE_LETTERS;
                 }
@@ -70,15 +74,20 @@ export class BoardManager {
                     data.direction == Direction.DOWN ? Direction.RIGHT : Direction.DOWN,
                 );
 
-                if (DictionaryService.wordExist(concurrentWord)) additionalWords.push(concurrentWord);
-                else return PlacedResponse.INVALID_POSITION;
+                if (DictionaryService.wordExist(concurrentWord)) {
+                    validPosition = true;
+                    additionalWords.push(concurrentWord);
+                }
+                else if(concurrentWord !== "") return PlacedResponse.INVALID_POSITION;
 
                 playerLetters.splice(playerLetters.indexOf(newLetter, 0), 1);
                 word += newLetter;
             }
-            if (data.direction == Direction.DOWN) currentPos.y--;
+            if (data.direction === Direction.DOWN) currentPos.y = currentPos.y - 1;
             else currentPos.x++;
         }
+        console.log(word)
+        if (!validPosition) return PlacedResponse.WORD_NOT_CONNECTED_TO_OTHERS;
         if (!DictionaryService.wordExist(word)) return PlacedResponse.WORD_NOT_EXIST;
         return PlacedResponse.OK;
     }
@@ -91,7 +100,7 @@ export class BoardManager {
      */
     private detectWordFromInside(position: Position, direction: Direction): string {
         let word : string = '';
-        let currentPos: Position = position;
+        let currentPos: Position = Object.assign({}, position);
         while (this.hasLetter(currentPos)) {
             if (direction == Direction.DOWN) currentPos.y++;
             else currentPos.x--;
@@ -115,7 +124,7 @@ export class BoardManager {
      * @returns the score gains by the player
      */
     putLettersOnBoard(data: PlaceWord, player: Player) : number {
-        let currentPos: Position = data.startPos;
+        let currentPos: Position = Object.assign({}, data.startPos);
         let lettersToPlaced: string[] = data.letters;
         while (lettersToPlaced.length > 0) {
             if (!this.hasLetter(currentPos)) {
@@ -124,7 +133,7 @@ export class BoardManager {
                     placedBy: player.username,
                     timestamp: Date.now(),
                     letter: newLetter,
-                    position: currentPos,
+                    position: Object.assign({}, currentPos),
                 });
             }
             if (data.direction == Direction.DOWN) currentPos.y--;

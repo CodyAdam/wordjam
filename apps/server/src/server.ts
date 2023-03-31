@@ -86,12 +86,15 @@ io.on('connection', (socket) => {
   socket.on('onSubmit', ({ submittedLetters, token }: { submittedLetters: PlaceWord; token: string }) => {
     const player = gameInstance.players.get(token);
     if (player === undefined) return socket.emit('onError', 'Player not found');
+    if(Object.prototype.toString.call(submittedLetters.letters) !== Object.prototype.toString.call( [] )
+        || submittedLetters.letters.length === 0) return socket.emit('onError', PlacedResponse.NO_LETTER_IN_REQUEST);
 
     let response = gameInstance.board.checkLetterPlacedFromClient(submittedLetters, player);
     if (response !== PlacedResponse.OK) return socket.emit('onError', response);
 
     gameInstance.board.putLettersOnBoard(submittedLetters, player);
     sendBoardToAll();
+    socket.emit('setInventory', player.letters);
   });
 
   console.log('New web socket connection');
