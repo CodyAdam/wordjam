@@ -5,7 +5,7 @@ export function toPlaceWord(inventory: InventoryLetter[]): PlaceWord {
   const placedInventoryLetters: InventoryLetterPlaced[] = inventory.filter(
     (letter) => letter.position !== undefined,
   ) as InventoryLetterPlaced[];
-  const letters: string[] = placedInventoryLetters.map((letter) => letter.letter);
+  const letters: string[] = placedInventoryLetters.map((letter) => letter.letter.toLowerCase());
   if (letters.length === 0) {
     throw new Error('No letters placed');
   }

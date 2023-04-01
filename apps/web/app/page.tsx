@@ -50,6 +50,9 @@ export default function App() {
       onLoginResponse: (response: LoginResponseType) => {
         if (response === LoginResponseType.SUCCESS) setAppStage(AppState.InGame);
       },
+      onInventory: (letters: string[]) => {
+        setInventory(letters.map((letter) => ({ letter: letter.toLocaleUpperCase() })));
+      },
       connect: () => {
         const token = localStorage.getItem('token');
         if (token) {
