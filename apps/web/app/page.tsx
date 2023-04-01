@@ -13,6 +13,7 @@ import TokenModal from '@/src/components/TokenModal';
 import { BoardLetter, LoginResponseType } from '@/src/types/api';
 import { BoardLetters, InventoryLetter } from '@/src/types/board';
 import { Pan } from '@/src/types/canvas';
+import { toPlaceWord } from '@/src/utils/submitHelper';
 
 export default function App() {
   // login related
@@ -77,8 +78,14 @@ export default function App() {
   }, []);
 
   const onSubmit = useCallback(() => {
-    console.log('submitting');
-  }, []);
+    try {
+      const placeWord = toPlaceWord(inventory);
+      const token = localStorage.getItem('token');
+      socket.emit('onSubmit', { submittedLetters: placeWord, token: token });
+    } catch (error) {
+      console.error(error);
+    }
+  }, [inventory, socket]);
 
   const onLogout = useCallback(() => {
     setAppStage(AppState.AwaitingLogin);
@@ -129,7 +136,10 @@ export default function App() {
           onReset={onResetInventoryPlacement}
           onSubmit={onSubmit}
         />
-        <button className='absolute bottom-0 left-0 m-3 p-3 rounded-md bg-purple-200 text-purple-800 ' onClick={() => onLogout()}>
+        <button
+          className='absolute bottom-0 left-0 m-3 rounded-md bg-purple-200 p-3 text-purple-800 '
+          onClick={() => onLogout()}
+        >
           (Debug) Logout
         </button>
       </>
