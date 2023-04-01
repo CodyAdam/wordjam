@@ -4,8 +4,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import useWindowSize from '../hooks/useWindowSize';
 import { SCROLL_MAX_TILE_SIZE, SCROLL_MIN_TILE_SIZE, SCROLL_SPEED, TILE_SIZE } from '../lib/constants';
 import { posCeil, posCentered, posFloor, screenToWorld, worldToScreen } from '../utils/posHelper';
-import { BoardLetter, BoardLetters, InventoryLetter, Pan, Position } from '../types/board';
+import {  BoardLetters, InventoryLetter } from '../types/board';
 import { useCursor } from '../hooks/useCursor';
+import { Position } from '../types/api';
+import { Pan } from '../types/canvas';
 
 export default function Canvas({
   placedLetters,

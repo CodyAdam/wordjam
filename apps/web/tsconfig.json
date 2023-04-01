@@ -31,10 +31,11 @@
   },
   "include": [
     "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
     ".next/types/**/*.ts",
-    "/home/cody/Git/wordjam/apps/web/.next/types/**/*.ts"
+    "src/**/*.tsx",
+    "app/**/*.tsx",
+    "app/**/*.ts",
+    "src/**/*.ts"
   ],
   "exclude": [
     "node_modules"

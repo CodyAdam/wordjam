@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { BoardLetters, Position } from '../types/board';
+import { Position } from '../types/api';
+import { BoardLetters } from '../types/board';
 import { keyFromPos } from '../utils/posHelper';
 
 function getNextCurPos(pos: Position, direction: boolean) {
