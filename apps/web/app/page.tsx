@@ -36,8 +36,7 @@ export default function App() {
   ]);
   const { isConnected, socket } = useSocket(SOCKET_URL, {
     events: {
-      board: (data) => {
-        const letters: BoardLetter[] = JSON.parse(data);
+      onBoard: (letters: BoardLetter[]) => {
         const newPlacedLetters: BoardLetters = new Map();
         letters.forEach((letter) => {
           newPlacedLetters.set(keyFromPos(letter.position), letter);
