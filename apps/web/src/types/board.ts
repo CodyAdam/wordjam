@@ -8,6 +8,10 @@ export type InventoryLetter = {
   letter: string;
   position?: Position;
 };
+export type InventoryLetterPlaced = {
+  letter: string;
+  position: Position;
+};
 
 export type BoardClient = {
   position: Position;
