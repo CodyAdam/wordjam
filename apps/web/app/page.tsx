@@ -14,27 +14,17 @@ import { BoardLetter, LoginResponseType } from '@/src/types/api';
 import { BoardLetters, InventoryLetter } from '@/src/types/board';
 import { Pan } from '@/src/types/canvas';
 import { toPlaceWord } from '@/src/utils/submitHelper';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.min.css';
 
 export default function App() {
   // login related
   const [appStage, setAppStage] = useState(AppState.AwaitingLogin);
   const [showTokenModal, setShowTokenModal] = useState(false);
-
   const [placedLetters, setPlacedLetters] = useState<BoardLetters>(new Map());
   const [pan, setPan] = useState<Pan>({ offset: { x: 0, y: 0 }, scale: 20, origin: { x: 0, y: 0 } });
   const { cursorDirection, cursorPos, setCursorDirection, setCursorPos, goToNextCursorPos } = useCursor(placedLetters);
-  const [inventory, setInventory] = useState<InventoryLetter[]>([
-    { letter: 'A' },
-    { letter: 'R' },
-    { letter: 'T' },
-    { letter: 'H' },
-    { letter: 'U' },
-    { letter: 'R' },
-    {
-      letter: 'X',
-      position: { x: 5, y: 5 },
-    },
-  ]);
+  const [inventory, setInventory] = useState<InventoryLetter[]>([]);
   const { isConnected, socket } = useSocket(SOCKET_URL, {
     events: {
       onBoard: (letters: BoardLetter[]) => {
@@ -52,6 +42,9 @@ export default function App() {
       },
       onInventory: (letters: string[]) => {
         setInventory(letters.map((letter) => ({ letter: letter.toLocaleUpperCase() })));
+      },
+      onError: (error: string) => {
+        toast.error(error);
       },
       connect: () => {
         const token = localStorage.getItem('token');
@@ -86,7 +79,7 @@ export default function App() {
       const token = localStorage.getItem('token');
       socket.emit('onSubmit', { submittedLetters: placeWord, token: token });
     } catch (error) {
-      console.error(error);
+      error instanceof Error && toast.error(error.message);
     }
   }, [inventory, socket]);
 
@@ -145,6 +138,18 @@ export default function App() {
         >
           (Debug) Logout
         </button>
+        <ToastContainer
+          position='bottom-right'
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme='light'
+        />
       </>
     );
 
