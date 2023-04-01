@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { Socket } from 'socket.io-client';
 import { AppState } from '@/src/lib/AppState';
-import { LoginResponseType } from '../types/ws';
+import { LoginResponseType } from '../types/api';
 
 enum Type {
   Nickname,

@@ -1,6 +1,5 @@
 'use client';
 import { useSocket } from '@/src/hooks/useSocket';
-import { BoardLetter, BoardLetters, InventoryLetter, Pan, Position } from '@/src/types/board';
 import { useCallback, useState } from 'react';
 import { AppState } from '@/src/lib/AppState';
 import { SOCKET_URL } from '@/src/lib/constants';
@@ -11,7 +10,9 @@ import { useCursor } from '@/src/hooks/useCursor';
 import { keyFromPos } from '@/src/utils/posHelper';
 import LinkDeviceButton from '@/src/components/LinkDeviceButton';
 import TokenModal from '@/src/components/TokenModal';
-import { LoginResponseType } from '@/src/types/ws';
+import { BoardLetter, LoginResponseType } from '@/src/types/api';
+import { BoardLetters, InventoryLetter } from '@/src/types/board';
+import { Pan } from '@/src/types/canvas';
 
 export default function App() {
   // login related
@@ -35,8 +36,7 @@ export default function App() {
   ]);
   const { isConnected, socket } = useSocket(SOCKET_URL, {
     events: {
-      board: (data) => {
-        const letters: BoardLetter[] = JSON.parse(data);
+      onBoard: (letters: BoardLetter[]) => {
         const newPlacedLetters: BoardLetters = new Map();
         letters.forEach((letter) => {
           newPlacedLetters.set(keyFromPos(letter.position), letter);
