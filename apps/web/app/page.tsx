@@ -139,7 +139,7 @@ export default function App() {
           (Debug) Logout
         </button>
         <ToastContainer
-          position='bottom-left'
+          position='bottom-right'
           autoClose={5000}
           hideProgressBar={false}
           newestOnTop={false}

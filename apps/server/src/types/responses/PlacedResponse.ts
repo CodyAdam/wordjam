@@ -1,8 +1,8 @@
 export enum PlacedResponse {
     OK = "OK",
-    PLAYER_DONT_HAVE_LETTERS = "PLAYER_DONT_HAVE_LETTERS",
-    INVALID_POSITION = "INVALID_POSITION",
-    WORD_NOT_EXIST = "WORD_NOT_EXIST",
-    WORD_NOT_CONNECTED_TO_OTHERS = "WORD_NOT_CONNECTED_TO_OTHERS",
-    NO_LETTER_IN_REQUEST = "NO_LETTER_IN_REQUEST",
+    PLAYER_DONT_HAVE_LETTERS = "You do not have all the letters you are trying to place",
+    INVALID_POSITION = "This letter placement is invalid",
+    WORD_NOT_EXIST = "Some of the words you are trying to place do not exist",
+    WORD_NOT_CONNECTED_TO_OTHERS = "You need to connect your word to at least one other word",
+    NO_LETTER_IN_REQUEST = "You need to place at least one letter",
 }
