@@ -1,4 +1,5 @@
-import { Pan, Position } from '../types/board';
+import { Position } from '../types/api';
+import { Pan } from '../types/canvas';
 
 export function screenToWorld(pos: Position, pan: Pan) {
   return {
