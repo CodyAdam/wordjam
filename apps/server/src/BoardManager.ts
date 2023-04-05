@@ -5,6 +5,7 @@ import {Position} from "./types/Position";
 import {PlaceWord} from "./types/PlaceWord";
 import {PlacedResponse} from "./types/responses/PlacedResponse";
 import {Direction} from "./types/Direction";
+import {CheckLetterResponse} from "./types/CheckLetterResponse";
 
 export class BoardManager {
     private readonly _board: Map<string, BoardLetter>;
@@ -52,7 +53,7 @@ export class BoardManager {
      * @param player The player who wants to place the word
      * @returns A PlacedResponse
      */
-    checkLetterPlacedFromClient(data: PlaceWord, player: Player): PlacedResponse {
+    checkLetterPlacedFromClient(data: PlaceWord, player: Player): CheckLetterResponse {
         let currentPos: Position = Object.assign({}, data.startPos);
         let word: string = '';
         let score = 0;
