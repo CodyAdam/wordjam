@@ -3,6 +3,7 @@ import {BoardManager} from "./BoardManager";
 import {generateLetters, getDatePlusCooldown} from "./Utils";
 import {PlaceWord} from "./types/PlaceWord";
 import {PlacedResponse} from "./types/responses/PlacedResponse";
+import {AddLetterResponse} from "./types/responses/AddLetterResponse";
 
 export class GameInstance {
     private readonly _players: Map<string, Player>;
@@ -82,10 +83,11 @@ export class GameInstance {
      * Add a letter to the player's letters inventory
      * @param player The player to add the letter to
      */
-    addLetterToPlayer(player: Player) {
-        if (player.cooldownTarget > new Date()) throw new Error('The cooldown is not over');
+    addLetterToPlayer(player: Player): AddLetterResponse {
+        if (player.cooldownTarget > new Date()) return AddLetterResponse.IN_COOLDOWN;
         player.letters.push(generateLetters(1)[0]);
         player.cooldownTarget = getDatePlusCooldown();
+        return AddLetterResponse.SUCCESS;
     }
 
 }
