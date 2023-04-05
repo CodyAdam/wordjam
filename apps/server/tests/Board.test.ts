@@ -61,14 +61,14 @@ describe("Board", ()=>{
         let board : BoardManager = new BoardManager();
         let player : Player = {username: "Test", token: "test", score: 0, cooldownTarget: new Date(), letters: ["W", "O", "R", "R", "L", "A", "G", "H", "T", "I", "U"]};
         let placeWord: PlaceWord = {letters: ["O", "R", "D"], startPos: {x: 0, y: 0}, direction: Direction.DOWN};
-        expect(board.checkLetterPlacedFromClient(placeWord, player)).toEqual(PlacedResponse.PLAYER_DONT_HAVE_LETTERS);
+        expect(board.checkLetterPlacedFromClient(placeWord, player).placement).toEqual(PlacedResponse.PLAYER_DONT_HAVE_LETTERS);
     });
 
     test("word starting below other one", () => {
         let board : BoardManager = new BoardManager();
         let player : Player = {username: "Test", token: "test", score: 0, cooldownTarget: new Date(), letters: ["W", "O", "D", "R", "R", "L", "A", "G", "H", "T", "I", "U"]};
         let placeWord: PlaceWord = {letters: ["O", "R", "D"], startPos: {x: 0, y: -1}, direction: Direction.DOWN};
-        expect(board.checkLetterPlacedFromClient(placeWord, player)).toEqual(PlacedResponse.OK);
+        expect(board.checkLetterPlacedFromClient(placeWord, player).placement).toEqual(PlacedResponse.OK);
     });
 
     test("one letter for two words", () => {
@@ -76,7 +76,7 @@ describe("Board", ()=>{
         let player : Player = {username: "Test", token: "test", score: 0, cooldownTarget: new Date(), letters: ["W", "O", "D", "R", "R", "L", "A", "G", "H", "T", "I", "U"]};
         let placeWord : PlaceWord = {letters: ["D"], startPos: {x: 3, y: 0}, direction: Direction.DOWN};
         board.putLettersOnBoard({letters: ["W", "O", "R"], startPos: {x: 3, y: 3}, direction: Direction.DOWN}, player);
-        expect(board.checkLetterPlacedFromClient(placeWord, player)).toEqual(PlacedResponse.OK);
+        expect(board.checkLetterPlacedFromClient(placeWord, player).placement).toEqual(PlacedResponse.OK);
     });
 
 });
