@@ -159,7 +159,7 @@ export class BoardManager {
      * @param player The player who wants to place the word
      * @returns the score gains by the player
      */
-    putLettersOnBoard(data: PlaceWord, player: Player) : number {
+    putLettersOnBoard(data: PlaceWord, player: Player) {
         let currentPos: Position = Object.assign({}, data.startPos);
         let lettersToPlaced: string[] = data.letters;
         while (lettersToPlaced.length > 0) {
@@ -176,7 +176,6 @@ export class BoardManager {
             else currentPos.x++;
         }
         this.removeLettersFromPlayer(player, data.letters);
-        return 0; // TODO: calculate score
     }
 
     /**
