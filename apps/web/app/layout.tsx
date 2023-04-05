@@ -9,7 +9,7 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang='en' className={`h-full ${uiFont.className}`}>
-      <body className='h-full'>{children}</body>
+      <body className='h-full relative flex items-center justify-center'>{children}</body>
     </html>
   );
 }

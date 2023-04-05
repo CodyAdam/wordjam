@@ -1,4 +1,4 @@
-import { TILE_SIZE } from '../lib/constants';
+import { TILE_PADDING, TILE_SIZE } from '../lib/constants';
 import { Position } from '../types/api';
 import { BoardLetters, InventoryLetter } from '../types/board';
 import { Pan } from '../types/canvas';
@@ -72,4 +72,19 @@ export function drawPlacedInventoryLetters(ctx: CanvasRenderingContext2D, placed
     const letterOffset = pan.scale * TILE_SIZE * 0.01;
     ctx.fillText(letter.letter, pos.x - letterOffset, pos.y + letterOffset);
   });
+}
+
+export function drawDarkenTile(ctx: CanvasRenderingContext2D, pos: Position, pan: Pan) {
+  pos = worldToScreen(pos, pan);
+  ctx.fillStyle = 'rgba(0,0,0,0.1)';
+
+  ctx.beginPath();
+  ctx.roundRect(
+    pos.x + TILE_PADDING,
+    pos.y - pan.scale + TILE_PADDING,
+    pan.scale - TILE_PADDING * 2,
+    pan.scale - TILE_PADDING * 2,
+    .15 * pan.scale, // rounded radius
+  );
+  ctx.fill();
 }

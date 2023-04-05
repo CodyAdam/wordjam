@@ -7,7 +7,7 @@ import { posCeil, posCentered, posFloor, screenToWorld, worldToScreen } from '..
 import { BoardLetters, InventoryLetter } from '../types/board';
 import { Position } from '../types/api';
 import { Pan } from '../types/canvas';
-import { drawGrid, drawPlacedLetters, drawPlacedInventoryLetters, drawDebug } from '../utils/drawing';
+import { drawGrid, drawPlacedLetters, drawPlacedInventoryLetters, drawDebug, drawDarkenTile } from '../utils/drawing';
 import { getMousePos } from '../utils/touch';
 
 export default function Canvas({
@@ -36,7 +36,7 @@ export default function Canvas({
   const [hoverPos, setHoverPos] = useState<Position | null>(null);
   const { width, height } = useWindowSize();
 
-  useEffect(() => {
+  useEffect(() => { // center on load
     if ( !width || !height) return;
     console.log('Center the board');
     // set pan to center of board
@@ -48,6 +48,7 @@ export default function Canvas({
       }
     }
     setPan(newPan);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [height, width]);
 
   useEffect(() => {
@@ -56,13 +57,11 @@ export default function Canvas({
     ctx.clearRect(0, 0, width, height);
 
     drawGrid(ctx, pan, width, height);
+    if (hoverPos) drawDarkenTile(ctx, posFloor(hoverPos), pan);
     drawPlacedLetters(ctx, placedLetters, pan);
     drawPlacedInventoryLetters(ctx, inventory, pan);
 
     // DEBUG
-    drawDebug(ctx, posCentered({ x: 0, y: 0 }), 'origin', 'red', pan);
-    drawDebug(ctx, posCentered({ x: 5, y: 5 }), '5, 5', 'blue', pan);
-    if (hoverPos) drawDebug(ctx, posCentered(posFloor(hoverPos)), 'hover', '#00ff0055', pan);
     if (cursorPos) drawDebug(ctx, posCentered(cursorPos), cursorDirection ? '>' : 'v', 'purple', pan);
   }, [height, pan, width, hoverPos, placedLetters, cursorPos, cursorDirection, inventory]);
 

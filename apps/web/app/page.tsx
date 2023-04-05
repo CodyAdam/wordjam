@@ -101,7 +101,7 @@ export default function App() {
   if (appStage === AppState.AwaitingLogin)
     return (
       <>
-        <main className='relative flex h-full bg-white'>
+        <main className='relative flex h-full bg-gray-100'>
           <Canvas
             placedLetters={placedLetters}
             pan={pan}
@@ -131,7 +131,7 @@ export default function App() {
           />
         )}
 
-        <main className='relative flex h-full bg-white'>
+        <main className='relative flex h-full bg-gray-100'>
 
           <Canvas
             placedLetters={placedLetters}
