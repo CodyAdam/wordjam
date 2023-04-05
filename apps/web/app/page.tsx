@@ -16,6 +16,8 @@ import { Pan } from '@/src/types/canvas';
 import { toPlaceWord } from '@/src/utils/submitHelper';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.min.css';
+import Confetti from 'react-confetti'
+import useWindowSize from "@/src/hooks/useWindowSize";
 
 export default function App() {
   // login related
@@ -88,6 +90,12 @@ export default function App() {
     localStorage.removeItem('token');
   }, []);
 
+  const [isConfetti, setIsConfetti] = useState(true);
+
+  function resetConfetti() {
+    setIsConfetti(true);
+  }
+
   if (appStage === AppState.AwaitingLogin)
     return (
       <>
@@ -107,10 +115,22 @@ export default function App() {
       </>
     );
 
+
   if (appStage === AppState.InGame)
     return (
       <>
+        {isConfetti && (
+          <Confetti
+            gravity={0.1}
+            initialVelocityX={2}
+            initialVelocityY={5}
+            recycle={false}
+            onConfettiComplete={() => setIsConfetti(false)}
+          />
+        )}
+
         <main className='relative flex h-full bg-white'>
+
           <Canvas
             placedLetters={placedLetters}
             pan={pan}
@@ -138,6 +158,7 @@ export default function App() {
         >
           (Debug) Logout
         </button>
+        <button className='absolute bottom-0 left-48 m-3 rounded-md bg-purple-200 p-3 text-purple-800 ' onClick={resetConfetti}>Reset confetti (Debug)</button>
         <ToastContainer
           position='bottom-right'
           autoClose={5000}
