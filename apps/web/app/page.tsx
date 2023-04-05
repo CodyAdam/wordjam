@@ -24,7 +24,9 @@ export default function App() {
   const [placedLetters, setPlacedLetters] = useState<BoardLetters>(new Map());
   const [pan, setPan] = useState<Pan>({ offset: { x: 0, y: 0 }, scale: 20, origin: { x: 0, y: 0 } });
   const { cursorDirection, cursorPos, setCursorDirection, setCursorPos, goToNextCursorPos } = useCursor(placedLetters);
-  const [inventory, setInventory] = useState<InventoryLetter[]>([]);
+  const [inventory, setInventory] = useState<InventoryLetter[]>([
+    {letter: 'A'},
+  ]);
   const { isConnected, socket } = useSocket(SOCKET_URL, {
     events: {
       onBoard: (letters: BoardLetter[]) => {
