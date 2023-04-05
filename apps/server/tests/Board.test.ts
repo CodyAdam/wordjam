@@ -38,15 +38,15 @@ describe("Board", ()=>{
         let board : BoardManager = new BoardManager();
         let player : Player = {username: "Test", token: "test", score: 0, cooldownTarget: new Date(), letters: ["D", "O", "R", "R", "L", "A", "G", "H", "T", "I", "D", "U"]};
         let placeWord: PlaceWord = {letters: ["O", "R", "D"], startPos: {x: 0, y: 0}, direction: Direction.DOWN};
-        expect(board.checkLetterPlacedFromClient(placeWord, player)).toEqual(PlacedResponse.OK);
+        expect(board.checkLetterPlacedFromClient(placeWord, player).placement).toEqual(PlacedResponse.OK);
         board.putLettersOnBoard({letters: ["O", "R", "D"], startPos: {x: 0, y: 0}, direction: Direction.DOWN}, player);
 
         placeWord = {letters: ["A", "L", "I", "G", "H", "T"], startPos: {x: -2, y: -2}, direction: Direction.RIGHT};
-        expect(board.checkLetterPlacedFromClient(placeWord, player)).toEqual(PlacedResponse.OK);
+        expect(board.checkLetterPlacedFromClient(placeWord, player).placement).toEqual(PlacedResponse.OK);
         board.putLettersOnBoard({letters: ["A", "L", "I", "G", "H", "T"], startPos: {x: -2, y: -2}, direction: Direction.RIGHT}, player);
 
         placeWord = {letters: ["D", "U"], startPos: {x: 2, y: 1}, direction: Direction.DOWN};
-        expect(board.checkLetterPlacedFromClient(placeWord, player)).toEqual(PlacedResponse.OK);
+        expect(board.checkLetterPlacedFromClient(placeWord, player).placement).toEqual(PlacedResponse.OK);
         board.putLettersOnBoard({letters: ["D", "U"], startPos: {x: 2, y: 1}, direction: Direction.DOWN}, player);
     });
 
@@ -54,7 +54,7 @@ describe("Board", ()=>{
         let board : BoardManager = new BoardManager();
         let player : Player = {username: "Test", token: "test", score: 0, cooldownTarget: new Date(), letters: ["W", "D", "O", "R", "R", "L", "A", "G", "H", "T", "I", "D", "U"]};
         let placeWord: PlaceWord = {letters: ["W", "O", "R", "D"], startPos: {x: 10, y: 0}, direction: Direction.DOWN};
-        expect(board.checkLetterPlacedFromClient(placeWord, player)).toEqual(PlacedResponse.WORD_NOT_CONNECTED_TO_OTHERS);
+        expect(board.checkLetterPlacedFromClient(placeWord, player).placement).toEqual(PlacedResponse.WORD_NOT_CONNECTED_TO_OTHERS);
     });
 
     test("player has not the letters", () => {

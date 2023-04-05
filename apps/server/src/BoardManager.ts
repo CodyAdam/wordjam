@@ -5,6 +5,7 @@ import {Position} from "./types/Position";
 import {PlaceWord} from "./types/PlaceWord";
 import {PlacedResponse} from "./types/responses/PlacedResponse";
 import {Direction} from "./types/Direction";
+import {CheckLetterResponse} from "./types/CheckLetterResponse";
 
 export class BoardManager {
     private readonly _board: Map<string, BoardLetter>;
@@ -52,9 +53,10 @@ export class BoardManager {
      * @param player The player who wants to place the word
      * @returns A PlacedResponse
      */
-    checkLetterPlacedFromClient(data: PlaceWord, player: Player): PlacedResponse {
+    checkLetterPlacedFromClient(data: PlaceWord, player: Player): CheckLetterResponse {
         let currentPos: Position = Object.assign({}, data.startPos);
         let word: string = '';
+        let score = 0;
         let additionalWords: string[] = [];
         let validPosition: boolean = false;
         let playerLetters: string[] = player.letters;
@@ -78,18 +80,26 @@ export class BoardManager {
             } else {
                 let newLetter : string = lettersToPlaced.shift() || '';
                 if (!playerLetters.includes(newLetter)) {
-                    return PlacedResponse.PLAYER_DONT_HAVE_LETTERS;
+                    return {
+                        placement: PlacedResponse.PLAYER_DONT_HAVE_LETTERS,
+                        score: 0
+                    };
                 }
                 let concurrentWord = this.detectWordFromInside(
                     currentPos,
                     data.direction == Direction.DOWN ? Direction.RIGHT : Direction.DOWN,
                 );
 
+                score += DictionaryService.getPointsOfWord(concurrentWord)
+
                 if (DictionaryService.wordExist(concurrentWord)) {
                     validPosition = true;
                     additionalWords.push(concurrentWord);
                 }
-                else if(concurrentWord !== "") return PlacedResponse.INVALID_POSITION;
+                else if(concurrentWord !== "") return {
+                    placement: PlacedResponse.INVALID_POSITION,
+                    score: 0
+                };
 
                 playerLetters.splice(playerLetters.indexOf(newLetter, 0), 1);
                 word += newLetter;
@@ -98,9 +108,20 @@ export class BoardManager {
             else currentPos.x++;
         }
         console.log(word)
-        if (!validPosition) return PlacedResponse.WORD_NOT_CONNECTED_TO_OTHERS;
-        if (!DictionaryService.wordExist(word)) return PlacedResponse.WORD_NOT_EXIST;
-        return PlacedResponse.OK;
+        if (!validPosition) return {
+            placement: PlacedResponse.WORD_NOT_CONNECTED_TO_OTHERS,
+            score: 0
+        };
+        if (!DictionaryService.wordExist(word)) return {
+            placement: PlacedResponse.WORD_NOT_EXIST,
+            score: 0
+        };
+
+        score += DictionaryService.getPointsOfWord(word)
+        return {
+            placement: PlacedResponse.OK,
+            score
+        };
     }
 
     /**
