@@ -90,7 +90,7 @@ io.on('connection', (socket) => {
         || submittedLetters.letters.length === 0) return socket.emit('onError', PlacedResponse.NO_LETTER_IN_REQUEST);
 
     let response = gameInstance.board.checkLetterPlacedFromClient(submittedLetters, player);
-    if (response !== PlacedResponse.OK) return socket.emit('onError', response);
+    if (response.placement !== PlacedResponse.OK) return socket.emit('onError', response.placement);
 
     gameInstance.board.putLettersOnBoard(submittedLetters, player);
     sendBoardToAll();
