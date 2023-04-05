@@ -4,10 +4,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import useWindowSize from '../hooks/useWindowSize';
 import { SCROLL_MAX_TILE_SIZE, SCROLL_MIN_TILE_SIZE, SCROLL_SPEED, TILE_SIZE } from '../lib/constants';
 import { posCeil, posCentered, posFloor, screenToWorld, worldToScreen } from '../utils/posHelper';
-import {  BoardLetters, InventoryLetter } from '../types/board';
-import { useCursor } from '../hooks/useCursor';
+import { BoardLetters, InventoryLetter } from '../types/board';
 import { Position } from '../types/api';
 import { Pan } from '../types/canvas';
+import { drawGrid, drawPlacedLetters, drawPlacedInventoryLetters, drawDebug } from '../utils/drawing';
 
 export default function Canvas({
   placedLetters,
@@ -46,7 +46,7 @@ export default function Canvas({
 
     // DEBUG
     drawDebug(ctx, posCentered({ x: 0, y: 0 }), 'origin', 'red', pan);
-    drawDebug(ctx, posCentered({ x: 10, y: 10 }), '10, 10', 'blue', pan);
+    drawDebug(ctx, posCentered({ x: 5, y: 5 }), '5, 5', 'blue', pan);
     if (hoverPos) drawDebug(ctx, posCentered(posFloor(hoverPos)), 'hover', '#00ff0055', pan);
     if (cursorPos) drawDebug(ctx, posCentered(cursorPos), cursorDirection ? '>' : 'v', 'purple', pan);
   }, [height, pan, width, hoverPos, placedLetters, cursorPos, cursorDirection, inventory]);
@@ -171,10 +171,10 @@ export default function Canvas({
       const scrollX = e.currentTarget.scrollLeft;
       const scrollY = e.currentTarget.scrollTop;
 
-      const newOffset : Position= {
+      const newOffset: Position = {
         x: pan.offset.x + scrollX,
         y: pan.offset.y + scrollY,
-      }
+      };
 
       setPan({
         ...pan,
@@ -202,68 +202,4 @@ export default function Canvas({
       onTouchCancel={onLeave}
     ></canvas>
   );
-}
-
-function drawGrid(ctx: CanvasRenderingContext2D, pan: Pan, width: number, height: number) {
-  ctx.beginPath();
-  ctx.strokeStyle = 'lightgrey';
-  ctx.lineWidth = 1;
-  // vertical lines
-  TILE_SIZE;
-  const minTopLeft = posFloor(screenToWorld({ x: -1, y: -1 }, pan));
-  const maxBottomRight = posCeil(screenToWorld({ x: width + 1, y: height + 1 }, pan));
-  for (let x = minTopLeft.x; x <= maxBottomRight.x; x++) {
-    const pos = worldToScreen({ x, y: minTopLeft.y }, pan);
-    ctx.moveTo(pos.x, pos.y);
-    const pos2 = worldToScreen({ x, y: maxBottomRight.y }, pan);
-    ctx.lineTo(pos2.x, pos2.y);
-  }
-  // horizontal lines
-  for (let y = minTopLeft.y; y <= maxBottomRight.y; y++) {
-    const pos = worldToScreen({ x: minTopLeft.x, y }, pan);
-    ctx.moveTo(pos.x, pos.y);
-    const pos2 = worldToScreen({ x: maxBottomRight.x, y }, pan);
-    ctx.lineTo(pos2.x, pos2.y);
-  }
-
-  ctx.stroke();
-}
-
-function drawDebug(ctx: CanvasRenderingContext2D, pos: Position, text: string, color: string, pan: Pan) {
-  // circle on origin
-  ctx.beginPath();
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 1;
-  pos = worldToScreen(pos, pan);
-  ctx.arc(pos.x, pos.y, 10, 0, 2 * Math.PI);
-  ctx.stroke();
-  // text on origin
-  ctx.font = '20px Arial';
-  ctx.fillStyle = color;
-  ctx.fillText(text, pos.x, pos.y - 20);
-}
-
-function drawPlacedLetters(ctx: CanvasRenderingContext2D, placedLetters: BoardLetters, pan: Pan) {
-  placedLetters.forEach((letter) => {
-    const pos = worldToScreen(posCentered(letter.position), pan);
-    ctx.fillStyle = 'black';
-    // use scaled font size
-    const fontSize = pan.scale * TILE_SIZE * 0.025;
-    ctx.font = `${fontSize}px Arial`;
-    const letterOffset = pan.scale * TILE_SIZE * 0.01;
-    ctx.fillText(letter.letter, pos.x - letterOffset, pos.y + letterOffset);
-  });
-}
-
-function drawPlacedInventoryLetters(ctx: CanvasRenderingContext2D, placedLetters: InventoryLetter[], pan: Pan) {
-  placedLetters.forEach((letter) => {
-    if (!letter.position) return;
-    const pos = worldToScreen(posCentered(letter.position), pan);
-    ctx.fillStyle = 'black';
-    // use scaled font size
-    const fontSize = pan.scale * TILE_SIZE * 0.025;
-    ctx.font = `${fontSize}px Arial`;
-    const letterOffset = pan.scale * TILE_SIZE * 0.01;
-    ctx.fillText(letter.letter, pos.x - letterOffset, pos.y + letterOffset);
-  });
 }
