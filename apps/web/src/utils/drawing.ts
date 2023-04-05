@@ -1,7 +1,8 @@
-import { TILE_SIZE } from '../lib/constants';
+import { TILE_PADDING, TILE_SIZE } from '../lib/constants';
 import { Position } from '../types/api';
 import { BoardLetters, InventoryLetter } from '../types/board';
 import { Pan } from '../types/canvas';
+import { boardFont } from './fontLoader';
 import { posFloor, screenToWorld, posCeil, worldToScreen, posCentered } from './posHelper';
 
 export function drawGrid(ctx: CanvasRenderingContext2D, pan: Pan, width: number, height: number) {
@@ -47,12 +48,30 @@ export function drawDebug(ctx: CanvasRenderingContext2D, pos: Position, text: st
 export function drawPlacedLetters(ctx: CanvasRenderingContext2D, placedLetters: BoardLetters, pan: Pan) {
   placedLetters.forEach((letter) => {
     const pos = worldToScreen(posCentered(letter.position), pan);
-    ctx.fillStyle = 'black';
+
+    // // Create the tile background
+    // ctx.beginPath();
+    // ctx.fillStyle = '#e2e8f0';
+    // const padding = 0.05 * pan.scale;
+    // ctx.roundRect(
+    //   pos.x + padding,
+    //   pos.y - pan.scale + padding,
+    //   pan.scale - padding * 2,
+    //   pan.scale - padding * 2,
+    //   0.15 * pan.scale, // rounded radius
+    // );
+    // ctx.fill();
+
+
     // use scaled font size
-    const fontSize = pan.scale * TILE_SIZE * 0.025;
-    ctx.font = `${fontSize}px Arial`;
-    const letterOffset = pan.scale * TILE_SIZE * 0.01;
-    ctx.fillText(letter.letter, pos.x - letterOffset, pos.y + letterOffset);
+    const fontSize = pan.scale * TILE_SIZE * 0.035;
+    ctx.font = `${fontSize}px ${boardFont.style.fontFamily}`;
+    ctx.fillStyle = 'rgb(63 63 70)';
+
+    // offset by .5 of the letter width to center it same for height
+    const letterOffset = { x: ctx.measureText(letter.letter).width / 2, y: fontSize / 2.9 };
+
+    ctx.fillText(letter.letter.toUpperCase(), pos.x - letterOffset.x, pos.y + letterOffset.y);
   });
 }
 
@@ -60,11 +79,29 @@ export function drawPlacedInventoryLetters(ctx: CanvasRenderingContext2D, placed
   placedLetters.forEach((letter) => {
     if (!letter.position) return;
     const pos = worldToScreen(posCentered(letter.position), pan);
-    ctx.fillStyle = 'black';
+
     // use scaled font size
-    const fontSize = pan.scale * TILE_SIZE * 0.025;
-    ctx.font = `${fontSize}px Arial`;
-    const letterOffset = pan.scale * TILE_SIZE * 0.01;
-    ctx.fillText(letter.letter, pos.x - letterOffset, pos.y + letterOffset);
+    const fontSize = pan.scale * TILE_SIZE * 0.035;
+    ctx.font = `${fontSize}px ${boardFont.style.fontFamily}`;
+    ctx.fillStyle = 'rgb(63 63 70  / 0.3)';
+
+    // offset by .5 of the letter width to center it same for height
+    const letterOffset = { x: ctx.measureText(letter.letter).width / 2, y: fontSize / 2.9 };
+    ctx.fillText(letter.letter.toUpperCase(), pos.x - letterOffset.x, pos.y + letterOffset.y);
   });
+}
+
+export function drawDarkenTile(ctx: CanvasRenderingContext2D, pos: Position, pan: Pan) {
+  pos = worldToScreen(pos, pan);
+  ctx.fillStyle = 'rgba(0,0,0,0.1)';
+  const padding = TILE_PADDING * pan.scale;
+  ctx.beginPath();
+  ctx.roundRect(
+    pos.x + padding,
+    pos.y - pan.scale + padding,
+    pan.scale - padding * 2,
+    pan.scale - padding * 2,
+    0.15 * pan.scale, // rounded radius
+  );
+  ctx.fill();
 }

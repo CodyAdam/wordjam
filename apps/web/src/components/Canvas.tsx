@@ -7,7 +7,8 @@ import { posCeil, posCentered, posFloor, screenToWorld, worldToScreen } from '..
 import { BoardLetters, InventoryLetter } from '../types/board';
 import { Position } from '../types/api';
 import { Pan } from '../types/canvas';
-import { drawGrid, drawPlacedLetters, drawPlacedInventoryLetters, drawDebug } from '../utils/drawing';
+import { drawGrid, drawPlacedLetters, drawPlacedInventoryLetters, drawDebug, drawDarkenTile } from '../utils/drawing';
+import { getMousePos } from '../utils/touch';
 
 export default function Canvas({
   placedLetters,
@@ -35,57 +36,48 @@ export default function Canvas({
   const [hoverPos, setHoverPos] = useState<Position | null>(null);
   const { width, height } = useWindowSize();
 
+  useEffect(() => { // center on load
+    if ( !width || !height) return;
+    console.log('Center the board');
+    // set pan to center of board
+    const newPan: Pan = {
+      ...pan,
+      offset : {
+        x : (width / 2) - (TILE_SIZE * 5) / 2,
+        y : (height / 2) - (TILE_SIZE * 5) / 2,
+      }
+    }
+    setPan(newPan);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [height, width]);
+
   useEffect(() => {
     const ctx = canvasRef.current?.getContext('2d');
     if (!ctx || !width || !height) return;
     ctx.clearRect(0, 0, width, height);
 
     drawGrid(ctx, pan, width, height);
+    if (hoverPos) drawDarkenTile(ctx, posFloor(hoverPos), pan);
     drawPlacedLetters(ctx, placedLetters, pan);
     drawPlacedInventoryLetters(ctx, inventory, pan);
 
     // DEBUG
-    drawDebug(ctx, posCentered({ x: 0, y: 0 }), 'origin', 'red', pan);
-    drawDebug(ctx, posCentered({ x: 5, y: 5 }), '5, 5', 'blue', pan);
-    if (hoverPos) drawDebug(ctx, posCentered(posFloor(hoverPos)), 'hover', '#00ff0055', pan);
     if (cursorPos) drawDebug(ctx, posCentered(cursorPos), cursorDirection ? '>' : 'v', 'purple', pan);
   }, [height, pan, width, hoverPos, placedLetters, cursorPos, cursorDirection, inventory]);
 
   const onDown = useCallback((e: React.TouchEvent | React.MouseEvent) => {
-    let x = 0;
-    let y = 0;
-    e.stopPropagation();
-    if (e.nativeEvent instanceof TouchEvent) {
-      if (e.nativeEvent.touches.length === 0) return;
-      x = e.nativeEvent.touches[0].clientX;
-      y = e.nativeEvent.touches[0].clientY;
-    } else if (e.nativeEvent instanceof MouseEvent) {
-      e.preventDefault();
-      x = e.nativeEvent.clientX;
-      y = e.nativeEvent.clientY;
-    } else {
-      return;
-    }
+    const mousePos = getMousePos(e);
+    if (!mousePos) return;
+    let { x, y } = mousePos;
     setDragStart({ x, y });
     setIsDown(true);
   }, []);
 
   const onUp = useCallback(
     (e: React.TouchEvent | React.MouseEvent) => {
-      let x = 0;
-      let y = 0;
-      e.stopPropagation();
-      if (e.nativeEvent instanceof TouchEvent) {
-        if (e.nativeEvent.touches.length === 0) return;
-        x = e.nativeEvent.touches[0].clientX;
-        y = e.nativeEvent.touches[0].clientY;
-      } else if (e.nativeEvent instanceof MouseEvent) {
-        e.preventDefault();
-        x = e.nativeEvent.clientX;
-        y = e.nativeEvent.clientY;
-      } else {
-        return;
-      }
+      const mousePos = getMousePos(e);
+      if (!mousePos) return;
+      let { x, y } = mousePos;
       if (!isDragging) {
         const pos = posFloor(screenToWorld({ x, y }, pan));
         if (pos.x === cursorPos?.x && pos.y === cursorPos?.y) {
@@ -104,22 +96,9 @@ export default function Canvas({
 
   const onMove = useCallback(
     (e: React.TouchEvent | React.MouseEvent) => {
-      console.log(e);
-      let x = 0;
-      let y = 0;
-      e.stopPropagation();
-      if (e.nativeEvent instanceof TouchEvent) {
-        if (e.nativeEvent.touches.length === 0) return;
-        x = e.nativeEvent.touches[0].clientX;
-        y = e.nativeEvent.touches[0].clientY;
-      } else if (e.nativeEvent instanceof MouseEvent) {
-        e.preventDefault();
-        x = e.nativeEvent.clientX;
-        y = e.nativeEvent.clientY;
-      } else {
-        return;
-      }
-
+      const mousePos = getMousePos(e);
+      if (!mousePos) return;
+      let { x, y } = mousePos;
       if (isDown) {
         setIsDragging(true);
         setPan({

@@ -4,9 +4,7 @@ import jamIcon from '../../public/jam.png';
 import { useEffect, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { Socket } from 'socket.io-client';
-import { AppState } from '@/src/lib/AppState';
 import { LoginResponseType } from '../types/api';
-import ConfettiExplosion from 'react-confetti-explosion';
 
 enum Type {
   Nickname,

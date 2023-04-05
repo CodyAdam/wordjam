@@ -24,7 +24,7 @@ export default function App() {
   const [appStage, setAppStage] = useState(AppState.AwaitingLogin);
   const [showTokenModal, setShowTokenModal] = useState(false);
   const [placedLetters, setPlacedLetters] = useState<BoardLetters>(new Map());
-  const [pan, setPan] = useState<Pan>({ offset: { x: 0, y: 0 }, scale: 20, origin: { x: 0, y: 0 } });
+  const [pan, setPan] = useState<Pan>({ offset: { x: 0, y: 0 }, scale: 100, origin: { x: 0, y: 0 } });
   const { cursorDirection, cursorPos, setCursorDirection, setCursorPos, goToNextCursorPos } = useCursor(placedLetters);
   const [inventory, setInventory] = useState<InventoryLetter[]>([
     {letter: 'A'},
@@ -45,7 +45,7 @@ export default function App() {
         if (response === LoginResponseType.SUCCESS) setAppStage(AppState.InGame);
       },
       onInventory: (letters: string[]) => {
-        setInventory(letters.map((letter) => ({ letter: letter.toLocaleUpperCase() })));
+        setInventory(letters.map((letter) => ({ letter: letter })));
       },
       onError: (error: string) => {
         toast.error(error);
@@ -101,7 +101,7 @@ export default function App() {
   if (appStage === AppState.AwaitingLogin)
     return (
       <>
-        <main className='relative flex h-full bg-white'>
+        <main className='relative flex h-full bg-gray-100'>
           <Canvas
             placedLetters={placedLetters}
             pan={pan}
@@ -131,7 +131,7 @@ export default function App() {
           />
         )}
 
-        <main className='relative flex h-full bg-white'>
+        <main className='relative flex h-full bg-gray-100'>
 
           <Canvas
             placedLetters={placedLetters}

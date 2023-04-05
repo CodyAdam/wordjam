@@ -1,4 +1,5 @@
 import './globals.css';
+import { uiFont } from '@/src/utils/fontLoader';
 
 export const metadata = {
   title: 'Create Next App',
@@ -7,8 +8,8 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang='en' className='h-full'>
-      <body className='h-full'>{children}</body>
+    <html lang='en' className={`h-full ${uiFont.className}`}>
+      <body className='h-full relative flex items-center justify-center'>{children}</body>
     </html>
   );
 }
