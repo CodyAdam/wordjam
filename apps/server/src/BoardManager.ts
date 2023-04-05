@@ -61,7 +61,7 @@ export class BoardManager {
         let additionalWords: string[] = [];
         let validPosition: boolean = false;
         let playerLetters: string[] = [...player.letters];
-        let lettersToPlaced: string[] = data.letters;
+        let lettersToPlaced: string[] = [...data.letters];
 
         let previousLetter = Object.assign({}, data.startPos);
         if (data.direction == Direction.DOWN) previousLetter.y++;
@@ -161,7 +161,7 @@ export class BoardManager {
      */
     putLettersOnBoard(data: PlaceWord, player: Player) {
         let currentPos: Position = Object.assign({}, data.startPos);
-        let lettersToPlaced: string[] = data.letters;
+        let lettersToPlaced: string[] = [...data.letters];
         while (lettersToPlaced.length > 0) {
             if (!this.hasLetter(currentPos)) {
                 let newLetter = lettersToPlaced.shift() || '';
@@ -184,9 +184,17 @@ export class BoardManager {
      * @param letters The letters to remove
      */
     private removeLettersFromPlayer(player: Player, letters: string[]) {
-        for (let letter of letters) {
-            player.letters.splice(player.letters.indexOf(letter, 0), 1);
-        }
+        console.log("inventory", player.letters)
+        console.log("letters to remove", letters)
+        player.letters = player.letters.filter((letter) => {
+            const indexInToRemove = letters.indexOf(letter);
+            if (indexInToRemove !== -1) {
+                letters.splice(indexInToRemove, 1);
+                return false;
+            }
+            return true;
+        });
+        console.log("inventory then ", player.letters)
     }
 
 }
