@@ -6,6 +6,7 @@ import {PlaceWord} from "./types/PlaceWord";
 import {PlacedResponse} from "./types/responses/PlacedResponse";
 import {Direction} from "./types/Direction";
 import {CheckLetterResponse} from "./types/CheckLetterResponse";
+import {posEquals} from "./Utils";
 
 export class BoardManager {
     private readonly _board: Map<string, BoardLetter>;
@@ -88,16 +89,17 @@ export class BoardManager {
                 let concurrentWord = this.detectWordFromInside(
                     currentPos,
                     data.direction == Direction.DOWN ? Direction.RIGHT : Direction.DOWN,
+                    newLetter
                 );
 
                 score += DictionaryService.getPointsOfWord(concurrentWord)
 
-                if (DictionaryService.wordExist(concurrentWord)) {
+                if (concurrentWord !== newLetter && DictionaryService.wordExist(concurrentWord)) {
                     validPosition = true;
                     additionalWords.push(concurrentWord);
                 }
-                else if(concurrentWord !== "") return {
-                    placement: PlacedResponse.INVALID_POSITION,
+                else if(concurrentWord !== newLetter) return {
+                    placement: PlacedResponse.INVALID_POSITION.toString().replace("%WORD%", concurrentWord.toUpperCase()),
                     score: 0
                 };
 
@@ -128,20 +130,22 @@ export class BoardManager {
      * Detect if there is a word on the board from a given position and a given direction
      * @param position The position of any letter of the word
      * @param direction The direction of the word
+     * @param letter The letter to be placed on the board at the given position
      * @returns The word if it exists, an empty string otherwise
      */
-    private detectWordFromInside(position: Position, direction: Direction): string {
+    private detectWordFromInside(position: Position, direction: Direction, letter: string): string {
         let word : string = '';
         let currentPos: Position = Object.assign({}, position);
-        while (this.hasLetter(currentPos)) {
+        while (this.hasLetter(currentPos) || posEquals(currentPos,position)) {
             if (direction == Direction.DOWN) currentPos.y++;
             else currentPos.x--;
         }
 
         if (direction == Direction.DOWN) currentPos.y--;
         else currentPos.x++;
-        while (this.hasLetter(currentPos)) {
-            word += this.board.get(currentPos.x + '_' + currentPos.y)?.letter;
+        while (this.hasLetter(currentPos) || posEquals(currentPos,position)) {
+            if (!posEquals(currentPos,position)) word += this.board.get(currentPos.x + '_' + currentPos.y)?.letter;
+            else word += letter;
             if (direction == Direction.DOWN) currentPos.y--;
             else currentPos.x++;
         }
