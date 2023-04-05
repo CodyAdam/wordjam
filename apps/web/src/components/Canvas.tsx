@@ -8,6 +8,7 @@ import { BoardLetters, InventoryLetter } from '../types/board';
 import { Position } from '../types/api';
 import { Pan } from '../types/canvas';
 import { drawGrid, drawPlacedLetters, drawPlacedInventoryLetters, drawDebug } from '../utils/drawing';
+import { getMousePos } from '../utils/touch';
 
 export default function Canvas({
   placedLetters,
@@ -52,38 +53,18 @@ export default function Canvas({
   }, [height, pan, width, hoverPos, placedLetters, cursorPos, cursorDirection, inventory]);
 
   const onDown = useCallback((e: React.TouchEvent | React.MouseEvent) => {
-    let x = 0;
-    let y = 0;
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.nativeEvent instanceof TouchEvent) {
-      x = e.nativeEvent.touches[0].clientX;
-      y = e.nativeEvent.touches[0].clientY;
-    } else if (e.nativeEvent instanceof MouseEvent) {
-      x = e.nativeEvent.clientX;
-      y = e.nativeEvent.clientY;
-    } else {
-      return;
-    }
+    const mousePos = getMousePos(e);
+    if (!mousePos) return;
+    let { x, y } = mousePos;
     setDragStart({ x, y });
     setIsDown(true);
   }, []);
 
   const onUp = useCallback(
     (e: React.TouchEvent | React.MouseEvent) => {
-      let x = 0;
-      let y = 0;
-      e.preventDefault();
-      e.stopPropagation();
-      if (e.nativeEvent instanceof TouchEvent) {
-        x = e.nativeEvent.touches[0].clientX;
-        y = e.nativeEvent.touches[0].clientY;
-      } else if (e.nativeEvent instanceof MouseEvent) {
-        x = e.nativeEvent.clientX;
-        y = e.nativeEvent.clientY;
-      } else {
-        return;
-      }
+      const mousePos = getMousePos(e);
+      if (!mousePos) return;
+      let { x, y } = mousePos;
       if (!isDragging) {
         const pos = posFloor(screenToWorld({ x, y }, pan));
         if (pos.x === cursorPos?.x && pos.y === cursorPos?.y) {
@@ -102,20 +83,9 @@ export default function Canvas({
 
   const onMove = useCallback(
     (e: React.TouchEvent | React.MouseEvent) => {
-      let x = 0;
-      let y = 0;
-      e.preventDefault();
-      e.stopPropagation();
-      if (e.nativeEvent instanceof TouchEvent) {
-        x = e.nativeEvent.touches[0].clientX;
-        y = e.nativeEvent.touches[0].clientY;
-      } else if (e.nativeEvent instanceof MouseEvent) {
-        x = e.nativeEvent.clientX;
-        y = e.nativeEvent.clientY;
-      } else {
-        return;
-      }
-
+      const mousePos = getMousePos(e);
+      if (!mousePos) return;
+      let { x, y } = mousePos;
       if (isDown) {
         setIsDragging(true);
         setPan({
