@@ -49,13 +49,28 @@ export function drawPlacedLetters(ctx: CanvasRenderingContext2D, placedLetters: 
   placedLetters.forEach((letter) => {
     const pos = worldToScreen(posCentered(letter.position), pan);
 
+    // // Create the tile background
+    // ctx.beginPath();
+    // ctx.fillStyle = '#e2e8f0';
+    // const padding = 0.05 * pan.scale;
+    // ctx.roundRect(
+    //   pos.x + padding,
+    //   pos.y - pan.scale + padding,
+    //   pan.scale - padding * 2,
+    //   pan.scale - padding * 2,
+    //   0.15 * pan.scale, // rounded radius
+    // );
+    // ctx.fill();
+
+
     // use scaled font size
     const fontSize = pan.scale * TILE_SIZE * 0.035;
     ctx.font = `${fontSize}px ${boardFont.style.fontFamily}`;
     ctx.fillStyle = 'rgb(63 63 70)';
 
-// offset by .5 of the letter width to center it same for height
+    // offset by .5 of the letter width to center it same for height
     const letterOffset = { x: ctx.measureText(letter.letter).width / 2, y: fontSize / 2.9 };
+
     ctx.fillText(letter.letter, pos.x - letterOffset.x, pos.y + letterOffset.y);
   });
 }
@@ -70,7 +85,6 @@ export function drawPlacedInventoryLetters(ctx: CanvasRenderingContext2D, placed
     ctx.font = `${fontSize}px ${boardFont.style.fontFamily}`;
     ctx.fillStyle = 'rgb(63 63 70  / 0.3)';
 
-    
     // offset by .5 of the letter width to center it same for height
     const letterOffset = { x: ctx.measureText(letter.letter).width / 2, y: fontSize / 2.9 };
     ctx.fillText(letter.letter, pos.x - letterOffset.x, pos.y + letterOffset.y);
@@ -80,14 +94,14 @@ export function drawPlacedInventoryLetters(ctx: CanvasRenderingContext2D, placed
 export function drawDarkenTile(ctx: CanvasRenderingContext2D, pos: Position, pan: Pan) {
   pos = worldToScreen(pos, pan);
   ctx.fillStyle = 'rgba(0,0,0,0.1)';
-
+  const padding = TILE_PADDING * pan.scale;
   ctx.beginPath();
   ctx.roundRect(
-    pos.x + TILE_PADDING,
-    pos.y - pan.scale + TILE_PADDING,
-    pan.scale - TILE_PADDING * 2,
-    pan.scale - TILE_PADDING * 2,
-    .15 * pan.scale, // rounded radius
+    pos.x + padding,
+    pos.y - pan.scale + padding,
+    pan.scale - padding * 2,
+    pan.scale - padding * 2,
+    0.15 * pan.scale, // rounded radius
   );
   ctx.fill();
 }
