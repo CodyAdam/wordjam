@@ -157,13 +157,13 @@ export default function App() {
           (Debug) Logout
         </button>
         <button
-          className='absolute bottom-0 left-0 m-3 rounded-md bg-purple-200 p-3 text-purple-800 '
+          className='absolute bottom-20 left-0 m-3 rounded-md bg-purple-200 p-3 text-purple-800 '
           onClick={() => {
             const token = localStorage.getItem('token');
             socket.emit('onAskLetter', token);
           }}
         >
-          (Debug) Logout
+          Ask letter
         </button>
         <button
           className='absolute bottom-0 left-48 m-3 rounded-md bg-purple-200 p-3 text-purple-800 '
