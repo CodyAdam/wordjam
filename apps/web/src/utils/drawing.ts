@@ -2,6 +2,7 @@ import { TILE_SIZE } from '../lib/constants';
 import { Position } from '../types/api';
 import { BoardLetters, InventoryLetter } from '../types/board';
 import { Pan } from '../types/canvas';
+import { boardFont } from './fontLoader';
 import { posFloor, screenToWorld, posCeil, worldToScreen, posCentered } from './posHelper';
 
 export function drawGrid(ctx: CanvasRenderingContext2D, pan: Pan, width: number, height: number) {
@@ -49,10 +50,14 @@ export function drawPlacedLetters(ctx: CanvasRenderingContext2D, placedLetters: 
     const pos = worldToScreen(posCentered(letter.position), pan);
     ctx.fillStyle = 'black';
     // use scaled font size
-    const fontSize = pan.scale * TILE_SIZE * 0.025;
-    ctx.font = `${fontSize}px Arial`;
-    const letterOffset = pan.scale * TILE_SIZE * 0.01;
-    ctx.fillText(letter.letter, pos.x - letterOffset, pos.y + letterOffset);
+    const fontSize = pan.scale * TILE_SIZE * 0.035;
+    ctx.font = `${fontSize}px ${boardFont.style.fontFamily}`;
+    ctx.fillStyle = 'rgb(63 63 70)';
+
+    // offset by .5 of the letter width to center it same for height
+
+    const letterOffset = { x: ctx.measureText(letter.letter).width / 2, y: fontSize / 2.9 };
+    ctx.fillText(letter.letter, pos.x - letterOffset.x, pos.y + letterOffset.y);
   });
 }
 

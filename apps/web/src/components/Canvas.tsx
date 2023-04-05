@@ -37,6 +37,20 @@ export default function Canvas({
   const { width, height } = useWindowSize();
 
   useEffect(() => {
+    if ( !width || !height) return;
+    console.log('Center the board');
+    // set pan to center of board
+    const newPan: Pan = {
+      ...pan,
+      offset : {
+        x : (width / 2) - (TILE_SIZE * 5) / 2,
+        y : (height / 2) - (TILE_SIZE * 5) / 2,
+      }
+    }
+    setPan(newPan);
+  }, [height, width]);
+
+  useEffect(() => {
     const ctx = canvasRef.current?.getContext('2d');
     if (!ctx || !width || !height) return;
     ctx.clearRect(0, 0, width, height);
