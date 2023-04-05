@@ -1,10 +1,11 @@
-import { Player } from './types/Player';
-import { Server } from 'socket.io';
+import {Player} from './types/Player';
+import {Server} from 'socket.io';
 import {GameInstance} from "./GameInstance";
 import {generateLetters, generateToken, getDatePlusCooldown} from "./Utils";
 import {LoginResponseType} from "./types/responses/LoginResponseType";
 import {PlaceWord} from "./types/PlaceWord";
 import {PlacedResponse} from "./types/responses/PlacedResponse";
+import {AddLetterResponse} from "./types/responses/AddLetterResponse";
 
 const io = new Server({
   cors: {
@@ -73,8 +74,8 @@ io.on('connection', (socket) => {
     const player = gameInstance.players.get(token);
     if (player === undefined) return socket.emit('onError', 'Player not found');
 
-    gameInstance.addLetterToPlayer(player);
-    socket.emit('onInventory', player.letters);
+    let response = gameInstance.addLetterToPlayer(player);
+    if(response === AddLetterResponse.SUCCESS) socket.emit('onInventory', player.letters);
   });
 
   /**
