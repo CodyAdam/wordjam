@@ -89,11 +89,11 @@ io.on('connection', (socket) => {
     if(Object.prototype.toString.call(submittedLetters.letters) !== Object.prototype.toString.call( [] )
         || submittedLetters.letters.length === 0) return socket.emit('onError', PlacedResponse.NO_LETTER_IN_REQUEST);
 
-    let response = gameInstance.board.checkLetterPlacedFromClient(submittedLetters, player);
-    if (response.placement !== PlacedResponse.OK) return socket.emit('onError', response.placement);
+    let response = gameInstance.submitWord(player, submittedLetters)
+    if (response !== PlacedResponse.OK) return socket.emit('onError', response);
 
-    gameInstance.board.putLettersOnBoard(submittedLetters, player);
     sendBoardToAll();
+    sendScoreToAll();
     socket.emit('setInventory', player.letters);
   });
 
@@ -106,4 +106,7 @@ io.on('connection', (socket) => {
  */
 function sendBoardToAll() {
   io.emit('onBoard', Array.from(gameInstance.board.board.values()));
+}
+function sendScoreToAll(){
+  io.emit('onScores', Array.from(gameInstance.players.values()))
 }

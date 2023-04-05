@@ -1,6 +1,8 @@
 import {Player} from "./types/Player";
 import {BoardManager} from "./BoardManager";
 import {generateLetters, getDatePlusCooldown} from "./Utils";
+import {PlaceWord} from "./types/PlaceWord";
+import {PlacedResponse} from "./types/responses/PlacedResponse";
 
 export class GameInstance {
     private readonly _players: Map<string, Player>;
@@ -50,6 +52,17 @@ export class GameInstance {
             if (player.username === username) return false;
         }
         return true;
+    }
+
+    submitWord(player: Player, word: PlaceWord): PlacedResponse {
+        let response = this.board.checkLetterPlacedFromClient(word, player);
+
+        if(response.placement == PlacedResponse.OK) {
+            this.board.putLettersOnBoard(word, player);
+            player.score += response.score
+        }
+
+        return response.placement
     }
 
     /**
