@@ -71,7 +71,7 @@ export function drawPlacedLetters(ctx: CanvasRenderingContext2D, placedLetters: 
     // offset by .5 of the letter width to center it same for height
     const letterOffset = { x: ctx.measureText(letter.letter).width / 2, y: fontSize / 2.9 };
 
-    ctx.fillText(letter.letter, pos.x - letterOffset.x, pos.y + letterOffset.y);
+    ctx.fillText(letter.letter.toUpperCase(), pos.x - letterOffset.x, pos.y + letterOffset.y);
   });
 }
 
@@ -87,7 +87,7 @@ export function drawPlacedInventoryLetters(ctx: CanvasRenderingContext2D, placed
 
     // offset by .5 of the letter width to center it same for height
     const letterOffset = { x: ctx.measureText(letter.letter).width / 2, y: fontSize / 2.9 };
-    ctx.fillText(letter.letter, pos.x - letterOffset.x, pos.y + letterOffset.y);
+    ctx.fillText(letter.letter.toUpperCase(), pos.x - letterOffset.x, pos.y + letterOffset.y);
   });
 }
 

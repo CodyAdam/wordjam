@@ -45,7 +45,7 @@ export default function App() {
         if (response === LoginResponseType.SUCCESS) setAppStage(AppState.InGame);
       },
       onInventory: (letters: string[]) => {
-        setInventory(letters.map((letter) => ({ letter: letter.toLocaleUpperCase() })));
+        setInventory(letters.map((letter) => ({ letter: letter })));
       },
       onError: (error: string) => {
         toast.error(error);
