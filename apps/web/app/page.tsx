@@ -16,8 +16,8 @@ import { Pan } from '@/src/types/canvas';
 import { toPlaceWord } from '@/src/utils/submitHelper';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.min.css';
-import Confetti from 'react-confetti'
-import useWindowSize from "@/src/hooks/useWindowSize";
+import Confetti from 'react-confetti';
+import useWindowSize from '@/src/hooks/useWindowSize';
 
 export default function App() {
   // login related
@@ -26,9 +26,7 @@ export default function App() {
   const [placedLetters, setPlacedLetters] = useState<BoardLetters>(new Map());
   const [pan, setPan] = useState<Pan>({ offset: { x: 0, y: 0 }, scale: 100, origin: { x: 0, y: 0 } });
   const { cursorDirection, cursorPos, setCursorDirection, setCursorPos, goToNextCursorPos } = useCursor(placedLetters);
-  const [inventory, setInventory] = useState<InventoryLetter[]>([
-    {letter: 'A'},
-  ]);
+  const [inventory, setInventory] = useState<InventoryLetter[]>([{ letter: 'A' }]);
   const { isConnected, socket } = useSocket(SOCKET_URL, {
     events: {
       onBoard: (letters: BoardLetter[]) => {
@@ -117,7 +115,6 @@ export default function App() {
       </>
     );
 
-
   if (appStage === AppState.InGame)
     return (
       <>
@@ -132,7 +129,6 @@ export default function App() {
         )}
 
         <main className='relative flex h-full bg-gray-100'>
-
           <Canvas
             placedLetters={placedLetters}
             pan={pan}
@@ -160,7 +156,21 @@ export default function App() {
         >
           (Debug) Logout
         </button>
-        <button className='absolute bottom-0 left-48 m-3 rounded-md bg-purple-200 p-3 text-purple-800 ' onClick={resetConfetti}>Reset confetti (Debug)</button>
+        <button
+          className='absolute bottom-0 left-0 m-3 rounded-md bg-purple-200 p-3 text-purple-800 '
+          onClick={() => {
+            const token = localStorage.getItem('token');
+            socket.emit('onAskLetter', token);
+          }}
+        >
+          (Debug) Logout
+        </button>
+        <button
+          className='absolute bottom-0 left-48 m-3 rounded-md bg-purple-200 p-3 text-purple-800 '
+          onClick={resetConfetti}
+        >
+          Reset confetti (Debug)
+        </button>
         <ToastContainer
           position='bottom-right'
           autoClose={5000}
