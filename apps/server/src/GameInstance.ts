@@ -54,6 +54,11 @@ export class GameInstance {
         return true;
     }
 
+    /**
+     * Check a word to submit and then apply the score
+     * @param player
+     * @param word
+     */
     submitWord(player: Player, word: PlaceWord): PlacedResponse {
         let response = this.board.checkLetterPlacedFromClient(word, player);
 
