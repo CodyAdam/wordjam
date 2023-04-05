@@ -59,7 +59,7 @@ export class BoardManager {
         let score = 0;
         let additionalWords: string[] = [];
         let validPosition: boolean = false;
-        let playerLetters: string[] = player.letters;
+        let playerLetters: string[] = [...player.letters];
         let lettersToPlaced: string[] = data.letters;
 
         let previousLetter = Object.assign({}, data.startPos);
