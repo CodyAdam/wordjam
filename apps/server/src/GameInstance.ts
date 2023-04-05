@@ -59,10 +59,10 @@ export class GameInstance {
      * @param player
      * @param word
      */
-    submitWord(player: Player, word: PlaceWord): PlacedResponse {
+    submitWord(player: Player, word: PlaceWord): string {
         let response = this.board.checkLetterPlacedFromClient(word, player);
-
-        if(response.placement == PlacedResponse.OK) {
+        console.log(response)
+        if(response.placement === PlacedResponse.OK) {
             this.board.putLettersOnBoard(word, player);
             player.score += response.score
         }

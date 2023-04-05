@@ -1,6 +1,4 @@
-import {PlacedResponse} from "./responses/PlacedResponse";
-
 export type CheckLetterResponse = {
-    placement: PlacedResponse,
+    placement: string,
     score: number
 }
