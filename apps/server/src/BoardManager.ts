@@ -59,6 +59,17 @@ export class BoardManager {
         let validPosition: boolean = false;
         let playerLetters: string[] = player.letters;
         let lettersToPlaced: string[] = data.letters;
+
+        let previousLetter = Object.assign({}, data.startPos);
+        if (data.direction == Direction.DOWN) previousLetter.y++;
+        else previousLetter.x--;
+        while(this.hasLetter(previousLetter)) {
+            word = this.board.get(previousLetter.x + '_' + previousLetter.y)?.letter + word;
+            validPosition = true;
+            if (data.direction == Direction.DOWN) previousLetter.y++;
+            else previousLetter.x--;
+        }
+
         while (lettersToPlaced.length > 0 || this.hasLetter(currentPos)) {
             if (this.hasLetter(currentPos)) {
                 let letter = this.board.get(currentPos.x + '_' + currentPos.y)?.letter;
