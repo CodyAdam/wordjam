@@ -1,5 +1,6 @@
 import {Config} from "./Config";
 import {DictionaryService} from "./Dictionary";
+import {Position} from "./types/Position";
 
 /**
  * get a date that represent the date from now when the cooldown will be over
@@ -31,4 +32,14 @@ export function generateLetters(len: number) {
     let letters = [];
     for (let i = 0; i < len; i++) letters.push(DictionaryService.getRandomLetter());
     return letters;
+}
+
+
+/**
+ * Check if two positions are equals
+ * @param pos1 the first position
+ * @param pos2 the second position
+ */
+export function posEquals(pos1: Position, pos2: Position) {
+    return pos1.x === pos2.x && pos1.y === pos2.y;
 }

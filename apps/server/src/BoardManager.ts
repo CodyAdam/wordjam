@@ -6,6 +6,7 @@ import {PlaceWord} from "./types/PlaceWord";
 import {PlacedResponse} from "./types/responses/PlacedResponse";
 import {Direction} from "./types/Direction";
 import {CheckLetterResponse} from "./types/CheckLetterResponse";
+import {posEquals} from "./Utils";
 
 export class BoardManager {
     private readonly _board: Map<string, BoardLetter>;
@@ -59,8 +60,8 @@ export class BoardManager {
         let score = 0;
         let additionalWords: string[] = [];
         let validPosition: boolean = false;
-        let playerLetters: string[] = player.letters;
-        let lettersToPlaced: string[] = data.letters;
+        let playerLetters: string[] = [...player.letters];
+        let lettersToPlaced: string[] = [...data.letters];
 
         let previousLetter = Object.assign({}, data.startPos);
         if (data.direction == Direction.DOWN) previousLetter.y++;
@@ -88,16 +89,17 @@ export class BoardManager {
                 let concurrentWord = this.detectWordFromInside(
                     currentPos,
                     data.direction == Direction.DOWN ? Direction.RIGHT : Direction.DOWN,
+                    newLetter
                 );
 
                 score += DictionaryService.getPointsOfWord(concurrentWord)
 
-                if (DictionaryService.wordExist(concurrentWord)) {
+                if (concurrentWord !== newLetter && DictionaryService.wordExist(concurrentWord)) {
                     validPosition = true;
                     additionalWords.push(concurrentWord);
                 }
-                else if(concurrentWord !== "") return {
-                    placement: PlacedResponse.INVALID_POSITION,
+                else if(concurrentWord !== newLetter) return {
+                    placement: PlacedResponse.INVALID_POSITION.toString().replace("%WORD%", concurrentWord.toUpperCase()),
                     score: 0
                 };
 
@@ -128,20 +130,22 @@ export class BoardManager {
      * Detect if there is a word on the board from a given position and a given direction
      * @param position The position of any letter of the word
      * @param direction The direction of the word
+     * @param letter The letter to be placed on the board at the given position
      * @returns The word if it exists, an empty string otherwise
      */
-    private detectWordFromInside(position: Position, direction: Direction): string {
+    private detectWordFromInside(position: Position, direction: Direction, letter: string): string {
         let word : string = '';
         let currentPos: Position = Object.assign({}, position);
-        while (this.hasLetter(currentPos)) {
+        while (this.hasLetter(currentPos) || posEquals(currentPos,position)) {
             if (direction == Direction.DOWN) currentPos.y++;
             else currentPos.x--;
         }
 
         if (direction == Direction.DOWN) currentPos.y--;
         else currentPos.x++;
-        while (this.hasLetter(currentPos)) {
-            word += this.board.get(currentPos.x + '_' + currentPos.y)?.letter;
+        while (this.hasLetter(currentPos) || posEquals(currentPos,position)) {
+            if (!posEquals(currentPos,position)) word += this.board.get(currentPos.x + '_' + currentPos.y)?.letter;
+            else word += letter;
             if (direction == Direction.DOWN) currentPos.y--;
             else currentPos.x++;
         }
@@ -155,9 +159,9 @@ export class BoardManager {
      * @param player The player who wants to place the word
      * @returns the score gains by the player
      */
-    putLettersOnBoard(data: PlaceWord, player: Player) : number {
+    putLettersOnBoard(data: PlaceWord, player: Player) {
         let currentPos: Position = Object.assign({}, data.startPos);
-        let lettersToPlaced: string[] = data.letters;
+        let lettersToPlaced: string[] = [...data.letters];
         while (lettersToPlaced.length > 0) {
             if (!this.hasLetter(currentPos)) {
                 let newLetter = lettersToPlaced.shift() || '';
@@ -172,7 +176,6 @@ export class BoardManager {
             else currentPos.x++;
         }
         this.removeLettersFromPlayer(player, data.letters);
-        return 0; // TODO: calculate score
     }
 
     /**
@@ -181,9 +184,17 @@ export class BoardManager {
      * @param letters The letters to remove
      */
     private removeLettersFromPlayer(player: Player, letters: string[]) {
-        for (let letter of letters) {
-            player.letters.splice(player.letters.indexOf(letter, 0), 1);
-        }
+        console.log("inventory", player.letters)
+        console.log("letters to remove", letters)
+        player.letters = player.letters.filter((letter) => {
+            const indexInToRemove = letters.indexOf(letter);
+            if (indexInToRemove !== -1) {
+                letters.splice(indexInToRemove, 1);
+                return false;
+            }
+            return true;
+        });
+        console.log("inventory then ", player.letters)
     }
 
 }

@@ -89,6 +89,9 @@ io.on('connection', (socket) => {
     if(Object.prototype.toString.call(submittedLetters.letters) !== Object.prototype.toString.call( [] )
         || submittedLetters.letters.length === 0) return socket.emit('onError', PlacedResponse.NO_LETTER_IN_REQUEST);
 
+    console.log(player)
+    console.log(submittedLetters)
+
     let response = gameInstance.submitWord(player, submittedLetters)
     if (response !== PlacedResponse.OK) return socket.emit('onError', response);
 
