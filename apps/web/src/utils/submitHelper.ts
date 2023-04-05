@@ -1,18 +1,33 @@
 import { Direction, PlaceWord } from '../types/api';
 import { InventoryLetter, InventoryLetterPlaced } from '../types/board';
 
+// X axis : left to right
+// Y axis : bottom to top
+
 export function toPlaceWord(inventory: InventoryLetter[]): PlaceWord {
   const placedInventoryLetters: InventoryLetterPlaced[] = inventory.filter(
     (letter) => letter.position !== undefined,
   ) as InventoryLetterPlaced[];
-  const letters: string[] = placedInventoryLetters.map((letter) => letter.letter.toLowerCase());
+
+  placedInventoryLetters.sort((a, b) => {
+    if (a.position.x < b.position.x || a.position.y > b.position.y) {
+      return -1;
+    } else if (a.position.x > b.position.x || a.position.y < b.position.y) {
+      return 1;
+    } else {
+      return 0;
+    }
+  });
+
+  let letters: string[] = placedInventoryLetters.map((letter) => letter.letter.toLowerCase());
   if (letters.length === 0) {
     throw new Error('No letters placed');
   }
+
   // most top left letter
   let startPos = placedInventoryLetters[0].position;
   placedInventoryLetters.forEach((letter) => {
-    if (letter.position.x < startPos.x || letter.position.y < startPos.y) {
+    if (letter.position.x < startPos.x || letter.position.y > startPos.y) {
       startPos = letter.position;
     }
   });
@@ -37,6 +52,10 @@ export function toPlaceWord(inventory: InventoryLetter[]): PlaceWord {
   if (isVertical) {
     direction = Direction.DOWN;
   }
+
+  console.log(startPos);
+  
+
   return {
     startPos,
     letters,
