@@ -6,14 +6,14 @@ import { keyFromPos } from '../utils/posHelper';
 function getNextCurPos(pos: Position, direction: boolean) {
   return {
     x: direction ? pos.x + 1 : pos.x,
-    y: direction ? pos.y : pos.y + 1,
+    y: direction ? pos.y : pos.y - 1,
   };
 }
 
 function getPrevCurPos(pos: Position, direction: boolean) {
   return {
     x: direction ? pos.x - 1 : pos.x,
-    y: direction ? pos.y : pos.y - 1,
+    y: direction ? pos.y : pos.y + 1,
   };
 }
 
@@ -53,8 +53,8 @@ export function useCursor(placedLetters: BoardLetters) {
       if (!cursorPos) return;
       if (e.key === 'ArrowRight') setCursorPos(getCursorPosWithOffset(cursorPos, { x: 1, y: 0 }));
       if (e.key === 'ArrowLeft') setCursorPos(getCursorPosWithOffset(cursorPos, { x: -1, y: 0 }));
-      if (e.key === 'ArrowUp') setCursorPos(getCursorPosWithOffset(cursorPos, { x: 0, y: -1 }));
-      if (e.key === 'ArrowDown') setCursorPos(getCursorPosWithOffset(cursorPos, { x: 0, y: 1 }));
+      if (e.key === 'ArrowUp') setCursorPos(getCursorPosWithOffset(cursorPos, { x: 0, y: 1 }));
+      if (e.key === 'ArrowDown') setCursorPos(getCursorPosWithOffset(cursorPos, { x: 0, y: -1 }));
       if (e.key === ' ') goToNextCursorPos();
       if (e.key === 'Backspace') goToPrevCursorPos();
       if (e.key === 'Tab' || e.key === 'Shift') setCursorDirection(!cursorDirection);

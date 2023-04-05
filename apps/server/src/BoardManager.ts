@@ -5,7 +5,6 @@ import {Position} from "./types/Position";
 import {PlaceWord} from "./types/PlaceWord";
 import {PlacedResponse} from "./types/responses/PlacedResponse";
 import {Direction} from "./types/Direction";
-import {CheckLetterResponse} from "./types/CheckLetterResponse";
 
 export class BoardManager {
     private readonly _board: Map<string, BoardLetter>;
@@ -53,7 +52,7 @@ export class BoardManager {
      * @param player The player who wants to place the word
      * @returns A PlacedResponse
      */
-    checkLetterPlacedFromClient(data: PlaceWord, player: Player): CheckLetterResponse {
+    checkLetterPlacedFromClient(data: PlaceWord, player: Player): PlacedResponse {
         let currentPos: Position = Object.assign({}, data.startPos);
         let word: string = '';
         let score = 0;
@@ -61,6 +60,16 @@ export class BoardManager {
         let validPosition: boolean = false;
         let playerLetters: string[] = player.letters;
         let lettersToPlaced: string[] = data.letters;
+
+        let previousLetter = Object.assign({}, data.startPos);
+        if (data.direction == Direction.DOWN) previousLetter.y++;
+        else previousLetter.x--;
+        while(this.hasLetter(previousLetter)) {
+            word = this.board.get(previousLetter.x + '_' + previousLetter.y)?.letter + word;
+            validPosition = true;
+            if (data.direction == Direction.DOWN) previousLetter.y++;
+            else previousLetter.x--;
+        }
 
         while (lettersToPlaced.length > 0 || this.hasLetter(currentPos)) {
             if (this.hasLetter(currentPos)) {

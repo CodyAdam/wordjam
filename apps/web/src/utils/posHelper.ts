@@ -4,7 +4,7 @@ import { Pan } from '../types/canvas';
 export function screenToWorld(pos: Position, pan: Pan) {
   return {
     x: (pos.x - pan.offset.x) / pan.scale,
-    y: (pos.y - pan.offset.y) / pan.scale,
+    y: -(pos.y - pan.offset.y) / pan.scale,
   };
 }
 
@@ -32,7 +32,7 @@ export function posCentered(pos: Position) {
 export function worldToScreen(pos: Position, pan: Pan) {
   return {
     x: pos.x * pan.scale + pan.offset.x,
-    y: pos.y * pan.scale + pan.offset.y,
+    y: -pos.y * pan.scale + pan.offset.y,
   };
 }
 
