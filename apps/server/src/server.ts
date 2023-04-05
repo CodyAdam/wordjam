@@ -6,6 +6,7 @@ import {LoginResponseType} from "./types/responses/LoginResponseType";
 import {PlaceWord} from "./types/PlaceWord";
 import {PlacedResponse} from "./types/responses/PlacedResponse";
 import {AddLetterResponse} from "./types/responses/AddLetterResponse";
+import {Config} from "./Config";
 
 const io = new Server({
   cors: {
@@ -14,6 +15,7 @@ const io = new Server({
 });
 
 const PORT = 8080;
+const devMode: boolean = false;
 io.listen(PORT);
 
 console.log('Server started on port ' + PORT);
@@ -113,4 +115,8 @@ function sendBoardToAll() {
 }
 function sendScoreToAll(){
   io.emit('onScores', Array.from(gameInstance.players.values()))
+}
+
+if(devMode){
+  Config.LETTER_COOLDOWN = 0;
 }

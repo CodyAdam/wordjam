@@ -115,7 +115,7 @@ export class BoardManager {
             score: 0
         };
         if (!DictionaryService.wordExist(word)) return {
-            placement: PlacedResponse.WORD_NOT_EXIST,
+            placement: PlacedResponse.WORD_NOT_EXIST.toString().replace("%WORD%", word.toUpperCase()),
             score: 0
         };
 
