@@ -74,7 +74,7 @@ io.on('connection', (socket) => {
     if (player === undefined) return socket.emit('onError', 'Player not found');
 
     gameInstance.addLetterToPlayer(player);
-    socket.emit('setInventory', player.letters);
+    socket.emit('onInventory', player.letters);
   });
 
   /**
@@ -97,7 +97,7 @@ io.on('connection', (socket) => {
 
     sendBoardToAll();
     sendScoreToAll();
-    socket.emit('setInventory', player.letters);
+    socket.emit('onInventory', player.letters);
   });
 
   console.log('New web socket connection');
