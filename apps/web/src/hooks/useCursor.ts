@@ -28,6 +28,20 @@ export function useCursor(placedLetters: BoardLetters) {
   const [cursorPos, setCursorPos] = useState<Position | null>(null);
   const [cursorDirection, setCursorDirection] = useState<boolean>(true); // true = right, false = down
 
+  const setCursorPosIfPossible = useCallback(
+    (pos: Position | null) => {
+      if (pos !== null && placedLetters.has(keyFromPos(pos))) {
+        console.log('BLOKED');
+        setCursorPos(null);
+        return
+      }
+      console.log('FREE', pos, pos && keyFromPos(pos));
+      console.log(placedLetters);
+      setCursorPos(pos);
+    },
+    [placedLetters],
+  );
+
   const goToNextCursorPos = useCallback(() => {
     if (!cursorPos) return;
     let newCursorPos: Position = getNextCurPos(cursorPos, cursorDirection);
@@ -68,7 +82,7 @@ export function useCursor(placedLetters: BoardLetters) {
 
   return {
     cursorPos,
-    setCursorPos,
+    setCursorPos: setCursorPosIfPossible,
     cursorDirection,
     setCursorDirection,
     goToNextCursorPos,
