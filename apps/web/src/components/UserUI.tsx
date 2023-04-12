@@ -47,13 +47,14 @@ export default function UserUI({
 
 
                     <div onClick={() => {
-                      if (letter.position != undefined) {
+
+                      if (letter.position == undefined) {
                         onPlace(i);
                       }
                     }} style={provided.draggableProps.style} ref={provided.innerRef}
                          {...provided.draggableProps}
                          {...provided.dragHandleProps}
-                         className="group cursor-pointer select-none disabled:opacity-30">
+                         className={`group cursor-pointer select-none disabled:opacity-30 ${snapshot.isDragging || letter.position != undefined  ? 'opacity-50' : ' '}`}>
                       <div
                         className="flex h-20 w-20 items-center justify-center rounded-lg bg-slate-200 pb-8 text-6xl font-bold text-zinc-700 shadow-sm transition-all duration-75 group-hover:-translate-y-4 group-hover:scale-105 group-hover:shadow-lg">
                         <div

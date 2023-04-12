@@ -12,7 +12,7 @@ export function LetterButton({
   disabled?: boolean;
 }) {
   return (
-    <div className='group cursor-pointer select-none disabled:opacity-30' onClick={onClick} disabled={disabled}>
+    <button className='group cursor-pointer select-none disabled:opacity-30' onClick={onClick} disabled={disabled}>
       <div className='flex h-20 w-20 items-center justify-center rounded-lg bg-slate-200 pb-8 text-6xl font-bold text-zinc-700 transition-all duration-75 group-hover:-translate-y-4 group-hover:scale-105 shadow-sm group-hover:shadow-lg'>
         <div className='flex h-20 w-20 items-center justify-center rounded-lg border-2 border-slate-200 bg-white p-1'>
           <span className={boardFont.className}>
@@ -20,6 +20,6 @@ export function LetterButton({
           </span>
         </div>
       </div>
-    </div>
+    </button>
   );
 }
