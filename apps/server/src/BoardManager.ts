@@ -7,6 +7,7 @@ import {PlacedResponse} from "./types/responses/PlacedResponse";
 import {Direction} from "./types/Direction";
 import {CheckLetterResponse} from "./types/CheckLetterResponse";
 import {posEquals} from "./Utils";
+import {Config} from "./Config";
 
 export class BoardManager {
     private readonly _board: Map<string, BoardLetter>;
@@ -62,6 +63,7 @@ export class BoardManager {
         let validPosition: boolean = false;
         let playerLetters: string[] = [...player.letters];
         let lettersToPlaced: string[] = [...data.letters];
+        let lettersPositions: Position[] = [];
 
         let previousLetter = Object.assign({}, data.startPos);
         if (data.direction == Direction.DOWN) previousLetter.y++;
@@ -74,6 +76,7 @@ export class BoardManager {
         }
 
         while (lettersToPlaced.length > 0 || this.hasLetter(currentPos)) {
+            lettersPositions.push(Object.assign({}, currentPos));
             if (this.hasLetter(currentPos)) {
                 let letter = this.board.get(currentPos.x + '_' + currentPos.y)?.letter;
                 word += letter;
@@ -83,10 +86,11 @@ export class BoardManager {
                 if (!playerLetters.includes(newLetter)) {
                     return {
                         placement: PlacedResponse.PLAYER_DONT_HAVE_LETTERS,
-                        score: 0
+                        score: 0,
+                        highlight: {positions: [], color: ''}
                     };
                 }
-                let concurrentWord = this.detectWordFromInside(
+                let {concurrentWord, concurrentPos}  = this.detectWordFromInside(
                     currentPos,
                     data.direction == Direction.DOWN ? Direction.RIGHT : Direction.DOWN,
                     newLetter
@@ -97,10 +101,12 @@ export class BoardManager {
                 if (concurrentWord !== newLetter && DictionaryService.wordExist(concurrentWord)) {
                     validPosition = true;
                     additionalWords.push(concurrentWord);
+                    lettersPositions.push(...concurrentPos);
                 }
                 else if(concurrentWord !== newLetter) return {
                     placement: PlacedResponse.INVALID_POSITION.toString().replace("%WORD%", concurrentWord.toUpperCase()),
-                    score: 0
+                    score: 0,
+                    highlight: {positions: concurrentPos, color: Config.COLOR_HIGHLIGHT_ERROR}
                 };
 
                 playerLetters.splice(playerLetters.indexOf(newLetter, 0), 1);
@@ -112,17 +118,20 @@ export class BoardManager {
         console.log(word)
         if (!validPosition) return {
             placement: PlacedResponse.WORD_NOT_CONNECTED_TO_OTHERS,
-            score: 0
+            score: 0,
+            highlight: {positions: lettersPositions, color: Config.COLOR_HIGHLIGHT_ERROR}
         };
         if (!DictionaryService.wordExist(word)) return {
             placement: PlacedResponse.WORD_NOT_EXIST.toString().replace("%WORD%", word.toUpperCase()),
-            score: 0
+            score: 0,
+            highlight: {positions: lettersPositions, color: Config.COLOR_HIGHLIGHT_ERROR}
         };
 
         score += DictionaryService.getPointsOfWord(word)
         return {
             placement: PlacedResponse.OK,
-            score
+            score,
+            highlight: {positions: lettersPositions, color: Config.COLOR_HIGHLIGHT_VALID}
         };
     }
 
@@ -133,7 +142,7 @@ export class BoardManager {
      * @param letter The letter to be placed on the board at the given position
      * @returns The word if it exists, an empty string otherwise
      */
-    private detectWordFromInside(position: Position, direction: Direction, letter: string): string {
+    private detectWordFromInside(position: Position, direction: Direction, letter: string): {concurrentWord: string, concurrentPos: Position[]} {
         let word : string = '';
         let currentPos: Position = Object.assign({}, position);
         while (this.hasLetter(currentPos) || posEquals(currentPos,position)) {
@@ -141,16 +150,18 @@ export class BoardManager {
             else currentPos.x--;
         }
 
+        let positions: Position[] = [];
         if (direction == Direction.DOWN) currentPos.y--;
         else currentPos.x++;
         while (this.hasLetter(currentPos) || posEquals(currentPos,position)) {
             if (!posEquals(currentPos,position)) word += this.board.get(currentPos.x + '_' + currentPos.y)?.letter;
             else word += letter;
+            positions.push(Object.assign({}, currentPos));
             if (direction == Direction.DOWN) currentPos.y--;
             else currentPos.x++;
         }
 
-        return word;
+        return {concurrentWord: word, concurrentPos: positions};
     }
 
     /**

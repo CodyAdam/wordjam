@@ -1,4 +1,7 @@
+import {LetterHighlight} from "./LetterHighlight";
+
 export type CheckLetterResponse = {
     placement: string,
-    score: number
+    score: number,
+    highlight: LetterHighlight
 }
