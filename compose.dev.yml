@@ -7,3 +7,11 @@ services:
       target: BACK
     ports:
       - 8080:8080
+
+  front:
+    image: fgdou/esirjam-front
+    build:
+      context: .
+      target: FRONT
+    ports:
+      - 3000:3000
