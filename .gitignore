@@ -3,6 +3,8 @@
 .idea
 .vscode
 
+**/dist
+
 # dependencies
 node_modules
 .pnp
