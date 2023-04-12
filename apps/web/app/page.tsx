@@ -124,6 +124,14 @@ export default function App() {
     };
   }, [cursorPos, inventory, placeInventoryLetter]);
 
+  function onMoveLetter(from: number, to: number) {
+    const newInventory = [...inventory];
+    // do not swap, only move
+    const letter = newInventory.splice(from, 1)[0];
+    newInventory.splice(to, 0, letter);
+    setInventory(newInventory);
+  }
+
   if (appStage === AppState.AwaitingLogin)
     return (
       <>
@@ -173,6 +181,7 @@ export default function App() {
           </div>
         </main>
         <UserUI
+          onReplace={onMoveLetter}
           inventory={inventory}
           onPlace={placeInventoryLetter}
           onReset={onResetInventoryPlacement}
