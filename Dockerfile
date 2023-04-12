@@ -1,20 +1,21 @@
-FROM node:18 as BUILD
+FROM node:18 as BACK-BUILD
 WORKDIR /app
 
 # Copy root package.json and lockfile
-COPY package.json ./
+COPY apps/server/package.json .
+RUN npm i
+COPY apps/server .
+RUN npm run build
 
-# Copy the docs package.json
-COPY apps/server/package.json ./apps/server/package.json
-COPY apps/web/package.json ./apps/web/package.json
+FROM node:18 as BACK-REMOVER
+WORKDIR /app
+COPY --from=BACK-BUILD /app/package*.json /app/dist ./
 
-RUN turbo run install
-COPY . .
-RUN turbo run build
+RUN npm i --only=production
 
 FROM node:18 as BACK
 WORKDIR /app
-COPY --from=BUILD /app/apps/server/dist .
+COPY --from=BACK-REMOVER /app /app/node_modules ./
 
 EXPOSE 8080
 CMD ["node", "src/server.js"]
