@@ -121,13 +121,13 @@ export class BoardManager {
             score: 0,
             highlight: {positions: lettersPositions, color: Config.COLOR_HIGHLIGHT_ERROR}
         };
-        if (!DictionaryService.wordExist(word)) return {
+        if (!DictionaryService.wordExist(word) && !(data.letters.length === 1 && word === data.letters[0])) return {
             placement: PlacedResponse.WORD_NOT_EXIST.toString().replace("%WORD%", word.toUpperCase()),
             score: 0,
             highlight: {positions: lettersPositions, color: Config.COLOR_HIGHLIGHT_ERROR}
         };
 
-        score += DictionaryService.getPointsOfWord(word)
+        if(!(data.letters.length === 1 && word === data.letters[0])) score += DictionaryService.getPointsOfWord(word)
         return {
             placement: PlacedResponse.OK,
             score,
