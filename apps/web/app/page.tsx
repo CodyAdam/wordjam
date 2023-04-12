@@ -7,7 +7,6 @@ import UserUI from '@/src/components/UserUI';
 import Login from '@/src/components/Login';
 import Canvas from '@/src/components/Canvas';
 import { useCursor } from '@/src/hooks/useCursor';
-import { keyFromPos } from '@/src/utils/posHelper';
 import LinkDeviceButton from '@/src/components/LinkDeviceButton';
 import TokenModal from '@/src/components/TokenModal';
 import { BoardLetter, LoginResponseType } from '@/src/types/api';
@@ -17,7 +16,7 @@ import { toPlaceWord } from '@/src/utils/submitHelper';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.min.css';
 import Confetti from 'react-confetti';
-import useWindowSize from '@/src/hooks/useWindowSize';
+import { keyFromPos } from '@/src/utils/posHelper';
 
 export default function App() {
   // login related
@@ -64,6 +63,12 @@ export default function App() {
     (index: number) => {
       if (!cursorPos) return;
       const newInventory = [...inventory];
+      // 
+      newInventory.map((letter) => {
+        if (letter.position && letter.position.x === cursorPos.x && letter.position.y === cursorPos.y) {
+          letter.position = undefined;
+        }
+      });
       newInventory[index] = { ...newInventory[index], position: cursorPos };
       setInventory(newInventory);
       goToNextCursorPos();
