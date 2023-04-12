@@ -1,6 +1,6 @@
 'use client';
 import { useSocket } from '@/src/hooks/useSocket';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { AppState } from '@/src/lib/AppState';
 import { SOCKET_URL } from '@/src/lib/constants';
 import UserUI from '@/src/components/UserUI';
@@ -63,7 +63,7 @@ export default function App() {
     (index: number) => {
       if (!cursorPos) return;
       const newInventory = [...inventory];
-      // 
+      //
       newInventory.map((letter) => {
         if (letter.position && letter.position.x === cursorPos.x && letter.position.y === cursorPos.y) {
           letter.position = undefined;
@@ -100,6 +100,29 @@ export default function App() {
   function resetConfetti() {
     setIsConfetti(true);
   }
+
+  useEffect(() => {
+    if (!window) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!cursorPos) return;
+      let done = false;
+      const key = e.key.toLowerCase();
+      inventory.forEach((letter, index) => {
+        if (done) return;
+        const lower = letter.letter.toLowerCase();
+        if (letter.position === undefined && lower === key) {
+          placeInventoryLetter(index);
+          done = true;
+        }
+      });
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [cursorPos, inventory, placeInventoryLetter]);
 
   function onMoveLetter(from: number, to: number) {
     const newInventory = [...inventory];

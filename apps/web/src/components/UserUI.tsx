@@ -38,7 +38,7 @@ export default function UserUI({
               className='h-30  absolute left-[35%] bottom-6 flex w-fit  flex-wrap justify-center gap-3'
             >
               {inventory.map((letter, i) => (
-                <Draggable key={letter.letter} draggableId={letter.letter} index={i}>
+                <Draggable key={i.toString()} draggableId={i.toString()} index={i}>
                   {(provided, snapshot) => (
                     <div
                       onClick={() => {
