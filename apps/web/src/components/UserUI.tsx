@@ -5,6 +5,7 @@ import { InventoryLetter } from '../types/board';
 import { LetterButton } from './Letter';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import { boardFont } from '@/src/utils/fontLoader';
+import { letterToPoints } from '../utils/letterPoints';
 
 export default function UserUI({
   inventory,
@@ -54,8 +55,9 @@ export default function UserUI({
                       }`}
                     >
                       <div className='flex h-20 w-20 items-center justify-center rounded-lg bg-slate-200 pb-8 text-6xl font-bold text-zinc-700 shadow-sm transition-all duration-75 group-hover:-translate-y-4 group-hover:scale-105 group-hover:shadow-lg'>
-                        <div className='flex h-20 w-20 items-center justify-center rounded-lg border-2 border-slate-200 bg-white p-1'>
+                        <div className='relative flex h-20 w-20 items-center justify-center rounded-lg border-2 border-slate-200 bg-white p-1'>
                           <span className={boardFont.className}>{letter.letter.toUpperCase()}</span>
+                          <div className='absolute top-0 right-1 text-sm'>{letterToPoints[letter.letter.toUpperCase()]}</div>
                         </div>
                       </div>
                     </div>
