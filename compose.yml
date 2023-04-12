@@ -1,0 +1,6 @@
+version: "3.4"
+services:
+  back:
+    image: fgdou/esirjam-back
+    ports:
+      - 8080:8080
