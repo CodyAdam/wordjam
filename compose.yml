@@ -2,12 +2,8 @@ version: "3.4"
 services:
   back:
     image: fgdou/esirjam-back
-    ports:
-      - 8080:8080
   front:
     image: fgdou/esirjam-front
-    ports:
-      - 3000:3000
   nginx:
     image: fgdou/esirjam-nginx
     ports:
