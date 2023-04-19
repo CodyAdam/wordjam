@@ -23,23 +23,34 @@ CMD ["node", "src/server.js"]
 FROM node:18 as FRONT-DEPENDENCIES
 WORKDIR /app
 COPY apps/web/package.json ./
-RUN npm install
+RUN npm install --production
+
 
 FROM node:18 as FRONT-BUILDER
+
+ENV NEXT_TELEMETRY_DISABLED 1
+
 WORKDIR /app
 COPY apps/web/ .
 COPY --from=FRONT-DEPENDENCIES /app/node_modules ./node_modules
 RUN npm run build
 
 FROM node:18 as FRONT
-WORKDIR /app
+
 ENV NODE_ENV production
+ENV NEXT_TELEMETRY_DISABLED 1
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+WORKDIR /app
 # If you are using a custom next.config.js file, uncomment this line.
 # COPY --from=builder /my-project/next.config.js ./
-COPY --from=FRONT-BUILDER /app/public ./public
-COPY --from=FRONT-BUILDER /app/.next ./.next
-COPY --from=FRONT-BUILDER /app/node_modules ./node_modules
-COPY --from=FRONT-BUILDER /app/package.json ./package.json
+COPY --from=FRONT-BUILDER --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=FRONT-BUILDER --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+USER nextjs
 
 EXPOSE 3000
-CMD ["npm", "run", "start"]
+ENV PORT 3000
+
+CMD ["node", "server.js"]
