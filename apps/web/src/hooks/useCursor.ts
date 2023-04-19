@@ -31,12 +31,9 @@ export function useCursor(placedLetters: BoardLetters) {
   const setCursorPosIfPossible = useCallback(
     (pos: Position | null) => {
       if (pos !== null && placedLetters.has(keyFromPos(pos))) {
-        console.log('BLOKED');
         setCursorPos(null);
-        return
+        return;
       }
-      console.log('FREE', pos, pos && keyFromPos(pos));
-      console.log(placedLetters);
       setCursorPos(pos);
     },
     [placedLetters],
@@ -65,10 +62,10 @@ export function useCursor(placedLetters: BoardLetters) {
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!cursorPos) return;
-      if (e.key === 'ArrowRight') setCursorPos(getCursorPosWithOffset(cursorPos, { x: 1, y: 0 }));
-      if (e.key === 'ArrowLeft') setCursorPos(getCursorPosWithOffset(cursorPos, { x: -1, y: 0 }));
-      if (e.key === 'ArrowUp') setCursorPos(getCursorPosWithOffset(cursorPos, { x: 0, y: 1 }));
-      if (e.key === 'ArrowDown') setCursorPos(getCursorPosWithOffset(cursorPos, { x: 0, y: -1 }));
+      if (e.key === 'ArrowRight') setCursorPosIfPossible(getCursorPosWithOffset(cursorPos, { x: 1, y: 0 }));
+      if (e.key === 'ArrowLeft') setCursorPosIfPossible(getCursorPosWithOffset(cursorPos, { x: -1, y: 0 }));
+      if (e.key === 'ArrowUp') setCursorPosIfPossible(getCursorPosWithOffset(cursorPos, { x: 0, y: 1 }));
+      if (e.key === 'ArrowDown') setCursorPosIfPossible(getCursorPosWithOffset(cursorPos, { x: 0, y: -1 }));
       if (e.key === ' ') goToNextCursorPos();
       if (e.key === 'Backspace') goToPrevCursorPos();
       if (e.key === 'Tab' || e.key === 'Shift') setCursorDirection(!cursorDirection);
@@ -78,7 +75,7 @@ export function useCursor(placedLetters: BoardLetters) {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [cursorDirection, cursorPos, goToNextCursorPos, goToPrevCursorPos]);
+  }, [cursorDirection, cursorPos, goToNextCursorPos, goToPrevCursorPos, setCursorPosIfPossible]);
 
   return {
     cursorPos,
