@@ -1,12 +1,12 @@
-import {Player} from './types/Player';
-import {Server} from 'socket.io';
-import {GameInstance} from "./GameInstance";
-import {generateLetters, generateToken, getDatePlusCooldown} from "./Utils";
-import {LoginResponseType} from "./types/responses/LoginResponseType";
-import {PlaceWord} from "./types/PlaceWord";
-import {PlacedResponse} from "./types/responses/PlacedResponse";
-import {AddLetterResponse} from "./types/responses/AddLetterResponse";
-import {Config} from "./Config";
+import { Player } from './types/Player';
+import { Server } from 'socket.io';
+import { GameInstance } from './GameInstance';
+import { generateLetters, generateToken, getDatePlusCooldown } from './Utils';
+import { LoginResponseType } from './types/responses/LoginResponseType';
+import { PlaceWord } from './types/PlaceWord';
+import { PlacedResponse } from './types/responses/PlacedResponse';
+import { AddLetterResponse } from './types/responses/AddLetterResponse';
+import { Config } from './Config';
 
 const io = new Server({
   cors: {
@@ -47,7 +47,8 @@ io.on('connection', (socket) => {
    */
   socket.on('onRegister', (username: string) => {
     // Player Username verification
-    if(!gameInstance.checkUsernameAvailability(username)) return socket.emit('onLoginResponse', LoginResponseType.ALREADY_EXIST);
+    if (!gameInstance.checkUsernameAvailability(username))
+      return socket.emit('onLoginResponse', LoginResponseType.ALREADY_EXIST);
 
     // Create new player
     let newPlayer: Player = {
@@ -77,7 +78,10 @@ io.on('connection', (socket) => {
     if (player === undefined) return socket.emit('onError', 'Player not found');
 
     let response = gameInstance.addLetterToPlayer(player);
-    if(response === AddLetterResponse.SUCCESS) socket.emit('onInventory', player.letters);
+    if (response === AddLetterResponse.SUCCESS) {
+      socket.emit('onCooldown', gameInstance.playerCooldown(player.token));
+      socket.emit('onInventory', player.letters);
+    }
   });
 
   /**
@@ -89,13 +93,16 @@ io.on('connection', (socket) => {
   socket.on('onSubmit', ({ submittedLetters, token }: { submittedLetters: PlaceWord; token: string }) => {
     const player = gameInstance.players.get(token);
     if (player === undefined) return socket.emit('onError', 'Player not found');
-    if(Object.prototype.toString.call(submittedLetters.letters) !== Object.prototype.toString.call( [] )
-        || submittedLetters.letters.length === 0) return socket.emit('onError', PlacedResponse.NO_LETTER_IN_REQUEST);
+    if (
+      Object.prototype.toString.call(submittedLetters.letters) !== Object.prototype.toString.call([]) ||
+      submittedLetters.letters.length === 0
+    )
+      return socket.emit('onError', PlacedResponse.NO_LETTER_IN_REQUEST);
 
-    console.log(player)
-    console.log(submittedLetters)
+    console.log(player);
+    console.log(submittedLetters);
 
-    let response = gameInstance.submitWord(player, submittedLetters)
+    let response = gameInstance.submitWord(player, submittedLetters);
     if (response !== PlacedResponse.OK) return socket.emit('onError', response);
 
     sendBoardToAll();
@@ -113,10 +120,10 @@ io.on('connection', (socket) => {
 function sendBoardToAll() {
   io.emit('onBoard', Array.from(gameInstance.board.board.values()));
 }
-function sendScoreToAll(){
-  io.emit('onScores', Array.from(gameInstance.players.values()))
+function sendScoreToAll() {
+  io.emit('onScores', Array.from(gameInstance.players.values()));
 }
 
-if(devMode){
+if (devMode) {
   Config.LETTER_COOLDOWN = 0;
 }
