@@ -1,6 +1,5 @@
 export let SOCKET_URL : string;
-// if (process.env.NODE_ENV === 'production') {
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === 'production') {
   if (process.env.NEXT_PUBLIC_SOCKET_URL) {
     SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL;
   } else {
