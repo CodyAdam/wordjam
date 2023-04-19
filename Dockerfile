@@ -29,7 +29,7 @@ RUN npm install
 FROM node:18 as FRONT-BUILDER
 
 ENV NEXT_TELEMETRY_DISABLED 1
-ENV NEXT_PUBLIC_SOCKET_URL "ws://localhost"
+ENV NEXT_PUBLIC_SOCKET_URL "ws://wordjam.fgdou.ovh"
 
 WORKDIR /app
 COPY apps/web/ .
