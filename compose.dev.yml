@@ -15,3 +15,9 @@ services:
       target: FRONT
     ports:
       - 3000:3000
+
+  nginx:
+    image: fgdou/esirjam-nginx
+    build: nginx
+    ports:
+      - 80:80
