@@ -23,7 +23,7 @@ CMD ["node", "src/server.js"]
 FROM node:18 as FRONT-DEPENDENCIES
 WORKDIR /app
 COPY apps/web/package.json ./
-RUN npm install --production
+RUN npm install
 
 
 FROM node:18 as FRONT-BUILDER
