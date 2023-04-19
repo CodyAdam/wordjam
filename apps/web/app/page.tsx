@@ -10,7 +10,7 @@ import { useCursor } from '@/src/hooks/useCursor';
 import LinkDeviceButton from '@/src/components/LinkDeviceButton';
 import TokenModal from '@/src/components/TokenModal';
 import { BoardLetter, LoginResponseType } from '@/src/types/api';
-import { BoardLetters, InventoryLetter } from '@/src/types/board';
+import { BoardLetters, Highlight, InventoryLetter } from '@/src/types/board';
 import { Pan } from '@/src/types/canvas';
 import { toPlaceWord } from '@/src/utils/submitHelper';
 import { toast, ToastContainer } from 'react-toastify';
@@ -18,7 +18,8 @@ import 'react-toastify/dist/ReactToastify.min.css';
 import Confetti from 'react-confetti';
 import { keyFromPos } from '@/src/utils/posHelper';
 
-let interval: string | number | NodeJS.Timeout | undefined = undefined;
+let cooldownInterval: string | number | NodeJS.Timeout | undefined = undefined;
+let highlightInterval: string | number | NodeJS.Timeout | undefined = undefined;
 
 export default function App() {
   // login related
@@ -29,6 +30,7 @@ export default function App() {
   const { cursorDirection, cursorPos, setCursorDirection, setCursorPos, goToNextCursorPos } = useCursor(placedLetters);
   const [cooldown, setCooldown] = useState(0);
   const [inventory, setInventory] = useState<InventoryLetter[]>([{ letter: 'A' }]);
+  const [highlight, setHighlight] = useState<Highlight>(null);
   const { isConnected, socket } = useSocket(SOCKET_URL, {
     events: {
       onBoard: (letters: BoardLetter[]) => {
@@ -53,11 +55,18 @@ export default function App() {
       onConfetti: () => {
         resetConfetti();
       },
+      onHighligh: (highlight: Highlight) => {
+        clearInterval(highlightInterval);
+        setHighlight(highlight);
+        highlightInterval = setTimeout(() => {
+          setHighlight(null);
+        }, 4000);
+      },
       onCooldown: (cooldown: number) => {
-        clearInterval(interval);
+        clearInterval(cooldownInterval);
         cooldown = Math.ceil(cooldown);
         setCooldown(cooldown);
-        interval = setInterval(() => {
+        cooldownInterval = setInterval(() => {
           if (cooldown > 0) setCooldown((c) => c - 1);
         }, 1000);
       },
@@ -158,6 +167,7 @@ export default function App() {
             inventory={inventory}
             cursorPos={cursorPos}
             setCursorPos={setCursorPos}
+            highlight={highlight}
             cursorDirection={cursorDirection}
             setCursorDirection={setCursorDirection}
           />
@@ -184,6 +194,7 @@ export default function App() {
             placedLetters={placedLetters}
             pan={pan}
             setPan={(p) => setPan(p)}
+            highlight={highlight}
             inventory={inventory}
             cursorPos={cursorPos}
             setCursorPos={setCursorPos}

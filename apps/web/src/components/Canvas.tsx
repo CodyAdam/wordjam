@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import useWindowSize from '../hooks/useWindowSize';
 import { SCROLL_MAX_TILE_SIZE, SCROLL_MIN_TILE_SIZE, SCROLL_SPEED, TILE_SIZE } from '../lib/constants';
 import { posCeil, posCentered, posFloor, screenToWorld, worldToScreen } from '../utils/posHelper';
-import { BoardLetters, InventoryLetter } from '../types/board';
+import { BoardLetters, Highlight, InventoryLetter } from '../types/board';
 import { Position } from '../types/api';
 import { Pan } from '../types/canvas';
 import { drawGrid, drawPlacedLetters, drawPlacedInventoryLetters, drawDebug, drawDarkenTile } from '../utils/drawing';
@@ -17,6 +17,7 @@ export default function Canvas({
   inventory,
   cursorPos,
   setCursorPos,
+  highlight,
   cursorDirection,
   setCursorDirection,
 }: {
@@ -25,6 +26,7 @@ export default function Canvas({
   setPan: (pan: Pan) => void;
   inventory: InventoryLetter[];
   cursorPos: Position | null;
+  highlight: null | Highlight;
   setCursorPos: (cursor: Position | null) => void;
   cursorDirection: boolean;
   setCursorDirection: (direction: boolean) => void;
@@ -58,12 +60,12 @@ export default function Canvas({
 
     drawGrid(ctx, pan, width, height);
     if (hoverPos) drawDarkenTile(ctx, posFloor(hoverPos), pan);
-    drawPlacedLetters(ctx, placedLetters, pan);
-    drawPlacedInventoryLetters(ctx, inventory, pan);
+    drawPlacedLetters(ctx, placedLetters, pan, highlight);
+    drawPlacedInventoryLetters(ctx, inventory, pan, highlight);
 
     // DEBUG
     if (cursorPos) drawDebug(ctx, posCentered(cursorPos), cursorDirection ? '>' : 'v', 'purple', pan);
-  }, [height, pan, width, hoverPos, placedLetters, cursorPos, cursorDirection, inventory]);
+  }, [height, pan, width, hoverPos, placedLetters, cursorPos, cursorDirection, inventory, highlight]);
 
   const onDown = useCallback((e: React.TouchEvent | React.MouseEvent) => {
     const mousePos = getMousePos(e);
