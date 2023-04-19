@@ -8,3 +8,10 @@ services:
     image: fgdou/esirjam-front
     ports:
       - 3000:3000
+  nginx:
+    image: fgdou/esirjam-nginx
+    ports:
+      - 80:80
+    depends_on:
+      - front
+      - back

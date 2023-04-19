@@ -29,6 +29,7 @@ RUN npm install
 FROM node:18 as FRONT-BUILDER
 
 ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_PUBLIC_SOCKET_URL "ws://localhost"
 
 WORKDIR /app
 COPY apps/web/ .

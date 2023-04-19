@@ -5,21 +5,18 @@ services:
     build:
       context: .
       target: BACK
-    ports:
-      - 8080:8080
 
   front:
     image: fgdou/esirjam-front
     build:
       context: .
       target: FRONT
-    ports:
-      - 3000:3000
-    environment:
-      - NEXT_PUBLIC_SOCKET_URL=/websocket
 
   nginx:
     image: fgdou/esirjam-nginx
     build: nginx
     ports:
       - 80:80
+    depends_on:
+      - front
+      - back
