@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { InventoryLetter } from "../types/board";
 import { LetterButton } from "./Letter";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
@@ -31,16 +31,24 @@ export default function UserUI({
     onReplace(result.source.index, result.destination.index);
   }
 
+  const isPlacedLetter = useMemo(() => {
+    // if all positions of the letter in the inventory is not null, return true
+    return inventory.map((letter) => letter.position).every((pos) => !pos);
+  }, [inventory]);
+
   return (
     <>
       <div className="absolute bottom-0 flex flex-col flex-wrap gap-6 p-4">
         <div className="flex gap-5">
-          <button
-            className="flex w-fit items-center justify-center rounded-lg bg-red-100 px-3 py-1 text-2xl font-bold text-red-700 transition-all duration-75 hover:-translate-y-2 hover:scale-105 hover:shadow-lg"
-            onClick={onReset}
-          >
-            Reset
-          </button>
+          {!isPlacedLetter && (
+            <button
+              className="disabled:bg-gray-300 disabled:text-gray-700 flex w-fit items-center justify-center rounded-lg bg-red-100 px-3 py-1 text-2xl font-bold text-red-700 transition-all duration-75 hover:-translate-y-2 hover:scale-105 hover:shadow-lg"
+              onClick={onReset}
+            >
+              Reset
+            </button>
+          )}
+
           <button
             className="flex w-fit items-center justify-center rounded-lg bg-blue-100 px-3 py-1 text-2xl font-bold text-blue-700 transition-all duration-75 hover:-translate-y-2 hover:scale-105 hover:shadow-lg"
             onClick={onSubmit}
