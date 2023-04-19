@@ -47,6 +47,9 @@ export default function App() {
       onError: (error: string) => {
         toast.error(error);
       },
+      onCooldown: (cooldown: number) => {
+
+      },
       connect: () => {
         const token = localStorage.getItem('token');
         if (token) {
