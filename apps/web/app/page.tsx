@@ -18,6 +18,8 @@ import 'react-toastify/dist/ReactToastify.min.css';
 import Confetti from 'react-confetti';
 import { keyFromPos } from '@/src/utils/posHelper';
 
+let interval: string | number | NodeJS.Timeout | undefined = undefined;
+
 export default function App() {
   // login related
   const [appStage, setAppStage] = useState(AppState.AwaitingLogin);
@@ -25,6 +27,7 @@ export default function App() {
   const [placedLetters, setPlacedLetters] = useState<BoardLetters>(new Map());
   const [pan, setPan] = useState<Pan>({ offset: { x: 0, y: 0 }, scale: 100, origin: { x: 0, y: 0 } });
   const { cursorDirection, cursorPos, setCursorDirection, setCursorPos, goToNextCursorPos } = useCursor(placedLetters);
+  const [cooldown, setCooldown] = useState(0);
   const [inventory, setInventory] = useState<InventoryLetter[]>([{ letter: 'A' }]);
   const { isConnected, socket } = useSocket(SOCKET_URL, {
     events: {
@@ -47,8 +50,16 @@ export default function App() {
       onError: (error: string) => {
         toast.error(error);
       },
+      onConfetti: () => {
+        resetConfetti();
+      },
       onCooldown: (cooldown: number) => {
-
+        clearInterval(interval);
+        cooldown = Math.ceil(cooldown);
+        setCooldown(cooldown);
+        interval = setInterval(() => {
+          if (cooldown > 0) setCooldown((c) => c - 1);
+        }, 1000);
       },
       connect: () => {
         const token = localStorage.getItem('token');
@@ -84,6 +95,7 @@ export default function App() {
   }, []);
 
   const onSubmit = useCallback(() => {
+    if (cooldown > 0) return;
     try {
       const placeWord = toPlaceWord(inventory);
       const token = localStorage.getItem('token');
@@ -91,7 +103,7 @@ export default function App() {
     } catch (error) {
       error instanceof Error && toast.error(error.message);
     }
-  }, [inventory, socket]);
+  }, [cooldown, inventory, socket]);
 
   const onLogout = useCallback(() => {
     setAppStage(AppState.AwaitingLogin);
@@ -189,6 +201,7 @@ export default function App() {
           onPlace={placeInventoryLetter}
           onReset={onResetInventoryPlacement}
           onSubmit={onSubmit}
+          cooldown={cooldown}
         />
         <button
           className='absolute bottom-0 left-0 m-3 rounded-md bg-purple-200 p-3 text-purple-800 '
@@ -202,8 +215,9 @@ export default function App() {
             const token = localStorage.getItem('token');
             socket.emit('onAskLetter', token);
           }}
+          disabled={cooldown > 0}
         >
-          Ask letter
+          {cooldown > 0 ? `${cooldown}s` : 'Ask letter'}
         </button>
         <button
           className='absolute bottom-0 left-48 m-3 rounded-md bg-purple-200 p-3 text-purple-800 '
@@ -212,7 +226,7 @@ export default function App() {
           Reset confetti (Debug)
         </button>
         <ToastContainer
-          position='bottom-right'
+          position='top-center'
           autoClose={5000}
           hideProgressBar={false}
           newestOnTop={false}
@@ -220,7 +234,6 @@ export default function App() {
           rtl={false}
           pauseOnFocusLoss
           draggable
-          pauseOnHover
           theme='light'
         />
       </>
