@@ -50,6 +50,9 @@ export default function App() {
       onError: (error: string) => {
         toast.error(error);
       },
+      onConfetti: () => {
+        resetConfetti();
+      },
       onCooldown: (cooldown: number) => {
         clearInterval(interval);
         cooldown = Math.ceil(cooldown);
