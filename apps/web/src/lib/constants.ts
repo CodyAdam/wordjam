@@ -1,4 +1,14 @@
-export const SOCKET_URL = process.env.NODE_ENV === 'production' ? 'ws://localhost:8080' : 'ws://localhost:8080';
+export let SOCKET_URL : string;
+// if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV === 'development') {
+  if (process.env.NEXT_PUBLIC_SOCKET_URL) {
+    SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL;
+  } else {
+    throw new Error('NEXT_PUBLIC_SOCKET_URL is not defined');
+  }
+} else {
+  SOCKET_URL = 'ws://localhost:8080';
+}
 
 export const TILE_SIZE = 20;
 export const TILE_PADDING = .07;
