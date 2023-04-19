@@ -29,7 +29,7 @@ FROM node:18 as FRONT-BUILDER
 WORKDIR /app
 COPY apps/web/ .
 COPY --from=FRONT-DEPENDENCIES /app/node_modules ./node_modules
-RUN npm build
+RUN npm run build
 
 FROM node:18 as FRONT
 WORKDIR /app
@@ -42,4 +42,4 @@ COPY --from=FRONT-BUILDER /app/node_modules ./node_modules
 COPY --from=FRONT-BUILDER /app/package.json ./package.json
 
 EXPOSE 3000
-CMD ["npm", "run start"]
+CMD ["npm", "run", "start"]
