@@ -4,6 +4,7 @@ import {generateLetters, getDatePlusCooldown} from "./Utils";
 import {PlaceWord} from "./types/PlaceWord";
 import {PlacedResponse} from "./types/responses/PlacedResponse";
 import {AddLetterResponse} from "./types/responses/AddLetterResponse";
+import {Config} from "./Config";
 
 export class GameInstance {
     private readonly _players: Map<string, Player>;
@@ -66,6 +67,9 @@ export class GameInstance {
         if(response.placement === PlacedResponse.OK) {
             this.board.putLettersOnBoard(word, player);
             player.score += response.score
+            while(player.letters.length < Config.MIN_HAND_LETTERS) {
+                this.addLetterToPlayer(player)
+            }
         }
 
         return response.placement
