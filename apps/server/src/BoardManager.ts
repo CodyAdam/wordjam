@@ -96,7 +96,10 @@ export class BoardManager {
                     newLetter
                 );
 
-                score += DictionaryService.getPointsOfWord(concurrentWord)
+                if(concurrentWord.length>1) {
+                    score += DictionaryService.getPointsOfWord(concurrentWord)
+                }
+
 
                 if (concurrentWord !== newLetter && DictionaryService.wordExist(concurrentWord)) {
                     validPosition = true;
@@ -127,7 +130,7 @@ export class BoardManager {
             highlight: {positions: lettersPositions, color: Config.COLOR_HIGHLIGHT_ERROR}
         };
 
-        if(!(data.letters.length === 1 && word === data.letters[0])) score += DictionaryService.getPointsOfWord(word)
+        score += DictionaryService.getPointsOfWord(word)
         return {
             placement: PlacedResponse.OK,
             score,
