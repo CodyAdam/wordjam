@@ -1,0 +1,22 @@
+version: "3.4"
+services:
+  back:
+    image: fgdou/esirjam-back
+    build:
+      context: .
+      target: BACK
+
+  front:
+    image: fgdou/esirjam-front
+    build:
+      context: .
+      target: FRONT
+
+  nginx:
+    image: fgdou/esirjam-nginx
+    build: nginx
+    ports:
+      - 80:80
+    depends_on:
+      - front
+      - back

@@ -1,13 +1,12 @@
 'use client';
 import { useSocket } from '@/src/hooks/useSocket';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { AppState } from '@/src/lib/AppState';
 import { SOCKET_URL } from '@/src/lib/constants';
 import UserUI from '@/src/components/UserUI';
 import Login from '@/src/components/Login';
 import Canvas from '@/src/components/Canvas';
 import { useCursor } from '@/src/hooks/useCursor';
-import { keyFromPos } from '@/src/utils/posHelper';
 import LinkDeviceButton from '@/src/components/LinkDeviceButton';
 import TokenModal from '@/src/components/TokenModal';
 import { BoardLetter, LoginResponseType } from '@/src/types/api';
@@ -17,7 +16,9 @@ import { toPlaceWord } from '@/src/utils/submitHelper';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.min.css';
 import Confetti from 'react-confetti';
-import useWindowSize from '@/src/hooks/useWindowSize';
+import { keyFromPos } from '@/src/utils/posHelper';
+
+let interval: string | number | NodeJS.Timeout | undefined = undefined;
 
 export default function App() {
   // login related
@@ -26,6 +27,7 @@ export default function App() {
   const [placedLetters, setPlacedLetters] = useState<BoardLetters>(new Map());
   const [pan, setPan] = useState<Pan>({ offset: { x: 0, y: 0 }, scale: 100, origin: { x: 0, y: 0 } });
   const { cursorDirection, cursorPos, setCursorDirection, setCursorPos, goToNextCursorPos } = useCursor(placedLetters);
+  const [cooldown, setCooldown] = useState(0);
   const [inventory, setInventory] = useState<InventoryLetter[]>([{ letter: 'A' }]);
   const { isConnected, socket } = useSocket(SOCKET_URL, {
     events: {
@@ -48,6 +50,17 @@ export default function App() {
       onError: (error: string) => {
         toast.error(error);
       },
+      onConfetti: () => {
+        resetConfetti();
+      },
+      onCooldown: (cooldown: number) => {
+        clearInterval(interval);
+        cooldown = Math.ceil(cooldown);
+        setCooldown(cooldown);
+        interval = setInterval(() => {
+          if (cooldown > 0) setCooldown((c) => c - 1);
+        }, 1000);
+      },
       connect: () => {
         const token = localStorage.getItem('token');
         if (token) {
@@ -64,6 +77,12 @@ export default function App() {
     (index: number) => {
       if (!cursorPos) return;
       const newInventory = [...inventory];
+      //
+      newInventory.map((letter) => {
+        if (letter.position && letter.position.x === cursorPos.x && letter.position.y === cursorPos.y) {
+          letter.position = undefined;
+        }
+      });
       newInventory[index] = { ...newInventory[index], position: cursorPos };
       setInventory(newInventory);
       goToNextCursorPos();
@@ -76,6 +95,7 @@ export default function App() {
   }, []);
 
   const onSubmit = useCallback(() => {
+    if (cooldown > 0) return;
     try {
       const placeWord = toPlaceWord(inventory);
       const token = localStorage.getItem('token');
@@ -83,7 +103,7 @@ export default function App() {
     } catch (error) {
       error instanceof Error && toast.error(error.message);
     }
-  }, [inventory, socket]);
+  }, [cooldown, inventory, socket]);
 
   const onLogout = useCallback(() => {
     setAppStage(AppState.AwaitingLogin);
@@ -94,6 +114,37 @@ export default function App() {
 
   function resetConfetti() {
     setIsConfetti(true);
+  }
+
+  useEffect(() => {
+    if (!window) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!cursorPos) return;
+      let done = false;
+      const key = e.key.toLowerCase();
+      inventory.forEach((letter, index) => {
+        if (done) return;
+        const lower = letter.letter.toLowerCase();
+        if (letter.position === undefined && lower === key) {
+          placeInventoryLetter(index);
+          done = true;
+        }
+      });
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [cursorPos, inventory, placeInventoryLetter]);
+
+  function onMoveLetter(from: number, to: number) {
+    const newInventory = [...inventory];
+    // do not swap, only move
+    const letter = newInventory.splice(from, 1)[0];
+    newInventory.splice(to, 0, letter);
+    setInventory(newInventory);
   }
 
   if (appStage === AppState.AwaitingLogin)
@@ -145,34 +196,19 @@ export default function App() {
           </div>
         </main>
         <UserUI
+          onReplace={onMoveLetter}
           inventory={inventory}
           onPlace={placeInventoryLetter}
           onReset={onResetInventoryPlacement}
           onSubmit={onSubmit}
-        />
-        <button
-          className='absolute bottom-0 left-0 m-3 rounded-md bg-purple-200 p-3 text-purple-800 '
-          onClick={() => onLogout()}
-        >
-          (Debug) Logout
-        </button>
-        <button
-          className='absolute bottom-20 left-0 m-3 rounded-md bg-purple-200 p-3 text-purple-800 '
-          onClick={() => {
+          cooldown={cooldown}
+          onAskLetter={() => {
             const token = localStorage.getItem('token');
             socket.emit('onAskLetter', token);
           }}
-        >
-          Ask letter
-        </button>
-        <button
-          className='absolute bottom-0 left-48 m-3 rounded-md bg-purple-200 p-3 text-purple-800 '
-          onClick={resetConfetti}
-        >
-          Reset confetti (Debug)
-        </button>
+        />
         <ToastContainer
-          position='bottom-right'
+          position='top-center'
           autoClose={5000}
           hideProgressBar={false}
           newestOnTop={false}
@@ -180,7 +216,6 @@ export default function App() {
           rtl={false}
           pauseOnFocusLoss
           draggable
-          pauseOnHover
           theme='light'
         />
       </>
