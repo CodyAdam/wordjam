@@ -16,6 +16,7 @@ const io = new Server({
 
 const PORT = 8080;
 const devMode: boolean = false;
+let devModeHand : string[] = ['d', 'd', 'o', 'o', 'e', 'n', 'g'];
 io.listen(PORT);
 
 console.log('Server started on port ' + PORT);
@@ -54,7 +55,7 @@ io.on('connection', (socket) => {
       username: username,
       token: generateToken(4),
       score: 0,
-      letters: generateLetters(7),
+      letters: devMode ? devModeHand : generateLetters(7),
       cooldownTarget: getDatePlusCooldown(),
     };
     gameInstance.addPlayer(newPlayer);
@@ -92,11 +93,9 @@ io.on('connection', (socket) => {
     if(Object.prototype.toString.call(submittedLetters.letters) !== Object.prototype.toString.call( [] )
         || submittedLetters.letters.length === 0) return socket.emit('onError', PlacedResponse.NO_LETTER_IN_REQUEST);
 
-    console.log(player)
-    console.log(submittedLetters)
-
     let response = gameInstance.submitWord(player, submittedLetters)
-    if (response !== PlacedResponse.OK) return socket.emit('onError', response);
+    if(response.highlight.positions.length > 0) socket.emit('onHighlight', response.highlight);
+    if (response.placement !== PlacedResponse.OK) return socket.emit('onError', response.placement);
 
     sendBoardToAll();
     sendScoreToAll();

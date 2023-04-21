@@ -70,17 +70,18 @@ export class BoardManager {
         else previousLetter.x--;
         while(this.hasLetter(previousLetter)) {
             word = this.board.get(previousLetter.x + '_' + previousLetter.y)?.letter + word;
+            lettersPositions.push(Object.assign({}, previousLetter));
             validPosition = true;
             if (data.direction == Direction.DOWN) previousLetter.y++;
             else previousLetter.x--;
         }
 
         while (lettersToPlaced.length > 0 || this.hasLetter(currentPos)) {
-            lettersPositions.push(Object.assign({}, currentPos));
             if (this.hasLetter(currentPos)) {
                 let letter = this.board.get(currentPos.x + '_' + currentPos.y)?.letter;
                 word += letter;
                 validPosition = true;
+                lettersPositions.push(Object.assign({}, currentPos));
             } else {
                 let newLetter : string = lettersToPlaced.shift() || '';
                 if (!playerLetters.includes(newLetter)) {
@@ -100,17 +101,20 @@ export class BoardManager {
                     score += DictionaryService.getPointsOfWord(concurrentWord)
                 }
 
-
                 if (concurrentWord !== newLetter && DictionaryService.wordExist(concurrentWord)) {
                     validPosition = true;
                     additionalWords.push(concurrentWord);
                     lettersPositions.push(...concurrentPos);
                 }
-                else if(concurrentWord !== newLetter) return {
-                    placement: PlacedResponse.INVALID_POSITION.toString().replace("%WORD%", concurrentWord.toUpperCase()),
-                    score: 0,
-                    highlight: {positions: concurrentPos, color: Config.COLOR_HIGHLIGHT_ERROR}
-                };
+                else if(concurrentWord !== newLetter) {
+                    return {
+                        placement: PlacedResponse.INVALID_POSITION.toString().replace("%WORD%", concurrentWord.toUpperCase()),
+                        score: 0,
+                        highlight: {positions: concurrentPos, color: Config.COLOR_HIGHLIGHT_ERROR}
+                    }
+                } else {
+                    lettersPositions.push(Object.assign({}, currentPos));
+                }
 
                 playerLetters.splice(playerLetters.indexOf(newLetter, 0), 1);
                 word += newLetter;
@@ -118,7 +122,6 @@ export class BoardManager {
             if (data.direction === Direction.DOWN) currentPos.y = currentPos.y - 1;
             else currentPos.x++;
         }
-        console.log(word)
         if (!validPosition) return {
             placement: PlacedResponse.WORD_NOT_CONNECTED_TO_OTHERS,
             score: 0,
@@ -198,8 +201,6 @@ export class BoardManager {
      * @param letters The letters to remove
      */
     private removeLettersFromPlayer(player: Player, letters: string[]) {
-        console.log("inventory", player.letters)
-        console.log("letters to remove", letters)
         player.letters = player.letters.filter((letter) => {
             const indexInToRemove = letters.indexOf(letter);
             if (indexInToRemove !== -1) {
@@ -208,7 +209,6 @@ export class BoardManager {
             }
             return true;
         });
-        console.log("inventory then ", player.letters)
     }
 
 }

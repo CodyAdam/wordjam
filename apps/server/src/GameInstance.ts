@@ -5,6 +5,7 @@ import {PlaceWord} from "./types/PlaceWord";
 import {PlacedResponse} from "./types/responses/PlacedResponse";
 import {AddLetterResponse} from "./types/responses/AddLetterResponse";
 import {Config} from "./Config";
+import {SubmitWordResponse} from "./types/SubmitWordResponse";
 
 export class GameInstance {
     private readonly _players: Map<string, Player>;
@@ -61,9 +62,8 @@ export class GameInstance {
      * @param player
      * @param word
      */
-    submitWord(player: Player, word: PlaceWord): string {
+    submitWord(player: Player, word: PlaceWord): SubmitWordResponse {
         let response = this.board.checkLetterPlacedFromClient(word, player);
-        console.log(response)
         if(response.placement === PlacedResponse.OK) {
             this.board.putLettersOnBoard(word, player);
             player.score += response.score
@@ -72,7 +72,7 @@ export class GameInstance {
             }
         }
 
-        return response.placement
+        return {placement: response.placement, highlight: response.highlight};
     }
 
     /**
