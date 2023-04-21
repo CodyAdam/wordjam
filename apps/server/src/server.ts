@@ -114,7 +114,7 @@ function sendBoardToAll() {
   io.emit('onBoard', Array.from(gameInstance.board.board.values()));
 }
 function sendScoreToAll(){
-  io.emit('onScores', Array.from(gameInstance.players.values()))
+  io.emit('onScores', Array.from(gameInstance.players.values()).map((player: Player) => {return {username: player.username, score: player.score};}));
 }
 
 if(devMode){
