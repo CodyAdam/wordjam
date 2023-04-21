@@ -16,7 +16,7 @@ const io = new Server({
 
 const PORT = 8080;
 const devMode: boolean = false;
-let devModeHand : string[] = ['d', 'd', 'o', 'o', 'e', 'n', 'g'];
+let devModeHand : string[] = ['d', 'd', 'o', 'o', 'e', 'n', 'a', 't'];
 io.listen(PORT);
 
 console.log('Server started on port ' + PORT);
@@ -95,7 +95,9 @@ io.on('connection', (socket) => {
 
     let response = gameInstance.submitWord(player, submittedLetters)
     if(response.highlight.positions.length > 0) socket.emit('onHighlight', response.highlight);
-    if (response.placement !== PlacedResponse.OK) return socket.emit('onError', response.placement);
+    if (response.placement !== PlacedResponse.OK) {
+      return socket.emit('onError', response.placement);
+    }
 
     sendBoardToAll();
     sendScoreToAll();

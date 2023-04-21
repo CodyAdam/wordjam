@@ -68,7 +68,7 @@ export class GameInstance {
             this.board.putLettersOnBoard(word, player);
             player.score += response.score
             while(player.letters.length < Config.MIN_HAND_LETTERS) {
-                this.addLetterToPlayer(player)
+                this.addLetterToPlayer(player, true)
             }
         }
 
@@ -86,11 +86,12 @@ export class GameInstance {
     /**
      * Add a letter to the player's letters inventory
      * @param player The player to add the letter to
+     * @param ignoreCD Ignore the cooldown
      */
-    addLetterToPlayer(player: Player): AddLetterResponse {
-        if (player.cooldownTarget > new Date()) return AddLetterResponse.IN_COOLDOWN;
+    addLetterToPlayer(player: Player, ignoreCD?: boolean): AddLetterResponse {
+        if (!ignoreCD && player.cooldownTarget > new Date()) return AddLetterResponse.IN_COOLDOWN;
         player.letters.push(generateLetters(1)[0]);
-        player.cooldownTarget = getDatePlusCooldown();
+        if (!ignoreCD) player.cooldownTarget = getDatePlusCooldown();
         return AddLetterResponse.SUCCESS;
     }
 
