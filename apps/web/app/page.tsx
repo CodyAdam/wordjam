@@ -46,7 +46,10 @@ export default function App() {
       onLoginResponse: (response: LoginResponseType) => {
         switch (response) {
           case LoginResponseType.ALREADY_EXIST:
-            toast.error(`Nickname already exist, please choose another one`);
+            toast.error(`This nickname already exists, please choose another one`);
+            break;
+          case LoginResponseType.WRONG_TOKEN:
+            toast.error(`This login credential is invalid`);
             break;
           case LoginResponseType.SUCCESS:
             setAppStage(AppState.InGame);
@@ -179,6 +182,19 @@ export default function App() {
           />
           <Login socket={socket} isConnected={isConnected} />
         </main>
+        <ToastContainer
+          position='top-center'
+          autoClose={4000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          limit={3}
+          pauseOnFocusLoss
+          pauseOnHover={false}
+          draggable
+          theme='light'
+        />
       </>
     );
 
@@ -226,12 +242,14 @@ export default function App() {
         />
         <ToastContainer
           position='top-center'
-          autoClose={5000}
+          autoClose={4000}
           hideProgressBar={false}
           newestOnTop={false}
           closeOnClick
           rtl={false}
+          limit={3}
           pauseOnFocusLoss
+          pauseOnHover={false}
           draggable
           theme='light'
         />
