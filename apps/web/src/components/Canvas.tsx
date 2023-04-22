@@ -10,7 +10,7 @@ import {
   TILE_SIZE,
   TOUCH_ZOOM_SENSITIVITY,
 } from '../lib/constants';
-import { distance, keyFromPos, posCeil, posCentered, posFloor, screenToWorld, worldToScreen } from '../utils/posHelper';
+import { distance, keyFromPos, posCentered, posFloor, screenToWorld, worldToScreen } from '../utils/posHelper';
 import { BoardLetters, Highlight, InventoryLetter } from '../types/board';
 import { Position } from '../types/api';
 import { Pan } from '../types/canvas';
@@ -18,7 +18,6 @@ import {
   drawGrid,
   drawPlacedLetters,
   drawPlacedInventoryLetters,
-  drawDebug,
   drawDarkenTile,
   drawCursor,
 } from '../utils/drawing';
