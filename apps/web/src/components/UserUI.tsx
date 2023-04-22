@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useMemo, useState } from "react";
-import { InventoryLetter } from "../types/board";
-import { LetterButton } from "./Letter";
-import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
-import { boardFont } from "@/src/utils/fontLoader";
-import { letterToPoints } from "../utils/letterPoints";
+import { useMemo, useState } from 'react';
+import { InventoryLetter } from '../types/board';
+import { LetterButton } from './Letter';
+import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
+import { boardFont } from '@/src/utils/fontLoader';
+import { letterToPoints } from '../utils/letterPoints';
 
 export default function UserUI({
   inventory,
@@ -38,47 +38,45 @@ export default function UserUI({
 
   return (
     <>
-      <div className="absolute bottom-0 flex flex-col flex-wrap gap-6 p-4">
-        <div className="flex gap-5">
-          {!isPlacedLetter && (
-            <button
-              className="disabled:bg-gray-300 disabled:text-gray-700 flex w-fit items-center justify-center rounded-lg bg-red-100 px-3 py-1 text-2xl font-bold text-red-700 transition-all duration-75 hover:-translate-y-2 hover:scale-105 hover:shadow-lg"
-              onClick={onReset}
-            >
-              Reset
-            </button>
-          )}
-
-          <button
-            className="flex w-fit items-center justify-center rounded-lg bg-blue-100 px-3 py-1 text-2xl font-bold text-blue-700 transition-all duration-75 hover:-translate-y-2 hover:scale-105 hover:shadow-lg"
-            onClick={onSubmit}
-          >
-            Submit
-          </button>
-
+      <div className='absolute bottom-0 flex flex-col flex-wrap gap-6 p-4'>
+        <div className='flex w-full gap-4'>
           <button
             disabled={cooldown > 0}
-            className="disabled:bg-gray-300 disabled:text-gray-700 flex w-fit items-center justify-center rounded-lg bg-orange-100 px-3 py-1 text-2xl font-bold text-orange-700 transition-all duration-75 hover:-translate-y-2 hover:scale-105 hover:shadow-lg"
+            className='group flex w-fit items-center justify-center '
             onClick={onAskLetter}
           >
-            {cooldown > 0 ? `${cooldown}s` : "Ask letter"}
+            <div className='rounded-lg border-b-4 border-orange-400 bg-orange-100 px-4 py-2 text-2xl font-bold text-orange-700 transition-all duration-75 group-hover:group-enabled:-translate-y-2 group-hover:group-enabled:scale-105 group-hover:group-enabled:shadow-lg group-disabled:cursor-not-allowed group-disabled:border-gray-500 group-disabled:bg-gray-300 group-disabled:text-gray-700 group-disabled:opacity-40'>
+              {cooldown > 0 ? (
+                `${cooldown}s`
+              ) : (
+                <>
+                  <span className='hidden md:block'>New letter</span>
+                  <span className='md:hidden'>Letter</span>
+                </>
+              )}
+            </div>
+          </button>
+          <div className='m-auto'></div>
+          {!isPlacedLetter && (
+            <button className='group flex w-fit items-center justify-center' onClick={onReset}>
+              <div className='rounded-lg border-b-4 border-red-400 bg-red-100 px-4 py-2 text-2xl font-bold text-red-700 transition-all duration-75 disabled:bg-gray-300 disabled:text-gray-700 group-hover:-translate-y-2 group-hover:scale-105 group-hover:shadow-lg'>
+                Reset
+              </div>
+            </button>
+          )}
+          <button className='group flex w-fit items-center justify-center' onClick={onSubmit}>
+            <div className='rounded-lg border-b-4 border-blue-400 bg-blue-100 px-4 py-2 text-2xl font-bold text-blue-700 transition-all duration-75 group-hover:-translate-y-2 group-hover:scale-105 group-hover:shadow-lg'>
+              Submit
+            </div>
           </button>
         </div>
 
         <DragDropContext onDragEnd={ondragend}>
-          <Droppable droppableId="droppable" direction="horizontal">
+          <Droppable droppableId='droppable' direction='horizontal'>
             {(provided, snapshot) => (
-              <div
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-                className="flex w-fit flex-wrap gap-3"
-              >
+              <div ref={provided.innerRef} {...provided.droppableProps} className='flex w-fit flex-wrap gap-3'>
                 {inventory.map((letter, i) => (
-                  <Draggable
-                    key={i.toString()}
-                    draggableId={i.toString()}
-                    index={i}
-                  >
+                  <Draggable key={i.toString()} draggableId={i.toString()} index={i}>
                     {(provided, snapshot) => (
                       <div
                         onClick={() => {
@@ -91,17 +89,13 @@ export default function UserUI({
                         {...provided.draggableProps}
                         {...provided.dragHandleProps}
                         className={`group cursor-pointer select-none disabled:opacity-30 ${
-                          snapshot.isDragging || letter.position != undefined
-                            ? "opacity-50"
-                            : " "
+                          snapshot.isDragging || letter.position != undefined ? 'opacity-50' : ' '
                         }`}
                       >
-                        <div className="flex h-20 w-20 items-center justify-center rounded-lg bg-slate-200 pb-8 text-6xl font-bold text-zinc-700 shadow-sm transition-all duration-75 group-hover:-translate-y-4 group-hover:scale-105 group-hover:shadow-lg">
-                          <div className="relative flex h-20 w-20 items-center justify-center rounded-lg border-2 border-slate-200 bg-white p-1">
-                            <span className={boardFont.className}>
-                              {letter.letter.toUpperCase()}
-                            </span>
-                            <div className="absolute top-0 right-1 text-sm">
+                        <div className='flex h-20 w-20 items-center justify-center rounded-lg bg-slate-200 pb-8 text-6xl font-bold text-zinc-700 shadow-sm transition-all duration-75 group-hover:-translate-y-4 group-hover:scale-105 group-hover:shadow-lg'>
+                          <div className='relative flex h-20 w-20 items-center justify-center rounded-lg border-2 border-slate-200 bg-white p-1'>
+                            <span className={boardFont.className}>{letter.letter.toUpperCase()}</span>
+                            <div className='absolute top-0 right-1 text-sm'>
                               {letterToPoints[letter.letter.toUpperCase()]}
                             </div>
                           </div>

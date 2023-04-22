@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import useWindowSize from '../hooks/useWindowSize';
-import { SCROLL_MAX_TILE_SIZE, SCROLL_MIN_TILE_SIZE, SCROLL_SPEED, TILE_SIZE } from '../lib/constants';
-import { posCeil, posCentered, posFloor, screenToWorld, worldToScreen } from '../utils/posHelper';
+import { DRAG_TRESHOLD, SCROLL_MAX_TILE_SIZE, SCROLL_MIN_TILE_SIZE, SCROLL_SPEED, TILE_SIZE } from '../lib/constants';
+import { distance, posCeil, posCentered, posFloor, screenToWorld, worldToScreen } from '../utils/posHelper';
 import { BoardLetters, Highlight, InventoryLetter } from '../types/board';
 import { Position } from '../types/api';
 import { Pan } from '../types/canvas';
@@ -101,8 +101,11 @@ export default function Canvas({
       const mousePos = getMousePos(e);
       if (!mousePos) return;
       let { x, y } = mousePos;
-      if (isDown) {
+
+      if (isDown && distance(dragStart, { x, y }) > DRAG_TRESHOLD && !isDragging)
         setIsDragging(true);
+      
+      if (isDragging) {
         setPan({
           ...pan,
           offset: {
@@ -115,7 +118,7 @@ export default function Canvas({
         setHoverPos(screenToWorld({ x, y }, pan));
       }
     },
-    [dragStart.x, dragStart.y, isDown, pan, setPan],
+    [dragStart, isDown, isDragging, pan, setPan],
   );
 
   const onLeave = useCallback(() => {

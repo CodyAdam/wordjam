@@ -54,8 +54,9 @@ export function drawPlacedLetters(
   placedLetters.forEach((letter) => {
     if (!letter.position) return;
 
+    ctx.fillStyle = 'rgb(63 63 70)';
     if (highlight && highlight.positions.some((pos) => pos.x === letter.position!.x && pos.y === letter.position!.y)) {
-      //TODO
+      ctx.fillStyle = highlight.color;
     }
     const pos = worldToScreen(posCentered(letter.position), pan);
 
@@ -75,7 +76,6 @@ export function drawPlacedLetters(
     // use scaled font size
     const fontSize = pan.scale * TILE_SIZE * 0.035;
     ctx.font = `${fontSize}px ${boardFont.style.fontFamily}`;
-    ctx.fillStyle = 'rgb(63 63 70)';
 
     // offset by .5 of the letter width to center it same for height
     const letterOffset = { x: ctx.measureText(letter.letter.toUpperCase()).width / 2, y: fontSize / 2.9 };
@@ -92,16 +92,17 @@ export function drawPlacedInventoryLetters(
 ) {
   placedLetters.forEach((letter) => {
     if (!letter.position) return;
-
+    
+    ctx.fillStyle = '#60a5fa';
     if (highlight && highlight.positions.some((pos) => pos.x === letter.position!.x && pos.y === letter.position!.y)) {
-      //TODO
+      ctx.fillStyle = highlight.color;
     }
+    
     const pos = worldToScreen(posCentered(letter.position), pan);
 
     // use scaled font size
     const fontSize = pan.scale * TILE_SIZE * 0.035;
     ctx.font = `${fontSize}px ${boardFont.style.fontFamily}`;
-    ctx.fillStyle = '#60a5fa';
 
     // offset by .5 of the letter width to center it same for height
     const letterOffset = { x: ctx.measureText(letter.letter.toUpperCase()).width / 2, y: fontSize / 2.9 };

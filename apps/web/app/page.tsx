@@ -2,7 +2,7 @@
 import { useSocket } from '@/src/hooks/useSocket';
 import { useCallback, useEffect, useState } from 'react';
 import { AppState } from '@/src/lib/AppState';
-import { SOCKET_URL } from '@/src/lib/constants';
+import { HIGHLIGHT_FADE_DURATION, SOCKET_URL } from '@/src/lib/constants';
 import UserUI from '@/src/components/UserUI';
 import Login from '@/src/components/Login';
 import Canvas from '@/src/components/Canvas';
@@ -44,7 +44,14 @@ export default function App() {
         localStorage.setItem('token', token);
       },
       onLoginResponse: (response: LoginResponseType) => {
-        if (response === LoginResponseType.SUCCESS) setAppStage(AppState.InGame);
+        switch (response) {
+          case LoginResponseType.ALREADY_EXIST:
+            toast.error(`Nickname already exist, please choose another one`);
+            break;
+          case LoginResponseType.SUCCESS:
+            setAppStage(AppState.InGame);
+            break;
+        }
       },
       onInventory: (letters: string[]) => {
         setInventory(letters.map((letter) => ({ letter: letter })));
@@ -55,12 +62,12 @@ export default function App() {
       onConfetti: () => {
         resetConfetti();
       },
-      onHighligh: (highlight: Highlight) => {
+      onHighlight: (highlight: NonNullable<Highlight>) => {
         clearInterval(highlightInterval);
         setHighlight(highlight);
         highlightInterval = setTimeout(() => {
           setHighlight(null);
-        }, 4000);
+        }, HIGHLIGHT_FADE_DURATION);
       },
       onCooldown: (cooldown: number) => {
         clearInterval(cooldownInterval);
@@ -104,7 +111,6 @@ export default function App() {
   }, []);
 
   const onSubmit = useCallback(() => {
-    if (cooldown > 0) return;
     try {
       const placeWord = toPlaceWord(inventory);
       const token = localStorage.getItem('token');
@@ -112,7 +118,7 @@ export default function App() {
     } catch (error) {
       error instanceof Error && toast.error(error.message);
     }
-  }, [cooldown, inventory, socket]);
+  }, [inventory, socket]);
 
   const onLogout = useCallback(() => {
     setAppStage(AppState.AwaitingLogin);
