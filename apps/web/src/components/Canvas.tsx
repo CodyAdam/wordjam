@@ -10,7 +10,7 @@ import {
   TILE_SIZE,
   TOUCH_ZOOM_SENSITIVITY,
 } from '../lib/constants';
-import { distance, keyFromPos, posCeil, posCentered, posFloor, screenToWorld, worldToScreen } from '../utils/posHelper';
+import { distance, keyFromPos, posCentered, posFloor, screenToWorld, worldToScreen } from '../utils/posHelper';
 import { BoardLetters, Highlight, InventoryLetter } from '../types/board';
 import { Position } from '../types/api';
 import { Pan } from '../types/canvas';
@@ -18,11 +18,9 @@ import {
   drawGrid,
   drawPlacedLetters,
   drawPlacedInventoryLetters,
-  drawDebug,
   drawDarkenTile,
   drawCursor,
 } from '../utils/drawing';
-import { getMousePos } from '../utils/touch';
 
 export default function Canvas({
   placedLetters,
@@ -109,16 +107,12 @@ export default function Canvas({
       height={height}
       width={width}
       onMouseDown={(e) => {
-        const mousePos = getMousePos(e);
-        if (!mousePos) return;
-        let { x, y } = mousePos;
+        const { clientX: x, clientY: y } = e;
         setDragStart({ x, y });
         setIsDown(true);
       }}
       onMouseUp={(e) => {
-        const mousePos = getMousePos(e);
-        if (!mousePos) return;
-        let { x, y } = mousePos;
+        const { clientX: x, clientY: y } = e;
         if (!isDragging) {
           const pos = posFloor(screenToWorld({ x, y }, pan));
           if (pos.x === cursorPos?.x && pos.y === cursorPos?.y) {
@@ -133,9 +127,7 @@ export default function Canvas({
         setIsDown(false);
       }}
       onMouseMove={(e) => {
-        const mousePos = getMousePos(e);
-        if (!mousePos) return;
-        let { x, y } = mousePos;
+        const { clientX: x, clientY: y } = e;
 
         if (isDown && distance(dragStart, { x, y }) > DRAG_TRESHOLD && !isDragging) setIsDragging(true);
 
