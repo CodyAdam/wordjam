@@ -32,6 +32,19 @@ export function toPlaceWord(inventory: InventoryLetter[]): PlaceWord {
     }
   });
 
+  // most bottom right letter
+  let endPos = placedInventoryLetters[0].position;
+  placedInventoryLetters.forEach((letter) => {
+    if (letter.position.x > endPos.x || letter.position.y < endPos.y) {
+      endPos = letter.position;
+    }
+  });
+
+  // if distance between start and end is not equal to the number of letters, it's not connected
+  if (Math.abs(startPos.x - endPos.x) + Math.abs(startPos.y - endPos.y) !== placedInventoryLetters.length - 1) {
+    throw new Error('The placed letters are not connected');
+  }
+
   let isHorizontal = true;
   let isVertical = true;
   // check if it's horizontal or vertical
@@ -54,7 +67,6 @@ export function toPlaceWord(inventory: InventoryLetter[]): PlaceWord {
   }
 
   console.log(startPos);
-  
 
   return {
     startPos,
