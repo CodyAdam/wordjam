@@ -112,7 +112,7 @@ export function drawPlacedInventoryLetters(
 
 export function drawDarkenTile(ctx: CanvasRenderingContext2D, pos: Position, pan: Pan) {
   pos = worldToScreen(pos, pan);
-  ctx.fillStyle = 'rgba(0,0,0,0.1)';
+  ctx.fillStyle = 'rgba(0,0,0,0.05)';
   const padding = TILE_PADDING * pan.scale;
   ctx.beginPath();
   ctx.roundRect(

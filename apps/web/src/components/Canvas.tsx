@@ -194,6 +194,7 @@ export default function Canvas({
         });
       }}
       onTouchStart={(event) => {
+        console.log('start : ', event.touches);
         if (event.touches.length === 2) {
           setTouchInitialDistance(
             Math.hypot(
@@ -204,6 +205,7 @@ export default function Canvas({
         }
       }}
       onTouchMove={(event) => {
+        console.log('move : ', event.touches);
         if (event.touches.length === 2) {
           const newPan = { ...pan };
           const currentDistance = Math.hypot(
@@ -218,7 +220,9 @@ export default function Canvas({
           );
         }
       }}
-      onTouchEnd={(event) => {}}
+      onTouchEnd={(event) => {
+        console.log('end : ', event.touches);
+      }}
     ></canvas>
   );
 }
