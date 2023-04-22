@@ -17,6 +17,6 @@ export const SCROLL_MIN_TILE_SIZE = 10;
 export const SCROLL_MAX_TILE_SIZE = 400;
 export const DRAG_TRESHOLD = 25;
 
-export const TOUCH_ZOOM_SENSITIVITY = 0.01;
+export const TOUCH_ZOOM_SENSITIVITY = .3;
 
 export const HIGHLIGHT_FADE_DURATION = 3000;

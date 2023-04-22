@@ -51,6 +51,7 @@ export default function Canvas({
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [hoverPos, setHoverPos] = useState<Position | null>(null);
   const [touchInitialDistance, setTouchInitialDistance] = useState<number>(0);
+  const [isPinching, setIsPinching] = useState(false);
   const { width, height } = useWindowSize();
 
   useEffect(() => {
@@ -177,24 +178,7 @@ export default function Canvas({
           },
         });
       }}
-      onScroll={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const scrollX = e.currentTarget.scrollLeft;
-        const scrollY = e.currentTarget.scrollTop;
-
-        const newOffset: Position = {
-          x: pan.offset.x + scrollX,
-          y: pan.offset.y + scrollY,
-        };
-
-        setPan({
-          ...pan,
-          offset: newOffset,
-        });
-      }}
       onTouchStart={(event) => {
-        console.log('start : ', event.touches);
         if (event.touches.length === 2) {
           setTouchInitialDistance(
             Math.hypot(
@@ -202,27 +186,65 @@ export default function Canvas({
               event.touches[0].pageY - event.touches[1].pageY,
             ),
           );
+          setIsPinching(true);
+        } else if (event.touches.length === 1) {
+          const { pageX: x, pageY: y } = event.touches[0];
+          setDragStart({ x, y });
+          setIsDown(true);
         }
       }}
       onTouchMove={(event) => {
-        console.log('move : ', event.touches);
         if (event.touches.length === 2) {
-          const newPan = { ...pan };
+          const { pageX: x, pageY: y } = event.touches[0];
           const currentDistance = Math.hypot(
             event.touches[0].pageX - event.touches[1].pageX,
             event.touches[0].pageY - event.touches[1].pageY,
           );
+
           const diff = currentDistance - touchInitialDistance;
           // use multiplier to scale the zoom TOUCH_ZOOM_SENSITIVITY
-          newPan.scale = Math.max(
+          const newScale = Math.max(
             Math.min(pan.scale + diff * TOUCH_ZOOM_SENSITIVITY, SCROLL_MAX_TILE_SIZE),
             SCROLL_MIN_TILE_SIZE,
           );
-          setPan(newPan);
+
+          const before = worldToScreen(screenToWorld({ x, y }, pan), { ...pan, scale: newScale });
+          const after = { x, y };
+          setPan({
+            ...pan,
+            scale: newScale,
+            offset: {
+              x: pan.offset.x - (before.x - after.x),
+              y: pan.offset.y - (before.y - after.y),
+            },
+          });
+          setTouchInitialDistance(currentDistance);
+        } else if (event.touches.length === 1) {
+          if (isPinching) return;
+          const { pageX: x, pageY: y } = event.touches[0];
+
+          if (isDown && distance(dragStart, { x, y }) > DRAG_TRESHOLD && !isDragging) setIsDragging(true);
+
+          if (isDragging) {
+            setPan({
+              ...pan,
+              offset: {
+                x: pan.offset.x + x - dragStart.x,
+                y: pan.offset.y + y - dragStart.y,
+              },
+            });
+            setDragStart({ x, y });
+          } else {
+            setHoverPos(screenToWorld({ x, y }, pan));
+          }
         }
       }}
       onTouchEnd={(event) => {
-        console.log('end : ', event.touches);
+        if (event.touches.length === 0) {
+          setIsDragging(false);
+          setIsPinching(false);
+          setIsDown(false);
+        }
       }}
     ></canvas>
   );
