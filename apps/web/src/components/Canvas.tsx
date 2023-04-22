@@ -218,6 +218,7 @@ export default function Canvas({
             Math.min(pan.scale + diff * TOUCH_ZOOM_SENSITIVITY, SCROLL_MAX_TILE_SIZE),
             SCROLL_MIN_TILE_SIZE,
           );
+          setPan(newPan);
         }
       }}
       onTouchEnd={(event) => {
