@@ -112,7 +112,7 @@ export function drawPlacedInventoryLetters(
 
 export function drawDarkenTile(ctx: CanvasRenderingContext2D, pos: Position, pan: Pan) {
   pos = worldToScreen(pos, pan);
-  ctx.fillStyle = 'rgba(0,0,0,0.1)';
+  ctx.fillStyle = 'rgba(0,0,0,0.05)';
   const padding = TILE_PADDING * pan.scale;
   ctx.beginPath();
   ctx.roundRect(
@@ -143,7 +143,6 @@ export function drawCursor(
     path = new Path2D(
       'M.1 29.3C-1.4 47 11.7 62.4 29.3 63.9l8 .7C70.5 67.3 96 95 96 128.3V224H64c-17.7 0-32 14.3-32 32s14.3 32 32 32h32v95.7c0 33.3-25.5 61-58.7 63.8l-8 .7C11.7 449.6-1.4 465 .1 482.7s16.9 30.7 34.5 29.2l8-.7c34.1-2.8 64.2-18.9 85.4-42.9c21.2 24 51.2 40.1 85.4 42.9l8 .7c17.6 1.5 33.1-11.6 34.5-29.2s-11.6-33.1-29.2-34.5l-8-.7c-33.2-2.8-58.7-30.5-58.7-63.8V288h32c17.7 0 32-14.3 32-32s-14.3-32-32-32h-32v-95.7c0-33.3 25.5-61 58.7-63.8l8-.7c17.6-1.5 30.7-16.9 29.2-34.5S239-1.4 221.3.1l-8 .7c-34.1 2.8-64.1 18.9-85.3 42.9c-21.2-24-51.2-40-85.4-42.9l-8-.7C17-1.4 1.6 11.7.1 29.3z',
     );
-
   } else {
     vw = 14;
     vh = 14;
@@ -167,16 +166,14 @@ export function drawCursor(
 
   // DRAW
   if (variant) {
-    ctx.lineCap = "round";
+    ctx.lineCap = 'round';
     ctx.strokeStyle = '#f3f4f6';
-    ctx.lineWidth =2;
+    ctx.lineWidth = 2.3;
     ctx.stroke(path);
     ctx.strokeStyle = '#fb923c';
     ctx.lineWidth = 1;
     ctx.stroke(path);
-
-  }
-  else {
+  } else {
     ctx.fillStyle = '#fb923c';
     ctx.strokeStyle = '#f3f4f6';
     ctx.lineWidth = 45;

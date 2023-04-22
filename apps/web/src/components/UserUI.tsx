@@ -33,7 +33,7 @@ export default function UserUI({
   cooldown: number;
 }) {
   const [showTokenModal, setShowTokenModal] = useState(false);
-  const [expandLeaderboard, setExpandLeaderboard] = useState(true);
+  const [expandLeaderboard, setExpandLeaderboard] = useState(false);
   const onDragEnd = useCallback(
     (result: any) => {
       if (!result.destination) {
@@ -62,12 +62,12 @@ export default function UserUI({
           </button>
           {expandLeaderboard && (
             <div className='md:max-h-80 max-h-40 overflow-y-auto px-2 text-sm md:text-base'>
-              <table className='table-auto border-t'>
+              <table className='table-auto border-t w-full'>
                 <thead>
                   <tr className='h-10 md:text-lg text-md text-slate-700'>
-                    <th className='text-start'></th>
+                    <th className='text-start pl-2'></th>
                     <th className='text-start'>Username</th>
-                    <th className='text-end'>Score</th>
+                    <th className='text-end pr-2'>Score</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -75,27 +75,27 @@ export default function UserUI({
                     const username = getUsername();
                     if (username === player.username)
                       return (
-                        <tr className='h-10 bg-blue-50 text-blue-800' key={i}>
-                          <td className='pr-4 text-center font-bold'>{i + 1}</td>
+                        <tr className='h-10  text-blue-800' key={i}>
+                          <td className='pr-4 text-center font-bold bg-blue-50 rounded-l-md pl-2'>{i + 1}</td>
                           <td
-                            className='max-w-[10rem] overflow-hidden text-ellipsis whitespace-nowrap text-start'
+                            className='max-w-[10rem] overflow-hidden text-ellipsis whitespace-nowrap text-start bg-blue-50'
                             title={player.username}
                           >
                             <span className='opacity-50'>(You)</span> {player.username}
                           </td>
-                          <td className='text-end'>{player.score}</td>
+                          <td className='text-end bg-blue-50 rounded-r-md pr-2'>{player.score}</td>
                         </tr>
                       );
                     return (
                       <tr className='' key={i}>
-                        <td className='h-5 pr-4 text-center font-bold'>{i + 1}</td>
+                        <td className='h-5 pr-4 text-center font-bold pl-2'>{i + 1}</td>
                         <td
                           className='max-w-[10rem] overflow-hidden text-ellipsis whitespace-nowrap text-start'
                           title={player.username}
                         >
                           {player.username}
                         </td>
-                        <td className='text-end'>{player.score}</td>
+                        <td className='text-end pr-2'>{player.score}</td>
                       </tr>
                     );
                   })}
