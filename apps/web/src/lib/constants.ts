@@ -8,7 +8,6 @@ if (process.env.NODE_ENV === 'production') {
 } else {
   SOCKET_URL = 'ws://localhost:8080';
 }
-console.log(SOCKET_URL)
 
 export const TILE_SIZE = 20;
 export const TILE_PADDING = .07;
@@ -16,4 +15,6 @@ export const TILE_PADDING = .07;
 export const SCROLL_SPEED = 0.2;
 export const SCROLL_MIN_TILE_SIZE = 10;
 export const SCROLL_MAX_TILE_SIZE = 400;
-export const DRAG_TRESHOLD = 20;
+export const DRAG_TRESHOLD = 25;
+
+export const HIGHLIGHT_FADE_DURATION = 3000;

@@ -1,6 +1,6 @@
 import { TILE_PADDING, TILE_SIZE } from '../lib/constants';
 import { Position } from '../types/api';
-import { BoardLetters, InventoryLetter } from '../types/board';
+import { BoardLetters, Highlight, InventoryLetter } from '../types/board';
 import { Pan } from '../types/canvas';
 import { boardFont } from './fontLoader';
 import { posFloor, screenToWorld, posCeil, worldToScreen, posCentered } from './posHelper';
@@ -45,8 +45,19 @@ export function drawDebug(ctx: CanvasRenderingContext2D, pos: Position, text: st
   ctx.fillText(text, pos.x, pos.y + 20);
 }
 
-export function drawPlacedLetters(ctx: CanvasRenderingContext2D, placedLetters: BoardLetters, pan: Pan) {
+export function drawPlacedLetters(
+  ctx: CanvasRenderingContext2D,
+  placedLetters: BoardLetters,
+  pan: Pan,
+  highlight: Highlight,
+) {
   placedLetters.forEach((letter) => {
+    if (!letter.position) return;
+
+    ctx.fillStyle = 'rgb(63 63 70)';
+    if (highlight && highlight.positions.some((pos) => pos.x === letter.position!.x && pos.y === letter.position!.y)) {
+      ctx.fillStyle = highlight.color;
+    }
     const pos = worldToScreen(posCentered(letter.position), pan);
 
     // // Create the tile background
@@ -62,11 +73,9 @@ export function drawPlacedLetters(ctx: CanvasRenderingContext2D, placedLetters: 
     // );
     // ctx.fill();
 
-
     // use scaled font size
     const fontSize = pan.scale * TILE_SIZE * 0.035;
     ctx.font = `${fontSize}px ${boardFont.style.fontFamily}`;
-    ctx.fillStyle = 'rgb(63 63 70)';
 
     // offset by .5 of the letter width to center it same for height
     const letterOffset = { x: ctx.measureText(letter.letter.toUpperCase()).width / 2, y: fontSize / 2.9 };
@@ -75,15 +84,25 @@ export function drawPlacedLetters(ctx: CanvasRenderingContext2D, placedLetters: 
   });
 }
 
-export function drawPlacedInventoryLetters(ctx: CanvasRenderingContext2D, placedLetters: InventoryLetter[], pan: Pan) {
+export function drawPlacedInventoryLetters(
+  ctx: CanvasRenderingContext2D,
+  placedLetters: InventoryLetter[],
+  pan: Pan,
+  highlight: Highlight,
+) {
   placedLetters.forEach((letter) => {
     if (!letter.position) return;
+    
+    ctx.fillStyle = '#60a5fa';
+    if (highlight && highlight.positions.some((pos) => pos.x === letter.position!.x && pos.y === letter.position!.y)) {
+      ctx.fillStyle = highlight.color;
+    }
+    
     const pos = worldToScreen(posCentered(letter.position), pan);
 
     // use scaled font size
     const fontSize = pan.scale * TILE_SIZE * 0.035;
     ctx.font = `${fontSize}px ${boardFont.style.fontFamily}`;
-    ctx.fillStyle = '#60a5fa';
 
     // offset by .5 of the letter width to center it same for height
     const letterOffset = { x: ctx.measureText(letter.letter.toUpperCase()).width / 2, y: fontSize / 2.9 };

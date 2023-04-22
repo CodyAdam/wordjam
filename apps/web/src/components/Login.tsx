@@ -34,27 +34,6 @@ export default function Login({ isConnected, socket }: { isConnected: boolean; s
 
   const [loginType, setLoginType] = useState(Type.Nickname);
 
-  useEffect(() => {
-    const loginResponseEvent = (response: LoginResponseType) => {
-      switch (response) {
-        case LoginResponseType.ALREADY_EXIST:
-          alert(`Nickname already exist, please choose another one`);
-          break;
-        case LoginResponseType.WRONG_TOKEN:
-          alert('Wrong token, please try again');
-          break;
-        case LoginResponseType.SUCCESS:
-          // handled by the parent component
-          break;
-      }
-    };
-    socket.on('onLoginResponse', loginResponseEvent);
-
-    return () => {
-      socket.off('onLoginResponse', loginResponseEvent);
-    };
-  }, [socket]);
-
   return (
     <div className='absolute flex h-full w-full flex-col items-center justify-center bg-black/20 backdrop-blur-sm'>
       <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-3 rounded-lg bg-white p-10 shadow'>

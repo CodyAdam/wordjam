@@ -29,6 +29,10 @@ export function posCentered(pos: Position) {
   };
 }
 
+export function distance(pos1: Position, pos2: Position) {
+  return Math.sqrt(Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.y - pos2.y, 2));
+}
+
 export function worldToScreen(pos: Position, pan: Pan) {
   return {
     x: pos.x * pan.scale + pan.offset.x,

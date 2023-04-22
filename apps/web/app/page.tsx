@@ -2,7 +2,7 @@
 import { useSocket } from '@/src/hooks/useSocket';
 import { useCallback, useEffect, useState } from 'react';
 import { AppState } from '@/src/lib/AppState';
-import { SOCKET_URL } from '@/src/lib/constants';
+import { HIGHLIGHT_FADE_DURATION, SOCKET_URL } from '@/src/lib/constants';
 import UserUI from '@/src/components/UserUI';
 import Login from '@/src/components/Login';
 import Canvas from '@/src/components/Canvas';
@@ -10,7 +10,7 @@ import { useCursor } from '@/src/hooks/useCursor';
 import LinkDeviceButton from '@/src/components/LinkDeviceButton';
 import TokenModal from '@/src/components/TokenModal';
 import { BoardLetter, LoginResponseType } from '@/src/types/api';
-import { BoardLetters, InventoryLetter } from '@/src/types/board';
+import { BoardLetters, Highlight, InventoryLetter } from '@/src/types/board';
 import { Pan } from '@/src/types/canvas';
 import { toPlaceWord } from '@/src/utils/submitHelper';
 import { toast, ToastContainer } from 'react-toastify';
@@ -18,7 +18,8 @@ import 'react-toastify/dist/ReactToastify.min.css';
 import Confetti from 'react-confetti';
 import { keyFromPos } from '@/src/utils/posHelper';
 
-let interval: string | number | NodeJS.Timeout | undefined = undefined;
+let cooldownInterval: string | number | NodeJS.Timeout | undefined = undefined;
+let highlightInterval: string | number | NodeJS.Timeout | undefined = undefined;
 
 export default function App() {
   // login related
@@ -29,6 +30,7 @@ export default function App() {
   const { cursorDirection, cursorPos, setCursorDirection, setCursorPos, goToNextCursorPos } = useCursor(placedLetters);
   const [cooldown, setCooldown] = useState(0);
   const [inventory, setInventory] = useState<InventoryLetter[]>([{ letter: 'A' }]);
+  const [highlight, setHighlight] = useState<Highlight>(null);
   const { isConnected, socket } = useSocket(SOCKET_URL, {
     events: {
       onBoard: (letters: BoardLetter[]) => {
@@ -42,7 +44,14 @@ export default function App() {
         localStorage.setItem('token', token);
       },
       onLoginResponse: (response: LoginResponseType) => {
-        if (response === LoginResponseType.SUCCESS) setAppStage(AppState.InGame);
+        switch (response) {
+          case LoginResponseType.ALREADY_EXIST:
+            toast.error(`Nickname already exist, please choose another one`);
+            break;
+          case LoginResponseType.SUCCESS:
+            setAppStage(AppState.InGame);
+            break;
+        }
       },
       onInventory: (letters: string[]) => {
         setInventory(letters.map((letter) => ({ letter: letter })));
@@ -53,11 +62,18 @@ export default function App() {
       onConfetti: () => {
         resetConfetti();
       },
+      onHighlight: (highlight: NonNullable<Highlight>) => {
+        clearInterval(highlightInterval);
+        setHighlight(highlight);
+        highlightInterval = setTimeout(() => {
+          setHighlight(null);
+        }, HIGHLIGHT_FADE_DURATION);
+      },
       onCooldown: (cooldown: number) => {
-        clearInterval(interval);
+        clearInterval(cooldownInterval);
         cooldown = Math.ceil(cooldown);
         setCooldown(cooldown);
-        interval = setInterval(() => {
+        cooldownInterval = setInterval(() => {
           if (cooldown > 0) setCooldown((c) => c - 1);
         }, 1000);
       },
@@ -95,7 +111,6 @@ export default function App() {
   }, []);
 
   const onSubmit = useCallback(() => {
-    if (cooldown > 0) return;
     try {
       const placeWord = toPlaceWord(inventory);
       const token = localStorage.getItem('token');
@@ -103,7 +118,7 @@ export default function App() {
     } catch (error) {
       error instanceof Error && toast.error(error.message);
     }
-  }, [cooldown, inventory, socket]);
+  }, [inventory, socket]);
 
   const onLogout = useCallback(() => {
     setAppStage(AppState.AwaitingLogin);
@@ -158,6 +173,7 @@ export default function App() {
             inventory={inventory}
             cursorPos={cursorPos}
             setCursorPos={setCursorPos}
+            highlight={highlight}
             cursorDirection={cursorDirection}
             setCursorDirection={setCursorDirection}
           />
@@ -184,6 +200,7 @@ export default function App() {
             placedLetters={placedLetters}
             pan={pan}
             setPan={(p) => setPan(p)}
+            highlight={highlight}
             inventory={inventory}
             cursorPos={cursorPos}
             setCursorPos={setCursorPos}
