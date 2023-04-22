@@ -18,8 +18,6 @@ export type BoardClient = {
   letter: BoardLetter | undefined;
 };
 
-
-
 export type Highlight = null | {
   positions: Position[];
   color: string;

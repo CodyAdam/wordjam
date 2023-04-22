@@ -1,8 +1,8 @@
 export type Player = {
 	username: string
 	score: number
-	letterCount: number
-	lastPlaced: number // date.getTime()
+	// letterCount: number
+	// lastPlaced: number // date.getTime()
 }
 
 export enum LoginResponseType {

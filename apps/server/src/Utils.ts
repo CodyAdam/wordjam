@@ -17,7 +17,7 @@ export function getDatePlusCooldown() {
  */
 export function generateToken(len: number): string {
     let text : string = '';
-    const charset : string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charset : string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     for (let i : number = 0; i < len; i++) text += charset.charAt(Math.floor(Math.random() * charset.length));
 
     return text;
