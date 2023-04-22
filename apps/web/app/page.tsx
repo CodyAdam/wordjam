@@ -163,16 +163,22 @@ export default function App() {
     if (!window) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!cursorPos) return;
-      let done = false;
-      const key = e.key.toLowerCase();
-      inventory.forEach((letter, index) => {
-        if (done) return;
-        const lower = letter.letter.toLowerCase();
-        if (letter.position === undefined && lower === key) {
-          placeInventoryLetter(index);
-          done = true;
-        }
-      });
+      // enter key to submit
+      if (e.key === 'Enter') {
+        onSubmit();
+        return;
+      } else {
+        let done = false;
+        const key = e.key.toLowerCase();
+        inventory.forEach((letter, index) => {
+          if (done) return;
+          const lower = letter.letter.toLowerCase();
+          if (letter.position === undefined && lower === key) {
+            placeInventoryLetter(index);
+            done = true;
+          }
+        });
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => {
