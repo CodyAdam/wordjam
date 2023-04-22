@@ -7,8 +7,6 @@ import UserUI from '@/src/components/UserUI';
 import Login from '@/src/components/Login';
 import Canvas from '@/src/components/Canvas';
 import { useCursor } from '@/src/hooks/useCursor';
-import LoginCredButton from '@/src/components/LinkDeviceButton';
-import TokenModal from '@/src/components/TokenModal';
 import { BoardLetter, LoginResponseType, Player } from '@/src/types/api';
 import { BoardLetters, Highlight, InventoryLetter } from '@/src/types/board';
 import { Pan } from '@/src/types/canvas';
@@ -104,8 +102,13 @@ export default function App() {
   const placeInventoryLetter = useCallback(
     (index: number) => {
       if (!cursorPos) return;
+
+      // if pos is a board letter do nothing
+      if (placedLetters.has(keyFromPos(cursorPos))) return;
+
       const newInventory = [...inventory];
-      //
+
+      // if pos is a inventory letter, replaced it
       newInventory.map((letter) => {
         if (letter.position && letter.position.x === cursorPos.x && letter.position.y === cursorPos.y) {
           letter.position = undefined;
@@ -115,7 +118,20 @@ export default function App() {
       setInventory(newInventory);
       goToNextCursorPos();
     },
-    [cursorPos, goToNextCursorPos, inventory],
+    [cursorPos, goToNextCursorPos, inventory, placedLetters],
+  );
+
+  const removeInventoryLetterAt = useCallback(
+    (pos: { x: number; y: number }) => {
+      const newInventory = [...inventory];
+      newInventory.map((letter) => {
+        if (letter.position && letter.position.x === pos.x && letter.position.y === pos.y) {
+          letter.position = undefined;
+        }
+      });
+      setInventory(newInventory);
+    },
+    [inventory],
   );
 
   const onResetInventoryPlacement = useCallback(() => {
@@ -145,7 +161,6 @@ export default function App() {
 
   useEffect(() => {
     if (!window) return;
-
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!cursorPos) return;
       let done = false;
@@ -159,7 +174,6 @@ export default function App() {
         }
       });
     };
-
     window.addEventListener('keydown', handleKeyDown);
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
@@ -228,11 +242,13 @@ export default function App() {
             highlight={highlight}
             inventory={inventory}
             cursorPos={cursorPos}
-            setCursorPos={setCursorPos}
+            setCursorPos={(pos) => {
+              if (pos) removeInventoryLetterAt(pos);
+              setCursorPos(pos);
+            }}
             cursorDirection={cursorDirection}
             setCursorDirection={setCursorDirection}
           />
-
         </main>
         <UserUI
           onReplace={onMoveLetter}

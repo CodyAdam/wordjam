@@ -92,12 +92,12 @@ export function drawPlacedInventoryLetters(
 ) {
   placedLetters.forEach((letter) => {
     if (!letter.position) return;
-    
-    ctx.fillStyle = '#60a5fa';
+
+    ctx.fillStyle = '#fb923c';
     if (highlight && highlight.positions.some((pos) => pos.x === letter.position!.x && pos.y === letter.position!.y)) {
       ctx.fillStyle = highlight.color;
     }
-    
+
     const pos = worldToScreen(posCentered(letter.position), pan);
 
     // use scaled font size
@@ -123,4 +123,73 @@ export function drawDarkenTile(ctx: CanvasRenderingContext2D, pos: Position, pan
     0.15 * pan.scale, // rounded radius
   );
   ctx.fill();
+}
+
+export function drawCursor(
+  ctx: CanvasRenderingContext2D,
+  pos: Position,
+  direction: boolean,
+  variant: boolean,
+  pan: Pan,
+) {
+  pos = worldToScreen(pos, pan);
+  let scale, vw, vh, path;
+
+  if (!variant) {
+    scale = 0.0012;
+    vw = 256;
+    vh = 512;
+    // viewBox="0 0 256 512"
+    path = new Path2D(
+      'M.1 29.3C-1.4 47 11.7 62.4 29.3 63.9l8 .7C70.5 67.3 96 95 96 128.3V224H64c-17.7 0-32 14.3-32 32s14.3 32 32 32h32v95.7c0 33.3-25.5 61-58.7 63.8l-8 .7C11.7 449.6-1.4 465 .1 482.7s16.9 30.7 34.5 29.2l8-.7c34.1-2.8 64.2-18.9 85.4-42.9c21.2 24 51.2 40.1 85.4 42.9l8 .7c17.6 1.5 33.1-11.6 34.5-29.2s-11.6-33.1-29.2-34.5l-8-.7c-33.2-2.8-58.7-30.5-58.7-63.8V288h32c17.7 0 32-14.3 32-32s-14.3-32-32-32h-32v-95.7c0-33.3 25.5-61 58.7-63.8l8-.7c17.6-1.5 30.7-16.9 29.2-34.5S239-1.4 221.3.1l-8 .7c-34.1 2.8-64.1 18.9-85.3 42.9c-21.2-24-51.2-40-85.4-42.9l-8-.7C17-1.4 1.6 11.7.1 29.3z',
+    );
+
+  } else {
+    vw = 14;
+    vh = 14;
+    scale = 0.05;
+    path = new Path2D(
+      'M10.5.5h2a1 1 0 0 1 1 1v2m-13 0v-2a1 1 0 0 1 1-1h2m7 13h2a1 1 0 0 0 1-1v-2m-13 0v2a1 1 0 0 0 1 1h2',
+    );
+  }
+
+  // move
+  ctx.translate(pos.x, pos.y);
+  // scale
+  ctx.scale(pan.scale / (1 / scale), pan.scale / (1 / scale));
+  // center
+  ctx.translate(-(vw / 2), -(vh / 2));
+  // rotate 90deg if direction is false
+  if (!direction && !variant) {
+    ctx.translate(vw / 2 + vh / 2, vw / 2);
+    ctx.rotate(Math.PI / 2);
+  }
+
+  // DRAW
+  if (variant) {
+    ctx.lineCap = "round";
+    ctx.strokeStyle = '#f3f4f6';
+    ctx.lineWidth =2;
+    ctx.stroke(path);
+    ctx.strokeStyle = '#fb923c';
+    ctx.lineWidth = 1;
+    ctx.stroke(path);
+
+  }
+  else {
+    ctx.fillStyle = '#fb923c';
+    ctx.strokeStyle = '#f3f4f6';
+    ctx.lineWidth = 45;
+    ctx.stroke(path);
+    ctx.fill(path, 'evenodd');
+  }
+
+  // reset
+  if (!direction && !variant) {
+    ctx.rotate(-Math.PI / 2);
+    ctx.translate(-(vw / 2) - vh / 2, -(vw / 2));
+  }
+  ctx.translate(vw / 2, vh / 2);
+  ctx.scale(1 / scale / pan.scale, 1 / scale / pan.scale);
+  ctx.translate(-pos.x, -pos.y);
 }

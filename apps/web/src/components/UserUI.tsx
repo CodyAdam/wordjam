@@ -127,7 +127,7 @@ export default function UserUI({
           {!isPlacedLetter && (
             <button className='group flex w-fit items-center justify-center' onClick={onReset}>
               <div className='rounded-lg border-b-4 border-red-400 bg-red-100 px-4 py-2 md:text-2xl text-xl font-bold text-red-700 transition-all duration-75 disabled:bg-gray-300 disabled:text-gray-700 group-hover:-translate-y-2 group-hover:scale-105 group-hover:shadow-lg'>
-                Reset
+                Clear
               </div>
             </button>
           )}
