@@ -3,11 +3,18 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import useWindowSize from '../hooks/useWindowSize';
 import { DRAG_TRESHOLD, SCROLL_MAX_TILE_SIZE, SCROLL_MIN_TILE_SIZE, SCROLL_SPEED, TILE_SIZE } from '../lib/constants';
-import { distance, posCeil, posCentered, posFloor, screenToWorld, worldToScreen } from '../utils/posHelper';
+import { distance, keyFromPos, posCeil, posCentered, posFloor, screenToWorld, worldToScreen } from '../utils/posHelper';
 import { BoardLetters, Highlight, InventoryLetter } from '../types/board';
 import { Position } from '../types/api';
 import { Pan } from '../types/canvas';
-import { drawGrid, drawPlacedLetters, drawPlacedInventoryLetters, drawDebug, drawDarkenTile } from '../utils/drawing';
+import {
+  drawGrid,
+  drawPlacedLetters,
+  drawPlacedInventoryLetters,
+  drawDebug,
+  drawDarkenTile,
+  drawCursor,
+} from '../utils/drawing';
 import { getMousePos } from '../utils/touch';
 
 export default function Canvas({
@@ -38,19 +45,20 @@ export default function Canvas({
   const [hoverPos, setHoverPos] = useState<Position | null>(null);
   const { width, height } = useWindowSize();
 
-  useEffect(() => { // center on load
-    if ( !width || !height) return;
+  useEffect(() => {
+    // center on load
+    if (!width || !height) return;
     console.log('Center the board');
     // set pan to center of board
     const newPan: Pan = {
       ...pan,
-      offset : {
-        x : (width / 2) - (TILE_SIZE * 5) / 2,
-        y : (height / 2) - (TILE_SIZE * 5) / 2,
-      }
-    }
+      offset: {
+        x: width / 2 - (TILE_SIZE * 5) / 2,
+        y: height / 2 - (TILE_SIZE * 5) / 2,
+      },
+    };
     setPan(newPan);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [height, width]);
 
   useEffect(() => {
@@ -63,8 +71,10 @@ export default function Canvas({
     drawPlacedLetters(ctx, placedLetters, pan, highlight);
     drawPlacedInventoryLetters(ctx, inventory, pan, highlight);
 
-    // DEBUG
-    if (cursorPos) drawDebug(ctx, posCentered(cursorPos), cursorDirection ? '>' : 'v', 'purple', pan);
+    if (cursorPos) {
+      if (placedLetters.has(keyFromPos(cursorPos))) drawCursor(ctx, posCentered(cursorPos), cursorDirection, true, pan);
+      else drawCursor(ctx, posCentered(cursorPos), cursorDirection, false, pan);
+    }
   }, [height, pan, width, hoverPos, placedLetters, cursorPos, cursorDirection, inventory, highlight]);
 
   const onDown = useCallback((e: React.TouchEvent | React.MouseEvent) => {
@@ -102,9 +112,8 @@ export default function Canvas({
       if (!mousePos) return;
       let { x, y } = mousePos;
 
-      if (isDown && distance(dragStart, { x, y }) > DRAG_TRESHOLD && !isDragging)
-        setIsDragging(true);
-      
+      if (isDown && distance(dragStart, { x, y }) > DRAG_TRESHOLD && !isDragging) setIsDragging(true);
+
       if (isDragging) {
         setPan({
           ...pan,

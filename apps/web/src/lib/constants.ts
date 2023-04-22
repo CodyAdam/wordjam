@@ -10,7 +10,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 export const TILE_SIZE = 20;
-export const TILE_PADDING = .07;
+export const TILE_PADDING = .04;
 
 export const SCROLL_SPEED = 0.2;
 export const SCROLL_MIN_TILE_SIZE = 10;
