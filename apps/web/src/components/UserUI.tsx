@@ -62,7 +62,7 @@ export default function UserUI({
           </button>
           {expandLeaderboard && (
             <div className='md:max-h-80 max-h-40 overflow-y-auto px-2 text-sm md:text-base'>
-              <table className='table-auto border-t'>
+              <table className='table-auto border-t w-full'>
                 <thead>
                   <tr className='h-10 md:text-lg text-md text-slate-700'>
                     <th className='text-start'></th>
