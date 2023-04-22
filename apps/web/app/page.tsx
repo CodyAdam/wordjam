@@ -80,6 +80,7 @@ export default function App() {
           if (cooldown > 0) setCooldown((c) => c - 1);
         }, 1000);
       },
+      
       connect: () => {
         const token = localStorage.getItem('token');
         if (token) {
@@ -115,13 +116,13 @@ export default function App() {
 
   const onSubmit = useCallback(() => {
     try {
-      const placeWord = toPlaceWord(inventory);
+      const placeWord = toPlaceWord(inventory, placedLetters);
       const token = localStorage.getItem('token');
       socket.emit('onSubmit', { submittedLetters: placeWord, token: token });
     } catch (error) {
       error instanceof Error && toast.error(error.message);
     }
-  }, [inventory, socket]);
+  }, [inventory, placedLetters, socket]);
 
   const onLogout = useCallback(() => {
     setAppStage(AppState.AwaitingLogin);

@@ -1,10 +1,11 @@
 import { Direction, PlaceWord } from '../types/api';
-import { InventoryLetter, InventoryLetterPlaced } from '../types/board';
+import { BoardLetters, InventoryLetter, InventoryLetterPlaced } from '../types/board';
+import { keyFromPos } from './posHelper';
 
 // X axis : left to right
 // Y axis : bottom to top
 
-export function toPlaceWord(inventory: InventoryLetter[]): PlaceWord {
+export function toPlaceWord(inventory: InventoryLetter[], boardLetters: BoardLetters): PlaceWord {
   const placedInventoryLetters: InventoryLetterPlaced[] = inventory.filter(
     (letter) => letter.position !== undefined,
   ) as InventoryLetterPlaced[];
@@ -40,10 +41,23 @@ export function toPlaceWord(inventory: InventoryLetter[]): PlaceWord {
     }
   });
 
-  // if distance between start and end is not equal to the number of letters, it's not connected
-  if (Math.abs(startPos.x - endPos.x) + Math.abs(startPos.y - endPos.y) !== placedInventoryLetters.length - 1) {
-    throw new Error('The placed letters are not connected');
+  const placedKeys = placedInventoryLetters.map((letter) => keyFromPos(letter.position));
+  const boardLettersKeys = Array.from(boardLetters.keys());
+  const allKeys = placedKeys.concat(boardLettersKeys);
+
+  // for each pos from (top left) to (bottom right) if its not in allKeys then throw error
+  let pos = {...startPos};
+  while (keyFromPos(pos) !== keyFromPos(endPos)) {
+    if (!allKeys.includes(keyFromPos(pos))) {
+      throw new Error('There is a gap in the placed letters');  
+    }
+    if (pos.x < endPos.x) {
+      pos.x++;
+    } else if (pos.y > endPos.y) {
+      pos.y--;
+    }
   }
+
 
   let isHorizontal = true;
   let isVertical = true;

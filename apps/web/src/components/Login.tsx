@@ -6,7 +6,6 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import { Socket } from 'socket.io-client';
 import { LoginResponseType } from '../types/api';
 import MaterialSymbolsFramePersonSharp from './svg/MaterialSymbolsFramePersonSharp';
-import SvgSpinnersGooeyBalls1 from './svg/SvgSpinnersGooeyBalls1';
 import SvgSpinnersBlocksShuffle3 from './svg/SvgSpinnersBlocksShuffle3';
 
 enum Type {
