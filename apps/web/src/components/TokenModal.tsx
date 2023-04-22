@@ -1,4 +1,6 @@
 import { motion } from 'framer-motion';
+import { toast } from 'react-toastify';
+import MajesticonsClipboardCopy from './svg/MajesticonsClipboardCopy';
 
 export default function TokenModal(props: { onClick: () => void }) {
   const token = localStorage.getItem('token');
@@ -15,19 +17,33 @@ export default function TokenModal(props: { onClick: () => void }) {
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         exit={{ scale: 0 }}
-        className='space-y-4 rounded-lg bg-white p-10 shadow'
+        className='max-w-sm space-y-4 rounded-2xl bg-white p-10 shadow-xl border-b-8 border-gray-200'
       >
-        <div className='text-xl font-bold'>Your token</div>
-        <input
-          disabled
-          value={token}
-          className='focus:shadow-outline w-full appearance-none rounded border py-2 px-3 leading-tight text-gray-700 shadow focus:outline-none'
-        ></input>
+        <div className='text-xl font-bold'>Login credential</div>
+        <p>
+          You can use this code to login to your account on other devices.
+          <b> Make sure to keep it</b>
+        </p>
+        <div className='flex gap-4'>
+          <input
+            value={token}
+            className='focus:shadow-outline w-full appearance-none rounded border py-2 px-3 leading-tight text-gray-700 focus:outline-none'
+          />
+          <button
+            onClick={() => {
+              toast.success('Copied to clipboard');
+              navigator.clipboard.writeText(token);
+            }}
+            className='flex items-center justify-center rounded-md bg-blue-100 p-2 text-xl font-bold text-blue-800 transition-colors hover:bg-blue-200 active:bg-blue-300 active:text-blue-500'
+          >
+            <MajesticonsClipboardCopy className='h-6 w-6' />
+          </button>
+        </div>
         <button
           onClick={props.onClick}
-          className='w-full rounded-md bg-green-400 p-2 text-xl font-bold text-white transition-colors hover:bg-green-500'
+          className='w-full rounded-md bg-slate-200 p-2 text-xl font-bold text-slate-800 transition-colors hover:bg-slate-300'
         >
-          Done
+          Close
         </button>
       </motion.div>
     </motion.div>
