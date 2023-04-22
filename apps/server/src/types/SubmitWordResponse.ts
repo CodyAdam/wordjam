@@ -1,7 +1,6 @@
 import {LetterHighlight} from "./LetterHighlight";
 
-export type CheckLetterResponse = {
+export type SubmitWordResponse = {
     placement: string,
-    score: number,
     highlight: LetterHighlight
 }

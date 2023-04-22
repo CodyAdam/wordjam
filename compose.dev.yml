@@ -5,5 +5,18 @@ services:
     build:
       context: .
       target: BACK
+
+  front:
+    image: fgdou/esirjam-front
+    build:
+      context: .
+      target: FRONT
+
+  nginx:
+    image: fgdou/esirjam-nginx
+    build: nginx
     ports:
-      - 8080:8080
+      - 80:80
+    depends_on:
+      - front
+      - back

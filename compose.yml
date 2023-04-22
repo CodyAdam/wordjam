@@ -2,5 +2,12 @@ version: "3.4"
 services:
   back:
     image: fgdou/esirjam-back
+  front:
+    image: fgdou/esirjam-front
+  nginx:
+    image: fgdou/esirjam-nginx
     ports:
-      - 8080:8080
+      - 80:80
+    depends_on:
+      - front
+      - back

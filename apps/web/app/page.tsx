@@ -213,29 +213,11 @@ export default function App() {
           onReset={onResetInventoryPlacement}
           onSubmit={onSubmit}
           cooldown={cooldown}
-        />
-        <button
-          className='absolute bottom-0 left-0 m-3 rounded-md bg-purple-200 p-3 text-purple-800 '
-          onClick={() => onLogout()}
-        >
-          (Debug) Logout
-        </button>
-        <button
-          className='absolute bottom-20 left-0 m-3 rounded-md bg-purple-200 p-3 text-purple-800 '
-          onClick={() => {
+          onAskLetter={() => {
             const token = localStorage.getItem('token');
             socket.emit('onAskLetter', token);
           }}
-          disabled={cooldown > 0}
-        >
-          {cooldown > 0 ? `${cooldown}s` : 'Ask letter'}
-        </button>
-        <button
-          className='absolute bottom-0 left-48 m-3 rounded-md bg-purple-200 p-3 text-purple-800 '
-          onClick={resetConfetti}
-        >
-          Reset confetti (Debug)
-        </button>
+        />
         <ToastContainer
           position='top-center'
           autoClose={5000}

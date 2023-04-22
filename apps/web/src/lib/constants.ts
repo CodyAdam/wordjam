@@ -8,6 +8,7 @@ if (process.env.NODE_ENV === 'production') {
 } else {
   SOCKET_URL = 'ws://localhost:8080';
 }
+console.log(SOCKET_URL)
 
 export const TILE_SIZE = 20;
 export const TILE_PADDING = .07;
