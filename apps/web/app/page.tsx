@@ -25,7 +25,7 @@ export default function App() {
   const [appStage, setAppStage] = useState(AppState.AwaitingLogin);
 
   const [placedLetters, setPlacedLetters] = useState<BoardLetters>(new Map());
-  const [pan, setPan] = useState<Pan>({ offset: { x: 0, y: 0 }, scale: 100, origin: { x: 0, y: 0 } });
+  const [pan, setPan] = useState<Pan>({ offset: { x: 0, y: 0 }, scale: 50, origin: { x: 0, y: 0 } });
   const { cursorDirection, cursorPos, setCursorDirection, setCursorPos, goToNextCursorPos } = useCursor(placedLetters);
   const [cooldown, setCooldown] = useState(0);
   const [inventory, setInventory] = useState<InventoryLetter[]>([{ letter: 'A' }]);
