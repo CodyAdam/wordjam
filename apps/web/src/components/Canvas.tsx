@@ -22,7 +22,6 @@ import {
   drawDarkenTile,
   drawCursor,
 } from '../utils/drawing';
-import { getMousePos } from '../utils/touch';
 
 export default function Canvas({
   placedLetters,
@@ -109,16 +108,12 @@ export default function Canvas({
       height={height}
       width={width}
       onMouseDown={(e) => {
-        const mousePos = getMousePos(e);
-        if (!mousePos) return;
-        let { x, y } = mousePos;
+        const { clientX: x, clientY: y } = e;
         setDragStart({ x, y });
         setIsDown(true);
       }}
       onMouseUp={(e) => {
-        const mousePos = getMousePos(e);
-        if (!mousePos) return;
-        let { x, y } = mousePos;
+        const { clientX: x, clientY: y } = e;
         if (!isDragging) {
           const pos = posFloor(screenToWorld({ x, y }, pan));
           if (pos.x === cursorPos?.x && pos.y === cursorPos?.y) {
@@ -133,9 +128,7 @@ export default function Canvas({
         setIsDown(false);
       }}
       onMouseMove={(e) => {
-        const mousePos = getMousePos(e);
-        if (!mousePos) return;
-        let { x, y } = mousePos;
+        const { clientX: x, clientY: y } = e;
 
         if (isDown && distance(dragStart, { x, y }) > DRAG_TRESHOLD && !isDragging) setIsDragging(true);
 

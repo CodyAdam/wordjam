@@ -184,7 +184,7 @@ export default function App() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [cursorPos, inventory, placeInventoryLetter]);
+  }, [cursorPos, inventory, onSubmit, placeInventoryLetter]);
 
   function onMoveLetter(from: number, to: number) {
     const newInventory = [...inventory];
