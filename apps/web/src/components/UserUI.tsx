@@ -1,36 +1,48 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { InventoryLetter } from '../types/board';
-import { LetterButton } from './Letter';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import { boardFont } from '@/src/utils/fontLoader';
 import { letterToPoints } from '../utils/letterPoints';
+import { Player } from '../types/api';
+import TokenModal from './TokenModal';
+import LinkDeviceButton from './LinkDeviceButton';
+import { getUsername } from '../utils/user';
+import IcOutlineChevronRight from './svg/IcOutlineChevronRight';
 
 export default function UserUI({
   inventory,
+  scores,
   onPlace,
   onReset,
+  onLogout,
   onSubmit,
   onReplace,
   onAskLetter,
   cooldown,
 }: {
   inventory: InventoryLetter[];
+  scores: Player[];
   onPlace: (index: number) => void;
   onReset: () => void;
   onSubmit: () => void;
+  onLogout: () => void;
   onReplace: (index: number, newIndex: number) => void;
   onAskLetter: () => void;
   cooldown: number;
 }) {
-  function ondragend(result: any) {
-    if (!result.destination) {
-      return;
-    }
-    onReplace(result.source.index, result.destination.index);
-  }
-
+  const [showTokenModal, setShowTokenModal] = useState(false);
+  const [expandLeaderboard, setExpandLeaderboard] = useState(true);
+  const onDragEnd = useCallback(
+    (result: any) => {
+      if (!result.destination) {
+        return;
+      }
+      onReplace(result.source.index, result.destination.index);
+    },
+    [onReplace],
+  );
   const isPlacedLetter = useMemo(() => {
     // if all positions of the letter in the inventory is not null, return true
     return inventory.map((letter) => letter.position).every((pos) => !pos);
@@ -38,6 +50,61 @@ export default function UserUI({
 
   return (
     <>
+      {showTokenModal && <TokenModal onClick={() => setShowTokenModal(false)} onLogout={onLogout} />}
+      <div className='absolute top-0 right-0 m-4 flex flex-col gap-4'>
+        <LinkDeviceButton onClick={() => setShowTokenModal(true)}></LinkDeviceButton>
+        <div className='flex flex-col gap-3 rounded-md border-b-4 border-gray-300 bg-white p-4 text-slate-800 '>
+          <button onClick={() => setExpandLeaderboard(!expandLeaderboard)} className='flex items-center gap-3'>
+            <IcOutlineChevronRight
+              className={`h-8 w-8 transform transition-transform ${expandLeaderboard ? 'rotate-90' : ''}`}
+            />
+            <h1 className='text-2xl font-bold'>Leaderboard</h1>
+          </button>
+          {expandLeaderboard && (
+            <div className='max-h-80 overflow-y-auto px-2'>
+              <table className='table-auto border-t'>
+                <thead>
+                  <tr className='h-10 text-lg text-slate-700'>
+                    <th className='text-start'></th>
+                    <th className='text-start'>Username</th>
+                    <th className='text-end'>Score</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {scores.map((player, i) => {
+                    const username = getUsername();
+                    if (username === player.username)
+                      return (
+                        <tr className='h-10 bg-blue-50 text-blue-800' key={i}>
+                          <td className='pr-4 text-center font-bold'>{i + 1}</td>
+                          <td
+                            className='max-w-[10rem] overflow-hidden text-ellipsis whitespace-nowrap text-start'
+                            title={player.username}
+                          >
+                            <span className='opacity-50'>(You)</span> {player.username}
+                          </td>
+                          <td className='text-end'>{player.score}</td>
+                        </tr>
+                      );
+                    return (
+                      <tr className='' key={i}>
+                        <td className='h-5 pr-4 text-center font-bold'>{i + 1}</td>
+                        <td
+                          className='max-w-[10rem] overflow-hidden text-ellipsis whitespace-nowrap text-start'
+                          title={player.username}
+                        >
+                          {player.username}
+                        </td>
+                        <td className='text-end'>{player.score}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
       <div className='absolute bottom-0 flex flex-col flex-wrap gap-6 p-4'>
         <div className='flex w-full gap-4'>
           <button
@@ -71,7 +138,7 @@ export default function UserUI({
           </button>
         </div>
 
-        <DragDropContext onDragEnd={ondragend}>
+        <DragDropContext onDragEnd={onDragEnd}>
           <Droppable droppableId='droppable' direction='horizontal'>
             {(provided, snapshot) => (
               <div ref={provided.innerRef} {...provided.droppableProps} className='flex w-fit flex-wrap gap-3'>

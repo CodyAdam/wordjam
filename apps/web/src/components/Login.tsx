@@ -7,6 +7,7 @@ import { Socket } from 'socket.io-client';
 import { LoginResponseType } from '../types/api';
 import MaterialSymbolsFramePersonSharp from './svg/MaterialSymbolsFramePersonSharp';
 import SvgSpinnersBlocksShuffle3 from './svg/SvgSpinnersBlocksShuffle3';
+import { setUsername } from '../utils/user';
 
 enum Type {
   Nickname,
@@ -38,6 +39,7 @@ export default function Login({ isConnected, socket }: { isConnected: boolean; s
   const onSubmit: SubmitHandler<Inputs> = (data) => {
     if (loginType === Type.Nickname) {
       const username = data.nicknameOrToken;
+      setUsername(username);
       socket.emit('onRegister', username);
     } else {
       const token = data.nicknameOrToken;

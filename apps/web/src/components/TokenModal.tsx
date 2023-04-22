@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 import MajesticonsClipboardCopy from './svg/MajesticonsClipboardCopy';
 
-export default function TokenModal(props: { onClick: () => void }) {
+export default function TokenModal(props: { onClick: () => void; onLogout: () => void }) {
   const token = localStorage.getItem('token');
   if (!token) return null;
 
@@ -17,7 +17,7 @@ export default function TokenModal(props: { onClick: () => void }) {
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         exit={{ scale: 0 }}
-        className='max-w-sm space-y-4 rounded-2xl bg-white p-10 shadow-xl border-b-8 border-gray-200'
+        className='flex max-w-sm flex-col gap-4 rounded-2xl border-b-8 border-gray-200 bg-white p-10 shadow-xl'
       >
         <div className='text-xl font-bold'>Login credential</div>
         <p>
@@ -45,6 +45,9 @@ export default function TokenModal(props: { onClick: () => void }) {
           className='w-full rounded-md bg-slate-200 p-2 text-xl font-bold text-slate-800 transition-colors hover:bg-slate-300'
         >
           Close
+        </button>
+        <button onClick={props.onLogout} className='w-full text-center text-sm text-gray-400 hover:text-gray-600'>
+          Click here to <b>logout</b>
         </button>
       </motion.div>
     </motion.div>

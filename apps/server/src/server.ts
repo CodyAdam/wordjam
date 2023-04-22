@@ -37,8 +37,11 @@ io.on('connection', (socket) => {
 
     socket.emit('onLoginResponse', LoginResponseType.SUCCESS);
     socket.emit('onToken', player.token);
+    socket.emit('onUsername', player.username);
     socket.emit('onInventory', player.letters);
     socket.emit('onCooldown', gameInstance.playerCooldown(player.token));
+      
+    socket.emit('onScores', Array.from(gameInstance.players.values()).map((player: Player) => {return {username: player.username, score: player.score};}));
   });
 
   /**
@@ -65,6 +68,7 @@ io.on('connection', (socket) => {
     socket.emit('onToken', newPlayer.token);
     socket.emit('onInventory', newPlayer.letters);
     socket.emit('onCooldown', gameInstance.playerCooldown(newPlayer.token));
+    socket.emit('onScores', Array.from(gameInstance.players.values()).map((player: Player) => {return {username: player.username, score: player.score};}));
 
     console.log('New Player : ' + newPlayer.username);
   });

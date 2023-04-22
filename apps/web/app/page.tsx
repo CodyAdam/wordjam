@@ -9,7 +9,7 @@ import Canvas from '@/src/components/Canvas';
 import { useCursor } from '@/src/hooks/useCursor';
 import LinkDeviceButton from '@/src/components/LinkDeviceButton';
 import TokenModal from '@/src/components/TokenModal';
-import { BoardLetter, LoginResponseType } from '@/src/types/api';
+import { BoardLetter, LoginResponseType, Player } from '@/src/types/api';
 import { BoardLetters, Highlight, InventoryLetter } from '@/src/types/board';
 import { Pan } from '@/src/types/canvas';
 import { toPlaceWord } from '@/src/utils/submitHelper';
@@ -17,6 +17,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.min.css';
 import Confetti from 'react-confetti';
 import { keyFromPos } from '@/src/utils/posHelper';
+import { setUsername } from '@/src/utils/user';
 
 let cooldownInterval: string | number | NodeJS.Timeout | undefined = undefined;
 let highlightInterval: string | number | NodeJS.Timeout | undefined = undefined;
@@ -24,13 +25,14 @@ let highlightInterval: string | number | NodeJS.Timeout | undefined = undefined;
 export default function App() {
   // login related
   const [appStage, setAppStage] = useState(AppState.AwaitingLogin);
-  const [showTokenModal, setShowTokenModal] = useState(false);
+
   const [placedLetters, setPlacedLetters] = useState<BoardLetters>(new Map());
   const [pan, setPan] = useState<Pan>({ offset: { x: 0, y: 0 }, scale: 100, origin: { x: 0, y: 0 } });
   const { cursorDirection, cursorPos, setCursorDirection, setCursorPos, goToNextCursorPos } = useCursor(placedLetters);
   const [cooldown, setCooldown] = useState(0);
   const [inventory, setInventory] = useState<InventoryLetter[]>([{ letter: 'A' }]);
   const [highlight, setHighlight] = useState<Highlight>(null);
+  const [scores, setScores] = useState<Player[]>([]);
   const { isConnected, socket } = useSocket(SOCKET_URL, {
     events: {
       onBoard: (letters: BoardLetter[]) => {
@@ -56,6 +58,10 @@ export default function App() {
             break;
         }
       },
+      onScores: (scores: Player[]) => {
+        scores.sort((a, b) => b.score - a.score);
+        setScores(scores);
+      },
       onInventory: (letters: string[]) => {
         setInventory(letters.map((letter) => ({ letter: letter })));
       },
@@ -80,7 +86,9 @@ export default function App() {
           if (cooldown > 0) setCooldown((c) => c - 1);
         }, 1000);
       },
-      
+      onUsername: (username: string) => {
+        setUsername(username);
+      },
       connect: () => {
         const token = localStorage.getItem('token');
         if (token) {
@@ -224,10 +232,7 @@ export default function App() {
             cursorDirection={cursorDirection}
             setCursorDirection={setCursorDirection}
           />
-          {showTokenModal && <TokenModal onClick={() => setShowTokenModal(false)} />}
-          <div className='absolute top-0 right-0 p-2'>
-            <LinkDeviceButton onClick={() => setShowTokenModal(true)}></LinkDeviceButton>
-          </div>
+
         </main>
         <UserUI
           onReplace={onMoveLetter}
@@ -235,7 +240,9 @@ export default function App() {
           onPlace={placeInventoryLetter}
           onReset={onResetInventoryPlacement}
           onSubmit={onSubmit}
+          onLogout={onLogout}
           cooldown={cooldown}
+          scores={scores}
           onAskLetter={() => {
             const token = localStorage.getItem('token');
             socket.emit('onAskLetter', token);
