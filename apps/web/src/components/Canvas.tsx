@@ -48,7 +48,7 @@ export default function Canvas({
   useEffect(() => {
     // center on load
     if (!width || !height) return;
-    console.log('Center the board');
+
     // set pan to center of board
     const newPan: Pan = {
       ...pan,
@@ -58,12 +58,30 @@ export default function Canvas({
       },
     };
     setPan(newPan);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [height, width]);
+
+    const canvas = canvasRef.current;
+    if (!canvas || !width || !height) return;
+    // Set display size (css pixels).
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+
+    // Set actual size in memory (scaled to account for extra pixel density).
+    const scale = window.devicePixelRatio; // Change to 1 on retina screens to see blurry canvas.
+    canvas.width = Math.floor(width * scale);
+    canvas.height = Math.floor(height * scale);
+
+    const ctx = canvasRef.current.getContext('2d');
+    if (!ctx) return;
+    ctx.scale(scale, scale);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [height, width, canvasRef]);
+
+  
 
   useEffect(() => {
-    const ctx = canvasRef.current?.getContext('2d');
-    if (!ctx || !width || !height) return;
+    const ctx = canvasRef.current!.getContext('2d');
+    if (!ctx || !width || !height) return; 
     ctx.clearRect(0, 0, width, height);
 
     drawGrid(ctx, pan, width, height);
