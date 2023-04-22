@@ -109,7 +109,7 @@ io.on('connection', (socket) => {
     if (response.placement !== PlacedResponse.OK) {
       return socket.emit('onError', response.placement);
     }
-
+    socket.emit('onConfetti');
     sendBoardToAll();
     sendScoreToAll();
     socket.emit('onInventory', player.letters);
