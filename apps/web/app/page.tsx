@@ -7,7 +7,7 @@ import UserUI from '@/src/components/UserUI';
 import Login from '@/src/components/Login';
 import Canvas from '@/src/components/Canvas';
 import { useCursor } from '@/src/hooks/useCursor';
-import LinkDeviceButton from '@/src/components/LinkDeviceButton';
+import LoginCredButton from '@/src/components/LinkDeviceButton';
 import TokenModal from '@/src/components/TokenModal';
 import { BoardLetter, LoginResponseType, Player } from '@/src/types/api';
 import { BoardLetters, Highlight, InventoryLetter } from '@/src/types/board';

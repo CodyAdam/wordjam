@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 import MajesticonsClipboardCopy from './svg/MajesticonsClipboardCopy';
 
-export default function TokenModal(props: { onClick: () => void; onLogout: () => void }) {
+export default function LoginCredModal(props: { onClick: () => void; onLogout: () => void }) {
   const token = localStorage.getItem('token');
   if (!token) return null;
 

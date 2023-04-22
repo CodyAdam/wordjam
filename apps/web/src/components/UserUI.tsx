@@ -6,8 +6,8 @@ import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import { boardFont } from '@/src/utils/fontLoader';
 import { letterToPoints } from '../utils/letterPoints';
 import { Player } from '../types/api';
-import TokenModal from './TokenModal';
-import LinkDeviceButton from './LinkDeviceButton';
+import LoginCredModal from './LoginCredModal';
+import LoginCredButton from './LoginCredButton';
 import { getUsername } from '../utils/user';
 import IcOutlineChevronRight from './svg/IcOutlineChevronRight';
 
@@ -50,21 +50,21 @@ export default function UserUI({
 
   return (
     <>
-      {showTokenModal && <TokenModal onClick={() => setShowTokenModal(false)} onLogout={onLogout} />}
+      {showTokenModal && <LoginCredModal onClick={() => setShowTokenModal(false)} onLogout={onLogout} />}
       <div className='absolute top-0 right-0 m-4 flex flex-col gap-4'>
-        <LinkDeviceButton onClick={() => setShowTokenModal(true)}></LinkDeviceButton>
-        <div className='flex flex-col gap-3 rounded-md border-b-4 border-gray-300 bg-white p-4 text-slate-800 '>
-          <button onClick={() => setExpandLeaderboard(!expandLeaderboard)} className='flex items-center gap-3'>
+        <LoginCredButton onClick={() => setShowTokenModal(true)}></LoginCredButton>
+        <div className='flex flex-col gap-3 rounded-md border-b-4 border-gray-300 bg-white md:p-4 p-2 text-slate-800 '>
+          <button onClick={() => setExpandLeaderboard(!expandLeaderboard)} className='flex items-center gap-1 md:gap-3'>
             <IcOutlineChevronRight
-              className={`h-8 w-8 transform transition-transform ${expandLeaderboard ? 'rotate-90' : ''}`}
+              className={`md:h-8 md:w-8 h-6 w-6 transform transition-transform ${expandLeaderboard ? 'rotate-90' : ''}`}
             />
-            <h1 className='text-2xl font-bold'>Leaderboard</h1>
+            <h1 className='md:text-2xl text-base font-bold'>Leaderboard</h1>
           </button>
           {expandLeaderboard && (
-            <div className='max-h-80 overflow-y-auto px-2'>
+            <div className='md:max-h-80 max-h-40 overflow-y-auto px-2 text-sm md:text-base'>
               <table className='table-auto border-t'>
                 <thead>
-                  <tr className='h-10 text-lg text-slate-700'>
+                  <tr className='h-10 md:text-lg text-md text-slate-700'>
                     <th className='text-start'></th>
                     <th className='text-start'>Username</th>
                     <th className='text-end'>Score</th>
@@ -112,7 +112,7 @@ export default function UserUI({
             className='group flex w-fit items-center justify-center '
             onClick={onAskLetter}
           >
-            <div className='rounded-lg border-b-4 border-orange-400 bg-orange-100 px-4 py-2 text-2xl font-bold text-orange-700 transition-all duration-75 group-hover:group-enabled:-translate-y-2 group-hover:group-enabled:scale-105 group-hover:group-enabled:shadow-lg group-disabled:cursor-not-allowed group-disabled:border-gray-500 group-disabled:bg-gray-300 group-disabled:text-gray-700 group-disabled:opacity-40'>
+            <div className='rounded-lg border-b-4 border-orange-400 bg-orange-100 px-4 py-2 md:text-2xl text-xl font-bold text-orange-700 transition-all duration-75 group-hover:group-enabled:-translate-y-2 group-hover:group-enabled:scale-105 group-hover:group-enabled:shadow-lg group-disabled:cursor-not-allowed group-disabled:border-gray-500 group-disabled:bg-gray-300 group-disabled:text-gray-700 group-disabled:opacity-40'>
               {cooldown > 0 ? (
                 `${cooldown}s`
               ) : (
@@ -126,13 +126,13 @@ export default function UserUI({
           <div className='m-auto'></div>
           {!isPlacedLetter && (
             <button className='group flex w-fit items-center justify-center' onClick={onReset}>
-              <div className='rounded-lg border-b-4 border-red-400 bg-red-100 px-4 py-2 text-2xl font-bold text-red-700 transition-all duration-75 disabled:bg-gray-300 disabled:text-gray-700 group-hover:-translate-y-2 group-hover:scale-105 group-hover:shadow-lg'>
+              <div className='rounded-lg border-b-4 border-red-400 bg-red-100 px-4 py-2 md:text-2xl text-xl font-bold text-red-700 transition-all duration-75 disabled:bg-gray-300 disabled:text-gray-700 group-hover:-translate-y-2 group-hover:scale-105 group-hover:shadow-lg'>
                 Reset
               </div>
             </button>
           )}
           <button className='group flex w-fit items-center justify-center' onClick={onSubmit}>
-            <div className='rounded-lg border-b-4 border-blue-400 bg-blue-100 px-4 py-2 text-2xl font-bold text-blue-700 transition-all duration-75 group-hover:-translate-y-2 group-hover:scale-105 group-hover:shadow-lg'>
+            <div className='rounded-lg border-b-4 border-blue-400 bg-blue-100 px-4 py-2 md:text-2xl text-xl font-bold text-blue-700 transition-all duration-75 group-hover:-translate-y-2 group-hover:scale-105 group-hover:shadow-lg'>
               Submit
             </div>
           </button>
@@ -159,8 +159,8 @@ export default function UserUI({
                           snapshot.isDragging || letter.position != undefined ? 'opacity-50' : ' '
                         }`}
                       >
-                        <div className='flex h-20 w-20 items-center justify-center rounded-lg bg-slate-200 pb-8 text-6xl font-bold text-zinc-700 shadow-sm transition-all duration-75 group-hover:-translate-y-4 group-hover:scale-105 group-hover:shadow-lg'>
-                          <div className='relative flex h-20 w-20 items-center justify-center rounded-lg border-2 border-slate-200 bg-white p-1'>
+                        <div className='flex md:h-20 h-14 md:w-20 w-14 items-center justify-center rounded-lg bg-slate-200 pb-4 md:pb-8 md:text-6xl text-4xl font-bold text-zinc-700 shadow-sm transition-all duration-75 group-hover:-translate-y-4 group-hover:scale-105 group-hover:shadow-lg'>
+                          <div className='relative flex md:h-20 h-14 md:w-20 w-14 items-center justify-center rounded-lg border-2 border-slate-200 bg-white p-1'>
                             <span className={boardFont.className}>{letter.letter.toUpperCase()}</span>
                             <div className='absolute top-0 right-1 text-sm'>
                               {letterToPoints[letter.letter.toUpperCase()]}
