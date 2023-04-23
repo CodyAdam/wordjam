@@ -7,6 +7,11 @@ services:
       target: BACK
     depends_on:
       - db
+    environment:
+      - POSTGRES_PASSWORD=$DB_PASSWORD
+      - POSTGRES_USER=$DB_USER
+      - POSTGRES_DB=$DB_DB
+      - POSTGRES_PORT=$DB_PORT
 
   front:
     image: fgdou/esirjam-front
@@ -19,9 +24,9 @@ services:
     volumes:
       - db:/var/lib/postgresql/data
     environment:
-      - POSTGRES_PASSWORD=admin
-      - POSTGRES_USER=admin
-      - POSTGRES_DB=wordjam
+      - POSTGRES_PASSWORD=$DB_PASSWORD
+      - POSTGRES_USER=$DB_USER
+      - POSTGRES_DB=$DB_DB
     ports:
       - 5432:5432
 

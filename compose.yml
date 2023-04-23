@@ -4,6 +4,11 @@ services:
     image: fgdou/esirjam-back
     depends_on:
       - db
+    environment:
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_USER=admin
+      - POSTGRES_DB=db
+      - POSTGRES_PORT=5432
   front:
     image: fgdou/esirjam-front
   nginx:
