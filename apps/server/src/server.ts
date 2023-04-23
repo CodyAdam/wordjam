@@ -1,3 +1,4 @@
+import "reflect-metadata"
 import { Player } from './types/Player';
 import { Server } from 'socket.io';
 import { GameInstance } from './GameInstance';

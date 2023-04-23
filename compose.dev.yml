@@ -5,6 +5,11 @@ services:
     build:
       context: .
       target: BACK
+    environment:
+      - DB_USER=$DB_USER
+      - DB_PASSWORD=$DB_PASSWORD
+      - DB_DB=$DB_DB
+      - DB_PORT=$DB_PORT
 
   front:
     image: fgdou/esirjam-front
@@ -20,3 +25,14 @@ services:
     depends_on:
       - front
       - back
+  db:
+    image: postgres:15.2
+    volumes:
+      - db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=$DB_PASSWORD
+      - POSTGRES_USER=$DB_USER
+      - POSTGRES_DB=$DB_DB
+
+volumes:
+  db:
