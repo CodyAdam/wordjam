@@ -53,7 +53,7 @@ export class GameInstance {
         this.database.load().then(res => {
             console.log(`Loading ${res.players.length} players and ${res.letters.length} letters`)
             res.players.forEach(p => {
-                this._players.set(p.username, p)
+                this._players.set(p.token, p)
             })
             res.letters.forEach(l => {
                 this._board.board.set(l.position.x + "_" + l.position.y, l)
