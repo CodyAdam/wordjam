@@ -8,6 +8,7 @@ import {Config} from "./Config";
 import {SubmitWordResponse} from "./types/SubmitWordResponse";
 import {Repository} from "typeorm";
 import {AppDataSource} from "./data-source";
+import {rootLogger} from "ts-jest";
 
 export class GameInstance {
     private readonly _board: BoardManager;
@@ -26,6 +27,7 @@ export class GameInstance {
     }
 
     async init() {
+        console.log("INIT GAME")
         await this._board.init("WORDJAM")
         await this.playerRepository.clear()
     }
@@ -36,14 +38,14 @@ export class GameInstance {
     async players(): Promise<Player[]> {
         return await this.playerRepository.find();
     }
-    async getPlayerByToken(token: string): Promise<Player> {
+    async getPlayerByToken(token: string): Promise<Player|undefined> {
         let res = await this.playerRepository.findOne({
             where: {
                 token: token
             }
         })
         if(!res)
-            throw `Player not found by token ${token}`
+            return undefined
         return res
     }
 
@@ -88,11 +90,12 @@ export class GameInstance {
     async submitWord(player: Player, word: PlaceWord): Promise<SubmitWordResponse> {
         let response = await this.board.checkLetterPlacedFromClient(word, player);
         if (response.placement === PlacedResponse.OK) {
-            this.board.putLettersOnBoard(word, player);
+            await this.board.putLettersOnBoard(word, player);
             player.score += response.score
             while (player.letters.length < Config.MIN_HAND_LETTERS) {
-                this.addLetterToPlayer(player);
+                await this.addLetterToPlayer(player);
             }
+            await this.playerRepository.save(player)
         }
 
         return {placement: response.placement, highlight: response.highlight};
@@ -110,8 +113,9 @@ export class GameInstance {
      * Add a letter to the player's letters inventory
      * @param player The player to add the letter to
      */
-    addLetterToPlayer(player: Player) {
+    async addLetterToPlayer(player: Player) {
         player.letters.push(generateLetters(1)[0]);
+        await this.playerRepository.save(player)
     }
 
     /**
@@ -127,11 +131,12 @@ export class GameInstance {
      * Replace all the letters of a player
      * @param player The player to replace the letters of
      */
-    replaceAllLetters(player: Player): AddLetterResponse {
+    async replaceAllLetters(player: Player): Promise<AddLetterResponse> {
         let response = this.checkReplaceLettersAvailability(player);
         if(response === AddLetterResponse.SUCCESS) {
             player.letters = generateLetters(Config.MIN_HAND_LETTERS);
             player.cooldownTarget = getDatePlusCooldown();
+            this.playerRepository.save(player)
         }
         return response;
     }

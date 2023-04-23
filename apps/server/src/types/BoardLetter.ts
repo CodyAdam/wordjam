@@ -8,7 +8,7 @@ export class BoardLetter {
 
     @Column()
     placedBy: string
-    @Column()
+    @Column({type: "bigint"})
     timestamp: number
     @Column()
     letter: string

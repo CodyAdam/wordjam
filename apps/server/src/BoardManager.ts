@@ -15,6 +15,7 @@ export class BoardManager {
 
   boardLetterRepository: Repository<BoardLetter> = AppDataSource.getRepository(BoardLetter)
   positionRepository: Repository<Position> = AppDataSource.getRepository(Position)
+  playerRepository: Repository<Player> = AppDataSource.getRepository(Player)
 
   async init(initialWord: string = 'WORDJAM') {
     await this.defaultBoardSetup(initialWord);
@@ -34,12 +35,13 @@ export class BoardManager {
     for (let i = 0; i < word.length; i++) {
       const x = i - offset;
 
-      this.boardLetterRepository.create({
+      let obj = this.boardLetterRepository.create({
         placedBy: 'Server',
         timestamp: Date.now(),
         letter: word[i],
         position: {x, y: 0},
       })
+      await this.boardLetterRepository.save(obj)
     }
   }
 
@@ -211,23 +213,24 @@ export class BoardManager {
    * @param player The player who wants to place the word
    * @returns the score gains by the player
    */
-  putLettersOnBoard(data: PlaceWord, player: Player) {
+  async putLettersOnBoard(data: PlaceWord, player: Player) {
     let currentPos: Position = Object.assign({}, data.startPos);
     let lettersToPlaced: string[] = [...data.letters];
     while (lettersToPlaced.length > 0) {
-      if (!this.hasLetter(currentPos)) {
+      if (!await this.hasLetter(currentPos)) {
         let newLetter = lettersToPlaced.shift() || '';
-        this.boardLetterRepository.create({
+        let obj = this.boardLetterRepository.create({
           placedBy: player.username,
           timestamp: Date.now(),
           letter: newLetter,
           position: Object.assign({}, currentPos),
         })
+        await this.boardLetterRepository.save(obj)
       }
       if (data.direction == Direction.DOWN) currentPos.y--;
       else currentPos.x++;
     }
-    this.removeLettersFromPlayer(player, data.letters);
+    await this.removeLettersFromPlayer(player, data.letters);
   }
 
   /**
@@ -235,7 +238,7 @@ export class BoardManager {
    * @param player The player to remove letters from
    * @param letters The letters to remove
    */
-  private removeLettersFromPlayer(player: Player, letters: string[]) {
+  private async removeLettersFromPlayer(player: Player, letters: string[]) {
     player.letters = player.letters.filter((letter) => {
       const indexInToRemove = letters.indexOf(letter);
       if (indexInToRemove !== -1) {
@@ -244,9 +247,11 @@ export class BoardManager {
       }
       return true;
     });
+    await this.playerRepository.save(player)
   }
 
   async needInit(): Promise<boolean> {
-    return await this.boardLetterRepository.count() == 0
+    let count = await this.boardLetterRepository.count()
+    return count == 0
   }
 }

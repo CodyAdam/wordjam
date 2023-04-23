@@ -92,7 +92,7 @@ import {AppDataSource} from "./data-source";
       const player = await gameInstance.getPlayerByToken(token);
       if (player === undefined) return socket.emit('onError', 'Player not found');
 
-      let response = gameInstance.replaceAllLetters(player);
+      let response = await gameInstance.replaceAllLetters(player);
       if (response === AddLetterResponse.SUCCESS) {
         socket.emit('onCooldown', gameInstance.playerCooldown(player.token));
         socket.emit('onInventory', player.letters);
@@ -126,14 +126,14 @@ import {AppDataSource} from "./data-source";
     });
 
     console.log('New web socket connection');
-    socket.emit('onBoard', await gameInstance.board.board);
+    socket.emit('onBoard', await gameInstance.board.board());
   });
 
   /**
    * Send the letters displayed on the board to all the players connected
    */
   async function sendBoardToAll() {
-    io.emit('onBoard', await gameInstance.board.board);
+    io.emit('onBoard', await gameInstance.board.board());
   }
 
   async function sendScoreToAll() {
