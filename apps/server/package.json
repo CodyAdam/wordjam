@@ -24,6 +24,7 @@
     "bufferutil": "^4.0.7",
     "socket.io": "^4.6.1",
     "socket.io-client": "^4.6.1",
-    "utf-8-validate": "^5.0.10"
+    "utf-8-validate": "^5.0.10",
+    "typeorm": "^0.3.15"
   }
 }
