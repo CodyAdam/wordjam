@@ -14,13 +14,7 @@ import { distance, keyFromPos, posCentered, posFloor, screenToWorld, worldToScre
 import { BoardLetters, Highlight, InventoryLetter } from '../types/board';
 import { Position } from '../types/api';
 import { Pan } from '../types/canvas';
-import {
-  drawGrid,
-  drawPlacedLetters,
-  drawPlacedInventoryLetters,
-  drawDarkenTile,
-  drawCursor,
-} from '../utils/drawing';
+import { drawGrid, drawPlacedLetters, drawPlacedInventoryLetters, drawDarkenTile, drawCursor } from '../utils/drawing';
 
 export default function Canvas({
   placedLetters,
@@ -202,14 +196,27 @@ export default function Canvas({
 
           const before = worldToScreen(screenToWorld({ x, y }, pan), { ...pan, scale: newScale });
           const after = { x, y };
-          setPan({
+          const newPan = {
             ...pan,
             scale: newScale,
             offset: {
               x: pan.offset.x - (before.x - after.x),
               y: pan.offset.y - (before.y - after.y),
             },
-          });
+          };
+
+          if (isDown && distance(dragStart, { x, y }) > DRAG_TRESHOLD && !isDragging) setIsDragging(true);
+
+          if (isDragging) {
+            newPan.offset = {
+              x: pan.offset.x + x - dragStart.x,
+              y: pan.offset.y + y - dragStart.y,
+            };
+            setDragStart({ x, y });
+          } else {
+            setHoverPos(screenToWorld({ x, y }, pan));
+          }
+          setPan(newPan);
           setTouchInitialDistance(currentDistance);
         } else if (event.touches.length === 1) {
           if (isPinching) return;
