@@ -59,8 +59,8 @@ io.on('connection', (socket) => {
       username: username,
       token: generateToken(4),
       score: 0,
-      letters: devMode ? devModeHand : generateLetters(7),
-      cooldownTarget: getDatePlusCooldown(),
+      letters: devMode ? devModeHand : generateLetters(Config.MIN_HAND_LETTERS),
+      cooldownTarget: new Date(),
     };
     gameInstance.addPlayer(newPlayer);
 
@@ -74,18 +74,18 @@ io.on('connection', (socket) => {
   });
 
   /**
-   * ####  EVENT ON ASK LETTER ####
-   * Call when a player want to get a new letter in his inventory
+   * ####  EVENT REPLACE ALL LETTERS ####
+   * Call when a player want to get a new inventory of letters
    * @param token : string, token of the player
    */
-  socket.on('onAskLetter', (token: string) => {
+  socket.on('replaceAllLetters', (token: string) => {
     const player = gameInstance.players.get(token);
     if (player === undefined) return socket.emit('onError', 'Player not found');
 
-    let response = gameInstance.addLetterToPlayer(player);
+    let response = gameInstance.replaceAllLetters(player);
     if (response === AddLetterResponse.SUCCESS) {
-      socket.emit('onCooldown', gameInstance.playerCooldown(player.token));
-      socket.emit('onInventory', player.letters);
+        socket.emit('onCooldown', gameInstance.playerCooldown(player.token));
+        socket.emit('onInventory', player.letters);
     }
   });
 

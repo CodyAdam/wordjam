@@ -68,7 +68,7 @@ export class GameInstance {
             this.board.putLettersOnBoard(word, player);
             player.score += response.score
             while(player.letters.length < Config.MIN_HAND_LETTERS) {
-                this.addLetterToPlayer(player, true)
+                this.addLetterToPlayer(player);
             }
         }
 
@@ -86,13 +86,31 @@ export class GameInstance {
     /**
      * Add a letter to the player's letters inventory
      * @param player The player to add the letter to
-     * @param ignoreCD Ignore the cooldown
      */
-    addLetterToPlayer(player: Player, ignoreCD?: boolean): AddLetterResponse {
-        if (!ignoreCD && player.cooldownTarget > new Date()) return AddLetterResponse.IN_COOLDOWN;
+    addLetterToPlayer(player: Player) {
         player.letters.push(generateLetters(1)[0]);
-        if (!ignoreCD) player.cooldownTarget = getDatePlusCooldown();
+    }
+
+    /**
+     * Check if a player can replace his letters
+     * @param player The player to check
+     */
+    checkReplaceLettersAvailability(player: Player): AddLetterResponse {
+        if (player.cooldownTarget > new Date()) return AddLetterResponse.IN_COOLDOWN;
         return AddLetterResponse.SUCCESS;
+    }
+
+    /**
+     * Replace all the letters of a player
+     * @param player The player to replace the letters of
+     */
+    replaceAllLetters(player: Player): AddLetterResponse {
+        let response = this.checkReplaceLettersAvailability(player);
+        if(response === AddLetterResponse.SUCCESS) {
+            player.letters = generateLetters(Config.MIN_HAND_LETTERS);
+            player.cooldownTarget = getDatePlusCooldown();
+        }
+        return response;
     }
 
 }
