@@ -17,12 +17,8 @@ export class BoardManager {
   positionRepository: Repository<Position> = AppDataSource.getRepository(Position)
 
   async init(initialWord: string = 'WORDJAM') {
-    let count = await this.boardLetterRepository.count()
-
-    if (count == 0) {
-      await this.defaultBoardSetup(initialWord);
-      DictionaryService.addCustomWord(initialWord);
-    }
+    await this.defaultBoardSetup(initialWord);
+    DictionaryService.addCustomWord(initialWord);
   }
 
 
@@ -248,5 +244,9 @@ export class BoardManager {
       }
       return true;
     });
+  }
+
+  async needInit(): Promise<boolean> {
+    return await this.boardLetterRepository.count() == 0
   }
 }

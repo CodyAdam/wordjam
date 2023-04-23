@@ -18,6 +18,11 @@ export class GameInstance {
      */
     constructor() {
         this._board = new BoardManager();
+
+        this._board.needInit().then(res => {
+            if(res)
+                this.init()
+        })
     }
 
     async init() {
