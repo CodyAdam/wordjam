@@ -51,6 +51,7 @@ export class GameInstance {
     load(){
         console.log("Loading...")
         this.database.load().then(res => {
+            console.log(`Loading ${res.players.length} players and ${res.letters.length} letters`)
             res.players.forEach(p => {
                 this._players.set(p.username, p)
             })

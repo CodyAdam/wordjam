@@ -1,3 +1,4 @@
+require('dotenv').config()
 import "reflect-metadata"
 import { Player } from './types/Player';
 import { Server } from 'socket.io';
@@ -10,7 +11,7 @@ import { AddLetterResponse } from './types/responses/AddLetterResponse';
 import { Config } from './Config';
 import {AppDataSource} from "./data-source";
 
-AppDataSource.initialize().then(() => {
+AppDataSource.initialize().then(async () => {
 
   const io = new Server({
     cors: {
@@ -26,6 +27,7 @@ AppDataSource.initialize().then(() => {
   console.log('Server started on port ' + PORT);
 
   let gameInstance = new GameInstance();
+  await gameInstance.init()
 
   console.log('GameInstance created');
 

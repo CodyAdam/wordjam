@@ -9,7 +9,7 @@ export class DBPlayer {
     username: string
     @Column()
     token: string
-    @Column({array: true, type: "string"})
+    @Column('text', {array: true})
     letters: string[]
     @Column()
     score: number
@@ -25,7 +25,7 @@ export class DBBoardLetter {
     @Column()
     placedBy: string
 
-    @Column()
+    @Column({type: 'bigint'})
     timestamp: number
 
     @Column()
