@@ -6,10 +6,12 @@ import {PlacedResponse} from "./types/responses/PlacedResponse";
 import {AddLetterResponse} from "./types/responses/AddLetterResponse";
 import {Config} from "./Config";
 import {SubmitWordResponse} from "./types/SubmitWordResponse";
+import {Database} from "./Database";
 
 export class GameInstance {
     private readonly _players: Map<string, Player>;
     private readonly _board: BoardManager;
+    private database = new Database()
 
     /**
      * Create a new GameInstance
@@ -17,6 +19,12 @@ export class GameInstance {
     constructor() {
         this._players = new Map<string, Player>();
         this._board = new BoardManager("WORDJAM");
+    }
+
+    async init(){
+        if(!await this.database.isEmpty()){
+            this.load()
+        }
     }
 
     /**
@@ -31,6 +39,25 @@ export class GameInstance {
      */
     get board(): BoardManager {
         return this._board;
+    }
+
+    save(){
+        let players = Array.from(this.players.values())
+        let letters = Array.from(this.board.board.values())
+
+        console.log("Saving...")
+        this.database.save(players, letters)
+    }
+    load(){
+        console.log("Loading...")
+        this.database.load().then(res => {
+            res.players.forEach(p => {
+                this._players.set(p.username, p)
+            })
+            res.letters.forEach(l => {
+                this._board.board.set(l.position.x + "_" + l.position.y, l)
+            })
+        })
     }
 
     /**

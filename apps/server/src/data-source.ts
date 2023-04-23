@@ -1,4 +1,5 @@
 import {DataSource} from "typeorm";
+import {DBBoardLetter, DBPlayer} from "./db";
 
 export const AppDataSource = new DataSource({
     type: "postgres",
@@ -10,7 +11,8 @@ export const AppDataSource = new DataSource({
     synchronize: true,
     logging: true,
     entities: [
-
+        DBPlayer,
+        DBBoardLetter
     ],
     subscribers: [],
     migrations: [],

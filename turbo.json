@@ -4,7 +4,7 @@
   "globalDependencies": ["**/.env.*local"],
   "pipeline": {
     "build": {
-      "env": ["NEXT_PUBLIC_SOCKET_URL", "DB_DB", "DB_HOST", "DB_USER", "DB_PASSWORD", "DB_PORT"],
+      "env": ["NEXT_PUBLIC_SOCKET_URL", "DB_DB", "DB_HOST", "DB_USER", "DB_PASSWORD", "DB_PORT", "SAVE_DELAY_SECONDS"],
       "dependsOn": ["^build"],
       "outputs": ["dist/**", ".next/**"]
     },
