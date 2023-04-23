@@ -8,7 +8,7 @@ export class Player {
     username: string
     @Column()
     token: string
-    @Column()
+    @Column('text', {array: true})
     letters: string[]
     @Column()
     score: number

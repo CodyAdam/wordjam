@@ -6,24 +6,40 @@ import {PlacedResponse} from "./types/responses/PlacedResponse";
 import {AddLetterResponse} from "./types/responses/AddLetterResponse";
 import {Config} from "./Config";
 import {SubmitWordResponse} from "./types/SubmitWordResponse";
+import {Repository} from "typeorm";
+import {AppDataSource} from "./data-source";
 
 export class GameInstance {
-    private readonly _players: Map<string, Player>;
     private readonly _board: BoardManager;
+    private playerRepository: Repository<Player> = AppDataSource.getRepository(Player)
 
     /**
      * Create a new GameInstance
      */
     constructor() {
-        this._players = new Map<string, Player>();
-        this._board = new BoardManager("WORDJAM");
+        this._board = new BoardManager();
+    }
+
+    async init() {
+        await this._board.init("WORDJAM")
+        await this.playerRepository.clear()
     }
 
     /**
      * Getter for the players map
      */
-    get players(): Map<string, Player> {
-        return this._players;
+    async players(): Promise<Player[]> {
+        return await this.playerRepository.find();
+    }
+    async getPlayerByToken(token: string): Promise<Player> {
+        let res = await this.playerRepository.findOne({
+            where: {
+                token: token
+            }
+        })
+        if(!res)
+            throw `Player not found by token ${token}`
+        return res
     }
 
     /**
@@ -37,10 +53,12 @@ export class GameInstance {
      * Get the cooldown (for getting new letter) of a player
      * @param token The token of the player
      */
-    playerCooldown(token : string): number {
+    async playerCooldown(token : string): Promise<number> {
         let now : Date = new Date();
-        let player : Player | undefined = this._players.get(token);
-        if (player === undefined) return -1;
+        let player : Player | null = await this.playerRepository.findOne({
+            where: {token: token}
+        })
+        if (player === null) return -1;
         if(player.cooldownTarget.getTime() < now.getTime()) return 0;
         let cd = player.cooldownTarget.getTime() - now.getTime();
         return Math.abs(cd/1000);
@@ -50,8 +68,8 @@ export class GameInstance {
      * Check if a username is available
      * @param username The username to check
      */
-    checkUsernameAvailability(username: string): boolean {
-        for (let player of this._players.values()) {
+    async checkUsernameAvailability(username: string): Promise<boolean> {
+        for (let player of await this.players()) {
             if (player.username === username) return false;
         }
         return true;
@@ -62,12 +80,12 @@ export class GameInstance {
      * @param player
      * @param word
      */
-    submitWord(player: Player, word: PlaceWord): SubmitWordResponse {
-        let response = this.board.checkLetterPlacedFromClient(word, player);
-        if(response.placement === PlacedResponse.OK) {
+    async submitWord(player: Player, word: PlaceWord): Promise<SubmitWordResponse> {
+        let response = await this.board.checkLetterPlacedFromClient(word, player);
+        if (response.placement === PlacedResponse.OK) {
             this.board.putLettersOnBoard(word, player);
             player.score += response.score
-            while(player.letters.length < Config.MIN_HAND_LETTERS) {
+            while (player.letters.length < Config.MIN_HAND_LETTERS) {
                 this.addLetterToPlayer(player);
             }
         }
@@ -79,8 +97,8 @@ export class GameInstance {
      * Add a player to the game
      * @param player The player to add
      */
-    addPlayer(player: Player) {
-        this._players.set(player.token, player);
+    async addPlayer(player: Player) {
+        await this.playerRepository.save(player)
     }
 
     /**

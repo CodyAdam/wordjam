@@ -8,35 +8,42 @@ import { Direction } from './types/Direction';
 import { CheckLetterResponse } from './types/CheckLetterResponse';
 import { posEquals } from './Utils';
 import { Config } from './Config';
+import {AppDataSource} from "./data-source";
+import {Repository} from "typeorm";
 
 export class BoardManager {
-  private readonly _board: Map<string, BoardLetter>;
 
-  /**
-   * Create a new BoardManager
-   * @param initialWord The word to be placed on the board at the start of the game
-   */
-  constructor(initialWord: string = 'WORDJAM') {
-    this._board = new Map<string, BoardLetter>();
-    this.defaultBoardSetup(initialWord);
-    DictionaryService.addCustomWord(initialWord);
+  boardLetterRepository: Repository<BoardLetter> = AppDataSource.getRepository(BoardLetter)
+  positionRepository: Repository<Position> = AppDataSource.getRepository(Position)
+
+  async init(initialWord: string = 'WORDJAM') {
+    let count = await this.boardLetterRepository.count()
+
+    if (count == 0) {
+      await this.defaultBoardSetup(initialWord);
+      DictionaryService.addCustomWord(initialWord);
+    }
   }
+
 
   /**
    * Place the initial word on the board
    * @param word The word to be placed on the board
    */
-  private defaultBoardSetup(word: string) {
+  private async defaultBoardSetup(word: string) {
+    await this.boardLetterRepository.clear()
+
     // offset the X pos so that the 0,0 pos is at the center of the word
     const offset = Math.floor(word.length / 2);
     for (let i = 0; i < word.length; i++) {
       const x = i - offset;
-      this._board.set(x + '_0', {
+
+      this.boardLetterRepository.create({
         placedBy: 'Server',
         timestamp: Date.now(),
         letter: word[i],
-        position: { x, y: 0 },
-      });
+        position: {x, y: 0},
+      })
     }
   }
 
@@ -44,8 +51,8 @@ export class BoardManager {
    * Getter for the board map
    * @returns The board map
    */
-  get board(): Map<string, BoardLetter> {
-    return this._board;
+  async board(): Promise<BoardLetter[]> {
+    return await this.boardLetterRepository.find()
   }
 
   /**
@@ -53,8 +60,27 @@ export class BoardManager {
    * @param position The position to check
    * @returns true if a letter is placed on the board at the given position, false otherwise
    */
-  private hasLetter(position: Position): boolean {
-    return this.board.has(position.x + '_' + position.y);
+  private async hasLetter(position: Position): Promise<boolean> {
+    return await this.positionRepository.exist({
+      where: {
+        x: position.x,
+        y: position.y
+      }
+    })
+  }
+
+  private async getLetter(position: Position): Promise<BoardLetter> {
+    let res = await this.boardLetterRepository.findOne({
+      where: {
+        position: {
+          x: position.x,
+          y: position.y
+        }
+      }
+    })
+    if(!res)
+      throw `Could not find letter at position ${position}`
+    return res
   }
 
   /**
@@ -63,7 +89,7 @@ export class BoardManager {
    * @param player The player who wants to place the word
    * @returns A PlacedResponse
    */
-  checkLetterPlacedFromClient(data: PlaceWord, player: Player): CheckLetterResponse {
+  async checkLetterPlacedFromClient(data: PlaceWord, player: Player): Promise<CheckLetterResponse> {
     let currentPos: Position = Object.assign({}, data.startPos);
     let word: string = '';
     let score = 0;
@@ -76,17 +102,17 @@ export class BoardManager {
     let previousLetter = Object.assign({}, data.startPos);
     if (data.direction == Direction.DOWN) previousLetter.y++;
     else previousLetter.x--;
-    while (this.hasLetter(previousLetter)) {
-      word = this.board.get(previousLetter.x + '_' + previousLetter.y)?.letter + word;
+    while (await this.hasLetter(previousLetter)) {
+      word = (await this.getLetter(previousLetter)).letter + word;
       lettersPositions.push(Object.assign({}, previousLetter));
       validPosition = true;
       if (data.direction == Direction.DOWN) previousLetter.y++;
       else previousLetter.x--;
     }
 
-    while (lettersToPlaced.length > 0 || this.hasLetter(currentPos)) {
-      if (this.hasLetter(currentPos)) {
-        let letter = this.board.get(currentPos.x + '_' + currentPos.y)?.letter;
+    while (lettersToPlaced.length > 0 || await this.hasLetter(currentPos)) {
+      if (await this.hasLetter(currentPos)) {
+        let letter = (await this.getLetter(currentPos)).letter;
         word += letter;
         validPosition = true;
         lettersPositions.push(Object.assign({}, currentPos));
@@ -99,7 +125,7 @@ export class BoardManager {
             highlight: { positions: [], color: '' },
           };
         }
-        let { concurrentWord, concurrentPos } = this.detectWordFromInside(
+        let { concurrentWord, concurrentPos } = await this.detectWordFromInside(
           currentPos,
           data.direction == Direction.DOWN ? Direction.RIGHT : Direction.DOWN,
           newLetter,
@@ -157,14 +183,14 @@ export class BoardManager {
    * @param letter The letter to be placed on the board at the given position
    * @returns The word if it exists, an empty string otherwise
    */
-  private detectWordFromInside(
-    position: Position,
-    direction: Direction,
-    letter: string,
-  ): { concurrentWord: string; concurrentPos: Position[] } {
+  private async detectWordFromInside(
+      position: Position,
+      direction: Direction,
+      letter: string,
+  ): Promise<{ concurrentWord: string; concurrentPos: Position[] }> {
     let word: string = '';
     let currentPos: Position = Object.assign({}, position);
-    while (this.hasLetter(currentPos) || posEquals(currentPos, position)) {
+    while (await this.hasLetter(currentPos) || posEquals(currentPos, position)) {
       if (direction == Direction.DOWN) currentPos.y++;
       else currentPos.x--;
     }
@@ -172,15 +198,15 @@ export class BoardManager {
     let positions: Position[] = [];
     if (direction == Direction.DOWN) currentPos.y--;
     else currentPos.x++;
-    while (this.hasLetter(currentPos) || posEquals(currentPos, position)) {
-      if (!posEquals(currentPos, position)) word += this.board.get(currentPos.x + '_' + currentPos.y)?.letter;
+    while (await this.hasLetter(currentPos) || posEquals(currentPos, position)) {
+      if (!posEquals(currentPos, position)) word += (await this.getLetter(currentPos)).letter;
       else word += letter;
       positions.push(Object.assign({}, currentPos));
       if (direction == Direction.DOWN) currentPos.y--;
       else currentPos.x++;
     }
 
-    return { concurrentWord: word, concurrentPos: positions };
+    return {concurrentWord: word, concurrentPos: positions};
   }
 
   /**
@@ -195,12 +221,12 @@ export class BoardManager {
     while (lettersToPlaced.length > 0) {
       if (!this.hasLetter(currentPos)) {
         let newLetter = lettersToPlaced.shift() || '';
-        this.board.set(currentPos.x + '_' + currentPos.y, {
+        this.boardLetterRepository.create({
           placedBy: player.username,
           timestamp: Date.now(),
           letter: newLetter,
           position: Object.assign({}, currentPos),
-        });
+        })
       }
       if (data.direction == Direction.DOWN) currentPos.y--;
       else currentPos.x++;

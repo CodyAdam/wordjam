@@ -1,3 +1,4 @@
+require('dotenv').config()
 import { Player } from './types/Player';
 import { Server } from 'socket.io';
 import { GameInstance } from './GameInstance';
@@ -30,14 +31,14 @@ import {AppDataSource} from "./data-source";
 
   console.log('GameInstance created');
 
-  io.on('connection', (socket) => {
+  io.on('connection', async (socket) => {
     /**
      * ####  EVENT ON LOGIN ####
      * Call when a player want to log in with his token
      * @param token : string, token of the player
      */
-    socket.on('onLogin', (token: string) => {
-      const player = gameInstance.players.get(token);
+    socket.on('onLogin', async (token: string) => {
+      const player = await gameInstance.getPlayerByToken(token);
       if (player === undefined) return socket.emit('onLoginResponse', LoginResponseType.WRONG_TOKEN);
 
       socket.emit('onLoginResponse', LoginResponseType.SUCCESS);
@@ -46,7 +47,7 @@ import {AppDataSource} from "./data-source";
       socket.emit('onInventory', player.letters);
       socket.emit('onCooldown', gameInstance.playerCooldown(player.token));
 
-      socket.emit('onScores', Array.from(gameInstance.players.values()).map((player: Player) => {
+      socket.emit('onScores', (await gameInstance.players()).map((player: Player) => {
         return {username: player.username, score: player.score};
       }));
     });
@@ -56,9 +57,9 @@ import {AppDataSource} from "./data-source";
      * Call when a player want to register with his username
      * @param username : string, username of the player
      */
-    socket.on('onRegister', (username: string) => {
+    socket.on('onRegister', async (username: string) => {
       // Player Username verification
-      if (!gameInstance.checkUsernameAvailability(username))
+      if (! await gameInstance.checkUsernameAvailability(username))
         return socket.emit('onLoginResponse', LoginResponseType.ALREADY_EXIST);
 
       // Create new player
@@ -69,13 +70,13 @@ import {AppDataSource} from "./data-source";
       newPlayer.letters = devMode ? devModeHand : generateLetters(Config.MIN_HAND_LETTERS)
       newPlayer.cooldownTarget = new Date()
 
-      gameInstance.addPlayer(newPlayer);
+      await gameInstance.addPlayer(newPlayer);
 
       socket.emit('onLoginResponse', LoginResponseType.SUCCESS);
       socket.emit('onToken', newPlayer.token);
       socket.emit('onInventory', newPlayer.letters);
       socket.emit('onCooldown', gameInstance.playerCooldown(newPlayer.token));
-      socket.emit('onScores', Array.from(gameInstance.players.values()).map((player: Player) => {
+      socket.emit('onScores', (await gameInstance.players()).map((player: Player) => {
         return {username: player.username, score: player.score};
       }));
 
@@ -87,8 +88,8 @@ import {AppDataSource} from "./data-source";
      * Call when a player want to get a new inventory of letters
      * @param token : string, token of the player
      */
-    socket.on('onReplaceAllLetters', (token: string) => {
-      const player = gameInstance.players.get(token);
+    socket.on('onReplaceAllLetters', async (token: string) => {
+      const player = await gameInstance.getPlayerByToken(token);
       if (player === undefined) return socket.emit('onError', 'Player not found');
 
       let response = gameInstance.replaceAllLetters(player);
@@ -104,8 +105,8 @@ import {AppDataSource} from "./data-source";
      * @param submittedLetters : PlaceWord, array of letters to place on the board
      * @param token : string, token of the player
      */
-    socket.on('onSubmit', ({submittedLetters, token}: { submittedLetters: PlaceWord; token: string }) => {
-      const player = gameInstance.players.get(token);
+    socket.on('onSubmit', async ({submittedLetters, token}: { submittedLetters: PlaceWord; token: string }) => {
+      const player = await gameInstance.getPlayerByToken(token);
       if (player === undefined) return socket.emit('onError', 'Player not found');
       if (
           Object.prototype.toString.call(submittedLetters.letters) !== Object.prototype.toString.call([]) ||
@@ -113,30 +114,30 @@ import {AppDataSource} from "./data-source";
       )
         return socket.emit('onError', PlacedResponse.NO_LETTER_IN_REQUEST);
 
-      let response = gameInstance.submitWord(player, submittedLetters)
+      let response = await gameInstance.submitWord(player, submittedLetters)
       if (response.highlight.positions.length > 0) socket.emit('onHighlight', response.highlight);
       if (response.placement !== PlacedResponse.OK) {
         return socket.emit('onError', response.placement);
       }
       socket.emit('onConfetti');
-      sendBoardToAll();
-      sendScoreToAll();
+      await sendBoardToAll();
+      await sendScoreToAll();
       socket.emit('onInventory', player.letters);
     });
 
     console.log('New web socket connection');
-    socket.emit('onBoard', Array.from(gameInstance.board.board.values()));
+    socket.emit('onBoard', await gameInstance.board.board);
   });
 
   /**
    * Send the letters displayed on the board to all the players connected
    */
-  function sendBoardToAll() {
-    io.emit('onBoard', Array.from(gameInstance.board.board.values()));
+  async function sendBoardToAll() {
+    io.emit('onBoard', await gameInstance.board.board);
   }
 
-  function sendScoreToAll() {
-    io.emit('onScores', Array.from(gameInstance.players.values()).map((player: Player) => {
+  async function sendScoreToAll() {
+    io.emit('onScores', (await gameInstance.players()).map((player: Player) => {
       return {username: player.username, score: player.score};
     }));
   }
