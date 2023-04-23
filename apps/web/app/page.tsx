@@ -2,7 +2,7 @@
 import { useSocket } from '@/src/hooks/useSocket';
 import { useCallback, useEffect, useState } from 'react';
 import { AppState } from '@/src/lib/AppState';
-import { HIGHLIGHT_FADE_DURATION, SOCKET_URL } from '@/src/lib/constants';
+import { HIGHLIGHT_FADE_DURATION, SOCKET_URL, TILE_SIZE } from '@/src/lib/constants';
 import UserUI from '@/src/components/UserUI';
 import Login from '@/src/components/Login';
 import Canvas from '@/src/components/Canvas';
@@ -16,6 +16,7 @@ import 'react-toastify/dist/ReactToastify.min.css';
 import Confetti from 'react-confetti';
 import { keyFromPos } from '@/src/utils/posHelper';
 import { setUsername } from '@/src/utils/user';
+import useWindowSize from '@/src/hooks/useWindowSize';
 
 let cooldownInterval: string | number | NodeJS.Timeout | undefined = undefined;
 let highlightInterval: string | number | NodeJS.Timeout | undefined = undefined;
@@ -31,6 +32,7 @@ export default function App() {
   const [inventory, setInventory] = useState<InventoryLetter[]>([{ letter: 'A' }]);
   const [highlight, setHighlight] = useState<Highlight>(null);
   const [scores, setScores] = useState<Player[]>([]);
+  const { width, height } = useWindowSize();
   const { isConnected, socket } = useSocket(SOCKET_URL, {
     events: {
       onBoard: (letters: BoardLetter[]) => {
@@ -153,6 +155,19 @@ export default function App() {
     localStorage.removeItem('token');
   }, []);
 
+  const onCenter = useCallback(() => {
+    if (!width || !height) return;
+    // set pan to center of board
+    const newPan: Pan = {
+      ...pan,
+      offset: {
+        x: width / 2 - (TILE_SIZE * 5) / 2,
+        y: height / 2 - (TILE_SIZE * 5) / 2,
+      },
+    };
+    setPan(newPan);
+  }, [height, pan, width]);
+
   const [isConfetti, setIsConfetti] = useState(true);
 
   function resetConfetti() {
@@ -160,7 +175,7 @@ export default function App() {
   }
 
   useEffect(() => {
-    if (!window) return;
+    if (!window || appStage !== AppState.InGame) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!cursorPos) return;
       // enter key to submit
@@ -184,7 +199,7 @@ export default function App() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [cursorPos, inventory, onSubmit, placeInventoryLetter]);
+  }, [appStage, cursorPos, inventory, onSubmit, placeInventoryLetter]);
 
   function onMoveLetter(from: number, to: number) {
     const newInventory = [...inventory];
@@ -264,6 +279,7 @@ export default function App() {
           onSubmit={onSubmit}
           onLogout={onLogout}
           cooldown={cooldown}
+          onCenter={onCenter}
           scores={scores}
           onLetterButton={() => {
             const token = localStorage.getItem('token');
