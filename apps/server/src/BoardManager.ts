@@ -67,7 +67,7 @@ export class BoardManager {
     })
   }
 
-  private async getLetter(position: Position): Promise<BoardLetter> {
+  async getLetter(position: Position): Promise<BoardLetter> {
     let res = await this.boardLetterRepository.findOne({
       where: {
         position: {
