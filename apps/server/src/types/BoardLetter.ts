@@ -1,5 +1,5 @@
 import {Position} from "./Position";
-import {Column, Entity, OneToOne, PrimaryGeneratedColumn} from "typeorm";
+import {Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn} from "typeorm";
 
 @Entity()
 export class BoardLetter {
@@ -12,6 +12,7 @@ export class BoardLetter {
     timestamp: number
     @Column()
     letter: string
-    @OneToOne(() => Position)
+    @OneToOne(() => Position, {cascade: true, eager: true})
+    @JoinColumn()
     position: Position
 }

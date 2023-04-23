@@ -45,7 +45,7 @@ import {AppDataSource} from "./data-source";
       socket.emit('onToken', player.token);
       socket.emit('onUsername', player.username);
       socket.emit('onInventory', player.letters);
-      socket.emit('onCooldown', gameInstance.playerCooldown(player.token));
+      socket.emit('onCooldown', await gameInstance.playerCooldown(player.token));
 
       socket.emit('onScores', (await gameInstance.players()).map((player: Player) => {
         return {username: player.username, score: player.score};
@@ -75,7 +75,7 @@ import {AppDataSource} from "./data-source";
       socket.emit('onLoginResponse', LoginResponseType.SUCCESS);
       socket.emit('onToken', newPlayer.token);
       socket.emit('onInventory', newPlayer.letters);
-      socket.emit('onCooldown', gameInstance.playerCooldown(newPlayer.token));
+      socket.emit('onCooldown', await gameInstance.playerCooldown(newPlayer.token));
       socket.emit('onScores', (await gameInstance.players()).map((player: Player) => {
         return {username: player.username, score: player.score};
       }));
@@ -94,7 +94,7 @@ import {AppDataSource} from "./data-source";
 
       let response = await gameInstance.replaceAllLetters(player);
       if (response === AddLetterResponse.SUCCESS) {
-        socket.emit('onCooldown', gameInstance.playerCooldown(player.token));
+        socket.emit('onCooldown', await gameInstance.playerCooldown(player.token));
         socket.emit('onInventory', player.letters);
       }
     });

@@ -136,7 +136,7 @@ export class GameInstance {
         if(response === AddLetterResponse.SUCCESS) {
             player.letters = generateLetters(Config.MIN_HAND_LETTERS);
             player.cooldownTarget = getDatePlusCooldown();
-            this.playerRepository.save(player)
+            await this.playerRepository.save(player)
         }
         return response;
     }
