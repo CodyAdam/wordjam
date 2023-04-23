@@ -78,7 +78,7 @@ io.on('connection', (socket) => {
    * Call when a player want to get a new inventory of letters
    * @param token : string, token of the player
    */
-  socket.on('replaceAllLetters', (token: string) => {
+  socket.on('onReplaceAllLetters', (token: string) => {
     const player = gameInstance.players.get(token);
     if (player === undefined) return socket.emit('onError', 'Player not found');
 
