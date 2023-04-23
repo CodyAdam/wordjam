@@ -5,12 +5,31 @@ services:
     build:
       context: .
       target: BACK
+    depends_on:
+      - db
 
   front:
     image: fgdou/esirjam-front
     build:
       context: .
       target: FRONT
+
+  db:
+    image: postgres:15.2
+    volumes:
+      - db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_USER=admin
+      - POSTGRES_DB=wordjam
+    ports:
+      - 5432:5432
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
 
   nginx:
     image: fgdou/esirjam-nginx
@@ -20,3 +39,5 @@ services:
     depends_on:
       - front
       - back
+volumes:
+  db:

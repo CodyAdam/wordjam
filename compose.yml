@@ -2,6 +2,8 @@ version: "3.4"
 services:
   back:
     image: fgdou/esirjam-back
+    depends_on:
+      - db
   front:
     image: fgdou/esirjam-front
   nginx:
@@ -11,3 +13,13 @@ services:
     depends_on:
       - front
       - back
+  db:
+    image: postgres:15.2
+    volumes:
+      - db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_USER=admin
+      - POSTGRES_DB=wordjam
+volumes:
+  db:
