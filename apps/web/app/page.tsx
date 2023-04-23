@@ -265,9 +265,9 @@ export default function App() {
           onLogout={onLogout}
           cooldown={cooldown}
           scores={scores}
-          onAskLetter={() => {
+          onLetterButton={() => {
             const token = localStorage.getItem('token');
-            socket.emit('onAskLetter', token);
+            socket.emit('onReplaceAllLetters', token);
           }}
         />
         <ToastContainer

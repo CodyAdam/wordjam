@@ -19,7 +19,7 @@ export default function UserUI({
   onLogout,
   onSubmit,
   onReplace,
-  onAskLetter,
+  onLetterButton,
   cooldown,
 }: {
   inventory: InventoryLetter[];
@@ -29,7 +29,7 @@ export default function UserUI({
   onSubmit: () => void;
   onLogout: () => void;
   onReplace: (index: number, newIndex: number) => void;
-  onAskLetter: () => void;
+  onLetterButton: () => void;
   cooldown: number;
 }) {
   const [showTokenModal, setShowTokenModal] = useState(false);
@@ -53,21 +53,21 @@ export default function UserUI({
       {showTokenModal && <LoginCredModal onClick={() => setShowTokenModal(false)} onLogout={onLogout} />}
       <div className='absolute top-0 right-0 m-4 flex flex-col gap-4'>
         <LoginCredButton onClick={() => setShowTokenModal(true)}></LoginCredButton>
-        <div className='flex flex-col gap-3 rounded-md border-b-4 border-gray-300 bg-white md:p-4 p-2 text-slate-800 '>
+        <div className='flex flex-col gap-3 rounded-md border-b-4 border-gray-300 bg-white p-2 text-slate-800 md:p-4 '>
           <button onClick={() => setExpandLeaderboard(!expandLeaderboard)} className='flex items-center gap-1 md:gap-3'>
             <IcOutlineChevronRight
-              className={`md:h-8 md:w-8 h-6 w-6 transform transition-transform ${expandLeaderboard ? 'rotate-90' : ''}`}
+              className={`h-6 w-6 transform transition-transform md:h-8 md:w-8 ${expandLeaderboard ? 'rotate-90' : ''}`}
             />
-            <h1 className='md:text-2xl text-base font-bold'>Leaderboard</h1>
+            <h1 className='text-base font-bold md:text-2xl'>Leaderboard</h1>
           </button>
           {expandLeaderboard && (
-            <div className='md:max-h-80 max-h-40 overflow-y-auto px-2 text-sm md:text-base'>
-              <table className='table-auto border-t w-full'>
+            <div className='max-h-40 overflow-y-auto px-2 text-sm md:max-h-80 md:text-base'>
+              <table className='w-full table-auto border-t'>
                 <thead>
-                  <tr className='h-10 md:text-lg text-md text-slate-700'>
-                    <th className='text-start pl-2'></th>
+                  <tr className='text-md h-10 text-slate-700 md:text-lg'>
+                    <th className='pl-2 text-start'></th>
                     <th className='text-start'>Username</th>
-                    <th className='text-end pr-2'>Score</th>
+                    <th className='pr-2 text-end'>Score</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -76,26 +76,26 @@ export default function UserUI({
                     if (username === player.username)
                       return (
                         <tr className='h-10  text-blue-800' key={i}>
-                          <td className='pr-4 text-center font-bold bg-blue-50 rounded-l-md pl-2'>{i + 1}</td>
+                          <td className='rounded-l-md bg-blue-50 pr-4 pl-2 text-center font-bold'>{i + 1}</td>
                           <td
-                            className='max-w-[10rem] overflow-hidden text-ellipsis whitespace-nowrap text-start bg-blue-50'
+                            className='max-w-[10rem] overflow-hidden text-ellipsis whitespace-nowrap bg-blue-50 text-start'
                             title={player.username}
                           >
                             <span className='opacity-50'>(You)</span> {player.username}
                           </td>
-                          <td className='text-end bg-blue-50 rounded-r-md pr-2'>{player.score}</td>
+                          <td className='rounded-r-md bg-blue-50 pr-2 text-end'>{player.score}</td>
                         </tr>
                       );
                     return (
                       <tr className='' key={i}>
-                        <td className='h-5 pr-4 text-center font-bold pl-2'>{i + 1}</td>
+                        <td className='h-5 pr-4 pl-2 text-center font-bold'>{i + 1}</td>
                         <td
                           className='max-w-[10rem] overflow-hidden text-ellipsis whitespace-nowrap text-start'
                           title={player.username}
                         >
                           {player.username}
                         </td>
-                        <td className='text-end pr-2'>{player.score}</td>
+                        <td className='pr-2 text-end'>{player.score}</td>
                       </tr>
                     );
                   })}
@@ -110,29 +110,22 @@ export default function UserUI({
           <button
             disabled={cooldown > 0}
             className='group flex w-fit items-center justify-center '
-            onClick={onAskLetter}
+            onClick={onLetterButton}
           >
-            <div className='rounded-lg border-b-4 border-orange-400 bg-orange-100 px-4 py-2 md:text-2xl text-xl font-bold text-orange-700 transition-all duration-75 group-hover:group-enabled:-translate-y-2 group-hover:group-enabled:scale-105 group-hover:group-enabled:shadow-lg group-disabled:cursor-not-allowed group-disabled:border-gray-500 group-disabled:bg-gray-300 group-disabled:text-gray-700 group-disabled:opacity-40'>
-              {cooldown > 0 ? (
-                `${cooldown}s`
-              ) : (
-                <>
-                  <span className='hidden md:block'>New letter</span>
-                  <span className='md:hidden'>Letter</span>
-                </>
-              )}
+            <div className='rounded-lg border-b-4 border-orange-400 bg-orange-100 px-4 py-2 text-xl font-bold text-orange-700 transition-all duration-75 group-hover:group-enabled:-translate-y-2 group-hover:group-enabled:scale-105 group-hover:group-enabled:shadow-lg group-disabled:cursor-not-allowed group-disabled:border-gray-500 group-disabled:bg-gray-300 group-disabled:text-gray-700 group-disabled:opacity-40 md:text-2xl'>
+              {cooldown > 0 ? `${cooldown}s` : 'Reroll'}
             </div>
           </button>
           <div className='m-auto'></div>
           {!isPlacedLetter && (
             <button className='group flex w-fit items-center justify-center' onClick={onReset}>
-              <div className='rounded-lg border-b-4 border-red-400 bg-red-100 px-4 py-2 md:text-2xl text-xl font-bold text-red-700 transition-all duration-75 disabled:bg-gray-300 disabled:text-gray-700 group-hover:-translate-y-2 group-hover:scale-105 group-hover:shadow-lg'>
+              <div className='rounded-lg border-b-4 border-red-400 bg-red-100 px-4 py-2 text-xl font-bold text-red-700 transition-all duration-75 disabled:bg-gray-300 disabled:text-gray-700 group-hover:-translate-y-2 group-hover:scale-105 group-hover:shadow-lg md:text-2xl'>
                 Clear
               </div>
             </button>
           )}
           <button className='group flex w-fit items-center justify-center' onClick={onSubmit}>
-            <div className='rounded-lg border-b-4 border-blue-400 bg-blue-100 px-4 py-2 md:text-2xl text-xl font-bold text-blue-700 transition-all duration-75 group-hover:-translate-y-2 group-hover:scale-105 group-hover:shadow-lg'>
+            <div className='rounded-lg border-b-4 border-blue-400 bg-blue-100 px-4 py-2 text-xl font-bold text-blue-700 transition-all duration-75 group-hover:-translate-y-2 group-hover:scale-105 group-hover:shadow-lg md:text-2xl'>
               Submit
             </div>
           </button>
@@ -159,8 +152,8 @@ export default function UserUI({
                           snapshot.isDragging || letter.position != undefined ? 'opacity-50' : ' '
                         }`}
                       >
-                        <div className='flex md:h-20 h-14 md:w-20 w-14 items-center justify-center rounded-lg bg-slate-200 pb-4 md:pb-8 md:text-6xl text-4xl font-bold text-zinc-700 shadow-sm transition-all duration-75 group-hover:-translate-y-4 group-hover:scale-105 group-hover:shadow-lg'>
-                          <div className='relative flex md:h-20 h-14 md:w-20 w-14 items-center justify-center rounded-lg border-2 border-slate-200 bg-white p-1'>
+                        <div className='flex h-14 w-14 items-center justify-center rounded-lg bg-slate-200 pb-4 text-4xl font-bold text-zinc-700 shadow-sm transition-all duration-75 group-hover:-translate-y-4 group-hover:scale-105 group-hover:shadow-lg md:h-20 md:w-20 md:pb-8 md:text-6xl'>
+                          <div className='relative flex h-14 w-14 items-center justify-center rounded-lg border-2 border-slate-200 bg-white p-1 md:h-20 md:w-20'>
                             <span className={boardFont.className}>{letter.letter.toUpperCase()}</span>
                             <div className='absolute top-0 right-1 text-sm'>
                               {letterToPoints[letter.letter.toUpperCase()]}
