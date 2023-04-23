@@ -209,8 +209,8 @@ export default function Canvas({
 
           if (isDragging) {
             newPan.offset = {
-              x: pan.offset.x + x - dragStart.x,
-              y: pan.offset.y + y - dragStart.y,
+              x: newPan.offset.x + x - dragStart.x,
+              y: newPan.offset.y + y - dragStart.y,
             };
             setDragStart({ x, y });
           } else {
