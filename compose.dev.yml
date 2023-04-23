@@ -10,6 +10,7 @@ services:
       - DB_PASSWORD=$DB_PASSWORD
       - DB_DB=$DB_DB
       - DB_PORT=$DB_PORT
+      - DB_HOST=$DB_HOST
       - SAVE_DELAY_SECONDS=$SAVE_DELAY_SECONDS=10
     depends_on:
       - db

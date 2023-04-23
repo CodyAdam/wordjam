@@ -7,7 +7,8 @@ services:
       - DB_PASSWORD=admin
       - DB_DB=wordjam
       - DB_PORT=5432
-      - SAVE_DELAY_SECONDS=10
+      - DB_HOST=db
+      - SAVE_DELAY_SECONDS=60
     depends_on:
       - db
   front:
