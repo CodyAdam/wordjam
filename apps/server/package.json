@@ -22,8 +22,12 @@
   },
   "dependencies": {
     "bufferutil": "^4.0.7",
+    "dotenv": "^16.0.3",
+    "pg": "^8.10.0",
+    "reflect-metadata": "^0.1.13",
     "socket.io": "^4.6.1",
     "socket.io-client": "^4.6.1",
+    "typeorm": "^0.3.15",
     "utf-8-validate": "^5.0.10"
   }
 }

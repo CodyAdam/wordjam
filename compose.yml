@@ -2,6 +2,15 @@ version: "3.4"
 services:
   back:
     image: fgdou/esirjam-back
+    environment:
+      - DB_USER=admin
+      - DB_PASSWORD=admin
+      - DB_DB=wordjam
+      - DB_PORT=5432
+      - DB_HOST=db
+      - SAVE_DELAY_SECONDS=60
+    depends_on:
+      - db
   front:
     image: fgdou/esirjam-front
   nginx:
@@ -11,3 +20,14 @@ services:
     depends_on:
       - front
       - back
+  db:
+    image: postgres:15.2
+    volumes:
+      - db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_USER=admin
+      - POSTGRES_DB=wordjam
+
+volumes:
+  db:
