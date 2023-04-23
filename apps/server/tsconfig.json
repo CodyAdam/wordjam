@@ -1,5 +1,8 @@
 {
   "compilerOptions": {
+
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
     /* Visit https://aka.ms/tsconfig to read more about this file */
 
     /* Projects */
@@ -102,7 +105,5 @@
   },
   "include": [
     "src/**/*"
-  ],
-  "emitDecoratorMetadata": true,
-  "experimentalDecorators": true
+  ]
 }
