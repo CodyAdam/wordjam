@@ -10,6 +10,7 @@ import LoginCredModal from './LoginCredModal';
 import LoginCredButton from './LoginCredButton';
 import { getUsername } from '../utils/user';
 import IcOutlineChevronRight from './svg/IcOutlineChevronRight';
+import MaterialSymbolsCenterFocusWeakOutlineSharp from './svg/MaterialSymbolsCenterFocusWeakOutlineSharp';
 
 export default function UserUI({
   inventory,
@@ -20,6 +21,7 @@ export default function UserUI({
   onSubmit,
   onReplace,
   onLetterButton,
+  onCenter,
   cooldown,
 }: {
   inventory: InventoryLetter[];
@@ -28,6 +30,7 @@ export default function UserUI({
   onReset: () => void;
   onSubmit: () => void;
   onLogout: () => void;
+  onCenter: () => void;
   onReplace: (index: number, newIndex: number) => void;
   onLetterButton: () => void;
   cooldown: number;
@@ -50,6 +53,12 @@ export default function UserUI({
 
   return (
     <>
+      <button className='group absolute top-0 left-0 m-4 flex w-fit items-center justify-center ' onClick={onCenter}>
+        <div className='flex items-center gap-2 rounded-lg border-b-4 border-orange-400 bg-orange-100 px-4 py-2 text-xl font-bold text-orange-700  transition-all duration-75 group-hover:group-enabled:bg-orange-200 group-disabled:cursor-not-allowed group-disabled:border-gray-500 group-disabled:bg-gray-300 group-disabled:text-gray-700 group-disabled:opacity-40 md:text-2xl'>
+          <MaterialSymbolsCenterFocusWeakOutlineSharp className='h-6 w-6 md:h-8 md:w-8' />
+          <span className='hidden md:block'>Center Focus</span>
+        </div>
+      </button>
       {showTokenModal && <LoginCredModal onClick={() => setShowTokenModal(false)} onLogout={onLogout} />}
       <div className='absolute top-0 right-0 m-4 flex flex-col gap-4'>
         <LoginCredButton onClick={() => setShowTokenModal(true)}></LoginCredButton>
@@ -116,6 +125,7 @@ export default function UserUI({
               {cooldown > 0 ? `${cooldown}s` : 'Reroll'}
             </div>
           </button>
+
           <div className='m-auto'></div>
           {!isPlacedLetter && (
             <button className='group flex w-fit items-center justify-center' onClick={onReset}>
