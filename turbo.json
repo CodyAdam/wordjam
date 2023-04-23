@@ -1,10 +1,10 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalEnv": ["NODE_ENV", "NEXT_PUBLIC_SOCKET_URL"],
+  "globalEnv": ["NODE_ENV", "NEXT_PUBLIC_SOCKET_URL", "DB_DB", "DB_HOST", "DB_USER", "DB_PASSWORD", "DB_PORT", "SAVE_DELAY_SECONDS"],
   "globalDependencies": ["**/.env.*local"],
   "pipeline": {
     "build": {
-      "env": ["NEXT_PUBLIC_SOCKET_URL", "DB_DB", "DB_HOST", "DB_USER", "DB_PASSWORD", "DB_PORT", "SAVE_DELAY_SECONDS"],
+      "env": ["NEXT_PUBLIC_SOCKET_URL"],
       "dependsOn": ["^build"],
       "outputs": ["dist/**", ".next/**"]
     },
