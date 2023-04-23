@@ -11,8 +11,10 @@ services:
       - SAVE_DELAY_SECONDS=60
     depends_on:
       - db
+    restart: always
   front:
     image: fgdou/esirjam-front
+    restart: always
   nginx:
     image: fgdou/esirjam-nginx
     ports:
@@ -20,6 +22,7 @@ services:
     depends_on:
       - front
       - back
+    restart: always
   db:
     image: postgres:15.2
     volumes:
@@ -28,6 +31,7 @@ services:
       - POSTGRES_PASSWORD=admin
       - POSTGRES_USER=admin
       - POSTGRES_DB=wordjam
+    restart: always
 
 volumes:
   db:
