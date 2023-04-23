@@ -9,7 +9,7 @@ export const AppDataSource = new DataSource({
     password: process.env.DB_PASSWORD,
     database: process.env.DB_DB,
     synchronize: true,
-    logging: true,
+    logging: false,
     entities: [
         DBPlayer,
         DBBoardLetter
