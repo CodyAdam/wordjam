@@ -7,6 +7,7 @@ import { PlaceWord } from './types/PlaceWord';
 import { PlacedResponse } from './types/responses/PlacedResponse';
 import { AddLetterResponse } from './types/responses/AddLetterResponse';
 import { Config } from './Config';
+import "reflect-metadata"
 
 const io = new Server({
   cors: {
