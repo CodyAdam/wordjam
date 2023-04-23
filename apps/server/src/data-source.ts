@@ -1,4 +1,7 @@
 import {DataSource} from "typeorm";
+import {Player} from "./types/Player";
+import {Position} from "./types/Position";
+import {BoardLetter} from "./types/BoardLetter";
 
 export const AppDataSource = new DataSource({
     type: "postgres",
@@ -10,7 +13,9 @@ export const AppDataSource = new DataSource({
     synchronize: true,
     logging: true,
     entities: [
-
+        Player,
+        Position,
+        BoardLetter
     ],
     subscribers: [],
     migrations: [],
