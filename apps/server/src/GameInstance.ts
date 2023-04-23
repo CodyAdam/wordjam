@@ -22,11 +22,11 @@ export class GameInstance {
 
         this._board.needInit().then(res => {
             if(res)
-                this.init()
+                this.reset()
         })
     }
 
-    async init() {
+    async reset() {
         console.log("INIT GAME")
         await this._board.init("WORDJAM")
         await this.playerRepository.clear()
