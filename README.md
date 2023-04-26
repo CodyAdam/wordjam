@@ -33,7 +33,7 @@ With a database launched on your side, configure the [.env](.env) file.
 Then, run the front and backend with this command :
 
 ```shell
-turo run dev
+turbo run dev
 ```
 
 ## Production
