@@ -1,6 +1,6 @@
 import './globals.css';
 import { uiFont } from '@/src/utils/fontLoader';
-
+import { Analytics } from '@vercel/analytics/react';
 export const metadata = {
   title: 'Wordjam',
   description: 'A multiplayer word game',
@@ -15,7 +15,10 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang='en' className={`h-full touch-none ${uiFont.className}`}>
-      <body className='relative flex h-full items-center justify-center overflow-hidden'>{children}</body>
+      <body className='relative flex h-full items-center justify-center overflow-hidden'>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
