@@ -28,7 +28,7 @@ export default function LoginCredModal(props: { onClick: () => void; onLogout: (
           <input
             value={token}
             readOnly
-            className='focus:shadow-outline w-full appearance-none rounded border py-2 px-3 leading-tight text-gray-700 focus:outline-none'
+            className='focus:shadow-outline font-mono w-full appearance-none rounded border py-2 px-3 leading-tight text-gray-700 focus:outline-none'
           />
           <button
             onClick={() => {
@@ -46,7 +46,7 @@ export default function LoginCredModal(props: { onClick: () => void; onLogout: (
         >
           Close
         </button>
-        <button onClick={props.onLogout} className='w-full text-center text-sm text-gray-400 hover:text-gray-600'>
+        <button onClick={props.onLogout} className='w-full text-center text-sm text-red-400 hover:text-red-600'>
           Click here to <b>logout</b>
         </button>
       </motion.div>

@@ -35,7 +35,7 @@ export default function UserUI({
   onLetterButton: () => void;
   cooldown: number;
 }) {
-  const [showTokenModal, setShowTokenModal] = useState(false);
+  const [showTokenModal, setShowTokenModal] = useState(true);
   const [expandLeaderboard, setExpandLeaderboard] = useState(false);
   const onDragEnd = useCallback(
     (result: any) => {
