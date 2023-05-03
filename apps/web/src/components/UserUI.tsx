@@ -53,10 +53,6 @@ export default function UserUI({
 
   return (
     <>
-      <div className='absolute top-3 flex flex-col font-mono text-xl font-bold justify-center items-center pointer-events-none select-none'>
-        <h1>BETA VERSION</h1>
-        <h2 className='text-sm font-normal'>Ending the 10th of May, 8pm CEST</h2>
-      </div>
       <button className='group absolute top-0 left-0 m-4 flex w-fit items-center justify-center ' onClick={onCenter}>
         <div className='flex items-center gap-2 rounded-lg border-b-4 border-orange-400 bg-orange-100 px-4 py-2 text-xl font-bold text-orange-700  transition-all duration-75 group-hover:group-enabled:bg-orange-200 group-disabled:cursor-not-allowed group-disabled:border-gray-500 group-disabled:bg-gray-300 group-disabled:text-gray-700 group-disabled:opacity-40 md:text-2xl'>
           <MaterialSymbolsCenterFocusWeakOutlineSharp className='h-6 w-6 md:h-8 md:w-8' />
