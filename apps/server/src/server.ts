@@ -73,10 +73,16 @@ AppDataSource.initialize().then(async () => {
       if(username.length > 20)
         return socket.emit('onLoginResponse', LoginResponseType.TOO_LONG);
 
+      let token = undefined
+
+      while(token == undefined || gameInstance.players.has(token)){
+        token = generateToken(4)
+      }
+
       // Create new player
       let newPlayer: Player = {
         username: username,
-        token: generateToken(4),
+        token: token,
         score: 0,
         letters: devMode ? devModeHand : generateLetters(Config.MIN_HAND_LETTERS),
         cooldownTarget: new Date(),
