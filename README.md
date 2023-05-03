@@ -15,8 +15,7 @@ WordJam is a Scabble like mass multiplayer game. The goal is to win points by pl
 
 # Try it
 Try the game at one of those links :
-- https://wordjam.cdy.pw/
-- https://wordjam.fgdou.ovh/
+- https://wordjam.fun/
 
 
 # Host it yourself
