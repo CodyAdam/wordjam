@@ -34,8 +34,9 @@ export default function Login({ isConnected, socket }: { isConnected: boolean; s
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
     resetField,
-  } = useForm<Inputs>();
+  } = useForm<Inputs>({});
   const onSubmit: SubmitHandler<Inputs> = (data) => {
     if (loginType === Type.Nickname) {
       const username = data.nicknameOrToken;
@@ -79,6 +80,9 @@ export default function Login({ isConnected, socket }: { isConnected: boolean; s
             type='text'
             placeholder='Nickname'
             {...register('nicknameOrToken', { required: true })}
+            onChange={(e) => {
+              setValue('nicknameOrToken', e.target.value.trim());
+            }}
           />
           {errors.nicknameOrToken && <span className='-mt-3 text-xs text-red-500'>You need a nickname to play!</span>}
           <button className='w-full rounded-lg border-b-4 border-green-400 bg-green-200 p-2 text-xl font-bold text-green-900 transition-colors hover:border-green-500 hover:bg-green-300'>
