@@ -63,9 +63,15 @@ AppDataSource.initialize().then(async () => {
      * @param username : string, username of the player
      */
     socket.on('onRegister', (username: string) => {
+      username = username.trim()
+      if(username.length == 0)
+        return socket.emit('onLoginResponse', LoginResponseType.EMPTY)
       // Player Username verification
       if (!gameInstance.checkUsernameAvailability(username))
         return socket.emit('onLoginResponse', LoginResponseType.ALREADY_EXIST);
+
+      if(username.length > 20)
+        return socket.emit('onLoginResponse', LoginResponseType.TOO_LONG);
 
       // Create new player
       let newPlayer: Player = {
