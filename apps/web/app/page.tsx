@@ -213,7 +213,7 @@ export default function App() {
     return (
       <>
         <main className='relative flex h-full bg-gray-100'>
-          <div className='pointer-events-none absolute top-3 flex select-none flex-col items-center justify-center font-mono text-xl font-bold'>
+          <div className='pointer-events-none absolute left-0 right-0 top-3 z-30 flex select-none flex-col items-center justify-center font-mono text-xl font-bold'>
             <h1>BETA VERSION</h1>
             <h2 className='text-sm font-normal'>Ending the 10th of May, 8pm CEST</h2>
           </div>
@@ -260,7 +260,7 @@ export default function App() {
         )}
 
         <main className='relative flex h-full bg-gray-100'>
-          <div className='pointer-events-none absolute top-3 flex select-none flex-col items-center justify-center font-mono text-xl font-bold'>
+          <div className='pointer-events-none absolute left-0 right-0 top-3 z-30 flex select-none flex-col items-center justify-center font-mono text-xl font-bold'>
             <h1>BETA VERSION</h1>
             <h2 className='text-sm font-normal'>Ending the 10th of May, 8pm CEST</h2>
           </div>
