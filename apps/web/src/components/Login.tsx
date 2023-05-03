@@ -57,9 +57,9 @@ export default function Login({ isConnected, socket }: { isConnected: boolean; s
           className='flex flex-col gap-3 rounded-2xl border-b-8 border-gray-200 bg-white p-10 shadow-xl'
         >
           {HEADER}
-          <div className='flex flex-col items-center justify-center gap-4 pt-6 text-gray-700 animate-pulse'>
+          <div className='flex animate-pulse flex-col items-center justify-center gap-4 pt-6 text-gray-700'>
             <h1 className='text-lg font-semibold '>Connecting to the server...</h1>
-            <SvgSpinnersBlocksShuffle3 className='w-10 h-10' />
+            <SvgSpinnersBlocksShuffle3 className='h-10 w-10' />
           </div>
         </form>
       </div>
@@ -110,7 +110,7 @@ export default function Login({ isConnected, socket }: { isConnected: boolean; s
           {...register('nicknameOrToken', { required: true })}
         />
         {errors.nicknameOrToken && <span className='-mt-3 text-xs text-red-500'>Where is your login code?</span>}
-        <button className='w-full rounded-lg border-b-4 border-blue-400 bg-blue-200 p-2 text-xl font-bold text-blue-900 transition-colors hover:bg-blue-300 flex items-center gap-3 justify-center'>
+        <button className='flex w-full items-center justify-center gap-3 rounded-lg border-b-4 border-blue-400 bg-blue-200 p-2 text-xl font-bold text-blue-900 transition-colors hover:bg-blue-300'>
           <MaterialSymbolsFramePersonSharp className='h-6 w-6'></MaterialSymbolsFramePersonSharp>
           Login
         </button>
