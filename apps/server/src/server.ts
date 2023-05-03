@@ -64,6 +64,8 @@ AppDataSource.initialize().then(async () => {
      */
     socket.on('onRegister', (username: string) => {
       username = username.trim()
+      if(username.length == 0)
+        return socket.emit('onLoginResponse', LoginResponseType.EMPTY)
       // Player Username verification
       if (!gameInstance.checkUsernameAvailability(username))
         return socket.emit('onLoginResponse', LoginResponseType.ALREADY_EXIST);
