@@ -41,11 +41,11 @@ export async function GET(request: Request) {
       >
         <img
           style={{ filter: "blur(1.5rem)" }}
-          src={imageBoardData}
+          src={imageBoardData as unknown as string}
           tw="absolute h-full w-full"
         />
         <div tw="flex flex-col items-center jutify-center">
-          <img tw="h-24" src={imageData} />
+          <img tw="h-24" src={imageData as unknown as string} />
           <h1 tw={"font-bold text-9xl"}>WordJam</h1>
           <p tw="text-4xl">
             Unleash Your Inner Wordsmith and Create a Symphony of Letters!
