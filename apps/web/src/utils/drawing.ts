@@ -55,7 +55,10 @@ export function drawDraft(ctx: CanvasRenderingContext2D, draft: Draft, pan: Pan)
   })
 
   draft.cursors.forEach(c => {
-    drawCursor_(ctx, c.position, (c.direction == Direction.RIGHT), false, colorDraft, pan)
+    drawCursor_(ctx, {
+      x: c.position.x+.5,
+      y: c.position.y+.5
+    }, (c.direction == Direction.RIGHT), false, colorDraft, pan)
   })
 
 }

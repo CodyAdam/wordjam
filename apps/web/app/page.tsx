@@ -90,6 +90,9 @@ export default function App() {
           if (cooldown > 0) setCooldown((c) => c - 1);
         }, 1000);
       },
+      onDraft: (draft: Draft) => {
+        setDraft(draft)
+      },
       onUsername: (username: string) => {
         setUsername(username);
       },
