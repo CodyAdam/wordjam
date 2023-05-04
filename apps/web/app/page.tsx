@@ -91,7 +91,7 @@ export default function App() {
         }, 1000);
       },
       onDraft: (draft: Draft) => {
-        if(!isConnected)
+        if(appStage != AppState.InGame)
           return
         setDraft(draft)
       },
@@ -211,7 +211,7 @@ export default function App() {
   }, [appStage, cursorPos, inventory, onSubmit, placeInventoryLetter]);
 
   setTimeout(() => {
-    if(!isConnected)
+    if(appStage != AppState.InGame)
       return
 
     let draft: Draft = {
