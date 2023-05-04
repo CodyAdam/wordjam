@@ -57,10 +57,14 @@ server.get<{Params: Static<typeof playerParams>}>('/player/:nickname', async (re
 
 const start = async () => {
     try {
+        // check if prisma is connected to the database
+        await prisma.$connect()
+        console.log('Connected to database')
+
         console.log('Starting server...')
         // eslint-disable-next-line turbo/no-undeclared-env-vars
         const host = process.env.HOST ?? 'localhost';
-        await server.listen({port: 3001})
+        await server.listen({port: 3001, host})
 
         const address = server.server.address()
         const port = typeof address === 'string' ? address : address?.port
@@ -68,7 +72,7 @@ const start = async () => {
         console.log(`Server is listening at ${port}`)
 
     } catch (err) {
-        server.log.error(err)
+        console.error(err)
         process.exit(1)
     }
 }
