@@ -65,6 +65,7 @@ AppDataSource.initialize().then(async () => {
         return {username: player.username, score: player.score};
       }));
       socketToPlayer.set(socket, player)
+      player.connected = true
     });
 
     /**
@@ -94,6 +95,7 @@ AppDataSource.initialize().then(async () => {
         username: username,
         token: token,
         score: 0,
+        connected: true,
         letters: devMode ? devModeHand : generateLetters(Config.MIN_HAND_LETTERS),
         cooldownTarget: new Date(),
       };
@@ -157,6 +159,7 @@ AppDataSource.initialize().then(async () => {
     socket.on('disconnect', () => {
       let player = socketToPlayer.get(socket)!!
       delete player.draft
+      player.connected = false
       socketToPlayer.delete(socket)
     })
 
@@ -180,7 +183,7 @@ AppDataSource.initialize().then(async () => {
 
   function sendScoreToAll() {
     io.emit('onScores', Array.from(gameInstance.players.values()).map((player: Player) => {
-      return {username: player.username, score: player.score};
+      return {username: player.username, score: player.score, connected: player.connected};
     }));
   }
 

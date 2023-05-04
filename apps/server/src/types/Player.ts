@@ -6,5 +6,6 @@ export type Player = {
     letters: string[]
     score: number
     cooldownTarget: Date
-    draft?: Draft
+    draft?: Draft,
+    connected: boolean
 }
