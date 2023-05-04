@@ -62,7 +62,7 @@ AppDataSource.initialize().then(async () => {
       socket.emit('onCooldown', gameInstance.playerCooldown(player.token));
 
       socket.emit('onScores', Array.from(gameInstance.players.values()).map((player: Player) => {
-        return {username: player.username, score: player.score};
+        return {username: player.username, score: player.score, connected: player.connected};
       }));
       socketToPlayer.set(socket, player)
       player.connected = true
@@ -106,7 +106,7 @@ AppDataSource.initialize().then(async () => {
       socket.emit('onInventory', newPlayer.letters);
       socket.emit('onCooldown', gameInstance.playerCooldown(newPlayer.token));
       socket.emit('onScores', Array.from(gameInstance.players.values()).map((player: Player) => {
-        return {username: player.username, score: player.score};
+        return {username: player.username, score: player.score, connected: player.connected};
       }));
 
       socketToPlayer.set(socket, newPlayer)

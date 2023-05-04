@@ -1,6 +1,7 @@
 export type Player = {
 	username: string
 	score: number
+    connected: boolean
 	// letterCount: number
 	// lastPlaced: number // date.getTime()
 }
