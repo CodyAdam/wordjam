@@ -60,3 +60,9 @@ export function getKeyY(key: number) {
 export function posFromKey(key: number) {
   return { x: getKeyX(key), y: getKeyY(key) };
 }
+
+export function isInBound(pos: Position, pan: Pan, width: number, height: number) {
+  const minBottomLeft = posFloor(screenToWorld({ x: -1, y: height + 1 }, pan));
+  const maxTopRight = posCeil(screenToWorld({ x: width + 1, y: -1 }, pan));
+  return pos.x >= minBottomLeft.x && pos.x <= maxTopRight.x && pos.y >= minBottomLeft.y && pos.y <= maxTopRight.y;
+}

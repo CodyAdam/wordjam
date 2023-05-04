@@ -20,9 +20,9 @@ import {
   drawPlacedInventoryLetters,
   drawDarkenTile,
   drawCursor,
-  drawDraft
+  drawDraft,
 } from '../utils/drawing';
-import {Draft} from "@/src/types/Draft";
+import { Draft } from '@/src/types/Draft';
 
 export default function Canvas({
   placedLetters,
@@ -88,19 +88,19 @@ export default function Canvas({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [height, width, canvasRef]);
 
-  function isFree(p: Position): boolean{
-    if(inventory.find(i => i.position != null && i.position.x == p.x && i.position.y == p.y))
-      return false
+  const isFree = useCallback(
+    (p: Position) => {
+      if (inventory.find((i) => i.position != null && i.position.x == p.x && i.position.y == p.y)) return false;
 
-    if(cursorPos != null && cursorPos.x == p.x && cursorPos.y == p.y)
-      return false
+      if (cursorPos != null && cursorPos.x == p.x && cursorPos.y == p.y) return false;
 
-    let key = keyFromPos(p)
-    if(placedLetters.has(key))
-      return false
+      let key = keyFromPos(p);
+      if (placedLetters.has(key)) return false;
 
-    return true
-  }
+      return true;
+    },
+    [inventory, cursorPos, placedLetters],
+  );
 
   useEffect(() => {
     const ctx = canvasRef.current!.getContext('2d');
@@ -110,21 +110,33 @@ export default function Canvas({
     drawGrid(ctx, pan, width, height);
 
     let newDraft: Draft = {
-      cursors: draft.cursors.filter(c => isFree(c.position)),
-      letters: draft.letters.filter(c => isFree(c))
-    }
+      cursors: draft.cursors.filter((c) => isFree(c.position)),
+      letters: draft.letters.filter((c) => isFree(c)),
+    };
 
-
-    drawDraft(ctx, newDraft, pan)
+    drawDraft(ctx, newDraft, pan);
     if (hoverPos) drawDarkenTile(ctx, posFloor(hoverPos), pan);
-    drawPlacedLetters(ctx, placedLetters, pan, highlight);
-    drawPlacedInventoryLetters(ctx, inventory, pan, highlight);
+    drawPlacedLetters(ctx, placedLetters, pan, highlight, width, height);
+    drawPlacedInventoryLetters(ctx, inventory, pan, highlight, width, height);
 
     if (cursorPos) {
       if (placedLetters.has(keyFromPos(cursorPos))) drawCursor(ctx, posCentered(cursorPos), cursorDirection, true, pan);
       else drawCursor(ctx, posCentered(cursorPos), cursorDirection, false, pan);
     }
-  }, [height, pan, width, hoverPos, placedLetters, cursorPos, cursorDirection, inventory, highlight]);
+  }, [
+    height,
+    pan,
+    width,
+    hoverPos,
+    placedLetters,
+    cursorPos,
+    cursorDirection,
+    inventory,
+    highlight,
+    draft.cursors,
+    draft.letters,
+    isFree,
+  ]);
 
   return (
     <canvas
