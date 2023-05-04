@@ -91,6 +91,8 @@ export default function App() {
         }, 1000);
       },
       onDraft: (draft: Draft) => {
+        if(!isConnected)
+          return
         setDraft(draft)
       },
       onUsername: (username: string) => {
@@ -209,6 +211,9 @@ export default function App() {
   }, [appStage, cursorPos, inventory, onSubmit, placeInventoryLetter]);
 
   setTimeout(() => {
+    if(!isConnected)
+      return
+
     let draft: Draft = {
       letters: [],
       cursors: []
