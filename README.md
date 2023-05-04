@@ -2,9 +2,12 @@
 WordJam is a Scabble like mass multiplayer game. The goal is to win points by placing words attached to others.
 
 # Members
-- Romain BRIEND
+
+- Arthur ALLAIN
+- [Cody ADAM](https://github.com/CodyAdam)
 - Fabien GOARDOU
 - Mael KERICHARD
+- Romain BRIEND
 
 # Planning
 | Start | End   | Description |
