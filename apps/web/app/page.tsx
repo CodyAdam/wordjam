@@ -218,7 +218,8 @@ export default function App() {
     })
 
     inventory.forEach(i => {
-      draft.letters.push(i.position!!)
+      if(i.position)
+        draft.letters.push(i.position)
     })
 
     socket.emit('onDraft', {token: localStorage.getItem('token'), draft: draft})
