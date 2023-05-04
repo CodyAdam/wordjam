@@ -49,18 +49,18 @@ export function drawDebug(ctx: CanvasRenderingContext2D, pos: Position, text: st
 }
 
 export function drawDraft(ctx: CanvasRenderingContext2D, draft: Draft, pan: Pan) {
-  draft.letters.forEach((l) => {
-    drawLetter(ctx, '×', l, colorDraft, pan, null);
+  draft.letters.forEach((position) => {
+    drawLetter(ctx, '×', position, colorDraft, pan, null);
   });
-
-  draft.cursors.forEach((c) => {
-    drawCursor_(
+  
+  draft.cursors.forEach((cursor) => {
+    drawCursorWithColor(
       ctx,
       {
-        x: c.position.x + 0.5,
-        y: c.position.y + 0.5,
+        x: cursor.position.x + 0.5,
+        y: cursor.position.y + 0.5,
       },
-      c.direction == Direction.RIGHT,
+      cursor.direction == Direction.RIGHT,
       false,
       colorDraft,
       pan,
@@ -150,7 +150,7 @@ export function drawDarkenTile(ctx: CanvasRenderingContext2D, pos: Position, pan
   ctx.fill();
 }
 
-function drawCursor_(
+function drawCursorWithColor(
   ctx: CanvasRenderingContext2D,
   pos: Position,
   direction: boolean,
@@ -224,5 +224,5 @@ export function drawCursor(
   variant: boolean,
   pan: Pan,
 ) {
-  drawCursor_(ctx, pos, direction, variant, '#fb923c', pan);
+  drawCursorWithColor(ctx, pos, direction, variant, '#fb923c', pan);
 }
