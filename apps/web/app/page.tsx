@@ -209,8 +209,16 @@ export default function App() {
     };
   }, [appStage, cursorPos, inventory, onSubmit, placeInventoryLetter]);
 
-  setTimeout(() => {
-    if (appStage != AppState.InGame) return;
+  function onMoveLetter(from: number, to: number) {
+    const newInventory = [...inventory];
+    // do not swap, only move
+    const letter = newInventory.splice(from, 1)[0];
+    newInventory.splice(to, 0, letter);
+    setInventory(newInventory);
+  }
+
+  useEffect(() => {
+    if (appStage !== AppState.InGame) return;
 
     let draft: Draft = {
       letters: [],
@@ -227,16 +235,13 @@ export default function App() {
       if (i.position) draft.letters.push(i.position);
     });
 
-    socket.emit('onDraft', { token: localStorage.getItem('token'), draft: draft });
-  }, 5 * 1000);
+    if (draft.letters.length > 0 || draft.cursors.length > 0)
+      socket.emit('onDraft', { token: localStorage.getItem('token'), draft: draft });
+  }, [appStage, cursorDirection, cursorPos, inventory, socket]);
 
-  function onMoveLetter(from: number, to: number) {
-    const newInventory = [...inventory];
-    // do not swap, only move
-    const letter = newInventory.splice(from, 1)[0];
-    newInventory.splice(to, 0, letter);
-    setInventory(newInventory);
-  }
+  useEffect(() => {
+    if (!isConnected && appStage === AppState.InGame) setAppStage(AppState.AwaitingLogin);
+  }, [appStage, isConnected]);
 
   if (appStage === AppState.AwaitingLogin)
     return (
@@ -290,7 +295,7 @@ export default function App() {
         )}
 
         <main className='relative flex h-full bg-gray-100'>
-          <div className='pointer-events-none absolute left-0 right-0 md:top-3 bottom-56 md:bottom-auto z-30 flex select-none flex-col items-center justify-center font-mono text-xl font-bold opacity-70 scale-70 md:scale-100'>
+          <div className='scale-70 pointer-events-none absolute left-0 right-0 bottom-56 z-30 flex select-none flex-col items-center justify-center font-mono text-xl font-bold opacity-70 md:top-3 md:bottom-auto md:scale-100'>
             <h1>BETA VERSION</h1>
             <h2 className='text-sm font-normal'>Ending the 10th of May, 8pm CEST</h2>
           </div>

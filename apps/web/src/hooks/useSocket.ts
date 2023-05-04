@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 import { io, ManagerOptions, SocketOptions } from 'socket.io-client';
 
 const SOCKET_OPTION: Partial<ManagerOptions & SocketOptions> = {
@@ -24,14 +25,14 @@ export function useSocket(
 
     function onDisconnect() {
       console.log('Disconnected from server');
+      toast.error("You have been disconnected from the server.\nWe'll be back soon !");
       setIsConnected(false);
     }
 
     socket.on('connect', onConnect);
     socket.on('disconnect', onDisconnect);
 
-    if (!socket.connected)
-      socket.connect();
+    if (!socket.connected) socket.connect();
     if (options?.events) {
       Object.entries(options.events).forEach(([event, callback]) => {
         socket.on(event, callback);
