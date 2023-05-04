@@ -1,7 +1,9 @@
+import {Draft} from "./types/Draft";
+
 require('dotenv').config()
 import "reflect-metadata"
 import { Player } from './types/Player';
-import { Server } from 'socket.io';
+import {Server, Socket} from 'socket.io';
 import { GameInstance } from './GameInstance';
 import { generateLetters, generateToken, getDatePlusCooldown } from './Utils';
 import { LoginResponseType } from './types/responses/LoginResponseType';
@@ -10,6 +12,8 @@ import { PlacedResponse } from './types/responses/PlacedResponse';
 import { AddLetterResponse } from './types/responses/AddLetterResponse';
 import { Config } from './Config';
 import {AppDataSource} from "./data-source";
+
+let socketToPlayer: Map<Socket, Player> = new Map()
 
 AppDataSource.initialize().then(async () => {
 
@@ -32,9 +36,14 @@ AppDataSource.initialize().then(async () => {
   console.log('GameInstance created');
 
   let saveRate = parseInt(process.env.SAVE_DELAY_SECONDS || "3600")
+  let draftRate = 5
   setInterval(() => {
     gameInstance.save()
   }, saveRate*1000)
+  setInterval(() => {
+    let draft = gameInstance.getDraft()
+    io.emit('onDraft', draft)
+  }, draftRate*1000)
 
   io.on('connection', (socket) => {
     /**
@@ -53,8 +62,10 @@ AppDataSource.initialize().then(async () => {
       socket.emit('onCooldown', gameInstance.playerCooldown(player.token));
 
       socket.emit('onScores', Array.from(gameInstance.players.values()).map((player: Player) => {
-        return {username: player.username, score: player.score};
+        return {username: player.username, score: player.score, connected: player.connected};
       }));
+      socketToPlayer.set(socket, player)
+      player.connected = true
     });
 
     /**
@@ -84,6 +95,7 @@ AppDataSource.initialize().then(async () => {
         username: username,
         token: token,
         score: 0,
+        connected: true,
         letters: devMode ? devModeHand : generateLetters(Config.MIN_HAND_LETTERS),
         cooldownTarget: new Date(),
       };
@@ -94,8 +106,10 @@ AppDataSource.initialize().then(async () => {
       socket.emit('onInventory', newPlayer.letters);
       socket.emit('onCooldown', gameInstance.playerCooldown(newPlayer.token));
       socket.emit('onScores', Array.from(gameInstance.players.values()).map((player: Player) => {
-        return {username: player.username, score: player.score};
+        return {username: player.username, score: player.score, connected: player.connected};
       }));
+
+      socketToPlayer.set(socket, newPlayer)
 
       console.log('New Player : ' + newPlayer.username);
     });
@@ -142,6 +156,20 @@ AppDataSource.initialize().then(async () => {
       socket.emit('onInventory', player.letters);
     });
 
+    socket.on('disconnect', () => {
+      let player = socketToPlayer.get(socket)!!
+      delete player.draft
+      player.connected = false
+      socketToPlayer.delete(socket)
+    })
+
+    socket.on('onDraft', ({token, draft}: {token: string, draft: Draft}) => {
+      const player = gameInstance.players.get(token);
+      if (player === undefined) return socket.emit('onError', 'Player not found');
+
+      player.draft = draft
+    })
+
     console.log('New web socket connection');
     socket.emit('onBoard', Array.from(gameInstance.board.board.values()));
   });
@@ -155,7 +183,7 @@ AppDataSource.initialize().then(async () => {
 
   function sendScoreToAll() {
     io.emit('onScores', Array.from(gameInstance.players.values()).map((player: Player) => {
-      return {username: player.username, score: player.score};
+      return {username: player.username, score: player.score, connected: player.connected};
     }));
   }
 

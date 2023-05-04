@@ -7,6 +7,7 @@ import {AddLetterResponse} from "./types/responses/AddLetterResponse";
 import {Config} from "./Config";
 import {SubmitWordResponse} from "./types/SubmitWordResponse";
 import {Database} from "./Database";
+import {Draft} from "./types/Draft";
 
 export class GameInstance {
     private readonly _players: Map<string, Player>;
@@ -141,4 +142,16 @@ export class GameInstance {
         return response;
     }
 
+    getDraft(): Draft {
+        let draft: Draft = {letters: [], cursors: []}
+
+        this.players.forEach(p => {
+            if(p.draft){
+                draft.letters.push(...p.draft.letters)
+                draft.cursors.push(...p.draft.cursors)
+            }
+        })
+
+        return draft
+    }
 }

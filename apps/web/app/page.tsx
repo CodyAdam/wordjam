@@ -1,22 +1,23 @@
 'use client';
-import { useSocket } from '@/src/hooks/useSocket';
-import { useCallback, useEffect, useState } from 'react';
-import { AppState } from '@/src/lib/AppState';
-import { HIGHLIGHT_FADE_DURATION, SOCKET_URL, TILE_SIZE } from '@/src/lib/constants';
+import {useSocket} from '@/src/hooks/useSocket';
+import {useCallback, useEffect, useState} from 'react';
+import {AppState} from '@/src/lib/AppState';
+import {HIGHLIGHT_FADE_DURATION, SOCKET_URL, TILE_SIZE} from '@/src/lib/constants';
 import UserUI from '@/src/components/UserUI';
 import Login from '@/src/components/Login';
 import Canvas from '@/src/components/Canvas';
-import { useCursor } from '@/src/hooks/useCursor';
-import { BoardLetter, LoginResponseType, Player } from '@/src/types/api';
-import { BoardLetters, Highlight, InventoryLetter } from '@/src/types/board';
-import { Pan } from '@/src/types/canvas';
-import { toPlaceWord } from '@/src/utils/submitHelper';
-import { toast, ToastContainer } from 'react-toastify';
+import {useCursor} from '@/src/hooks/useCursor';
+import {BoardLetter, Direction, LoginResponseType, Player} from '@/src/types/api';
+import {BoardLetters, Highlight, InventoryLetter} from '@/src/types/board';
+import {Pan} from '@/src/types/canvas';
+import {toPlaceWord} from '@/src/utils/submitHelper';
+import {toast, ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.min.css';
 import Confetti from 'react-confetti';
-import { keyFromPos } from '@/src/utils/posHelper';
-import { setUsername } from '@/src/utils/user';
+import {keyFromPos} from '@/src/utils/posHelper';
+import {setUsername} from '@/src/utils/user';
 import useWindowSize from '@/src/hooks/useWindowSize';
+import {Draft} from "@/src/types/Draft";
 
 let cooldownInterval: string | number | NodeJS.Timeout | undefined = undefined;
 let highlightInterval: string | number | NodeJS.Timeout | undefined = undefined;
@@ -33,6 +34,9 @@ export default function App() {
   const [highlight, setHighlight] = useState<Highlight>(null);
   const [scores, setScores] = useState<Player[]>([]);
   const { width, height } = useWindowSize();
+
+  const [draft, setDraft] = useState<Draft>({cursors: [], letters: []})
+
   const { isConnected, socket } = useSocket(SOCKET_URL, {
     events: {
       onBoard: (letters: BoardLetter[]) => {
@@ -85,6 +89,9 @@ export default function App() {
         cooldownInterval = setInterval(() => {
           if (cooldown > 0) setCooldown((c) => c - 1);
         }, 1000);
+      },
+      onDraft: (draft: Draft) => {
+        setDraft(draft)
       },
       onUsername: (username: string) => {
         setUsername(username);
@@ -201,6 +208,26 @@ export default function App() {
     };
   }, [appStage, cursorPos, inventory, onSubmit, placeInventoryLetter]);
 
+  setTimeout(() => {
+    let draft: Draft = {
+      letters: [],
+      cursors: []
+    }
+
+    if(cursorPos)
+    draft.cursors.push({
+      position: cursorPos,
+      direction: (cursorDirection) ? Direction.RIGHT : Direction.DOWN
+    })
+
+    inventory.forEach(i => {
+      if(i.position)
+        draft.letters.push(i.position)
+    })
+
+    socket.emit('onDraft', {token: localStorage.getItem('token'), draft: draft})
+  }, 5*1000)
+
   function onMoveLetter(from: number, to: number) {
     const newInventory = [...inventory];
     // do not swap, only move
@@ -227,6 +254,7 @@ export default function App() {
             highlight={highlight}
             cursorDirection={cursorDirection}
             setCursorDirection={setCursorDirection}
+            draft={draft}
           />
           <Login socket={socket} isConnected={isConnected} />
         </main>
@@ -271,6 +299,7 @@ export default function App() {
             highlight={highlight}
             inventory={inventory}
             cursorPos={cursorPos}
+            draft={draft}
             setCursorPos={(pos) => {
               if (pos) removeInventoryLetterAt(pos);
               setCursorPos(pos);

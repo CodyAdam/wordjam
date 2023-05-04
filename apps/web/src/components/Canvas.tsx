@@ -14,7 +14,15 @@ import { distance, keyFromPos, posCentered, posFloor, screenToWorld, worldToScre
 import { BoardLetters, Highlight, InventoryLetter } from '../types/board';
 import { Position } from '../types/api';
 import { Pan } from '../types/canvas';
-import { drawGrid, drawPlacedLetters, drawPlacedInventoryLetters, drawDarkenTile, drawCursor } from '../utils/drawing';
+import {
+  drawGrid,
+  drawPlacedLetters,
+  drawPlacedInventoryLetters,
+  drawDarkenTile,
+  drawCursor,
+  drawDraft
+} from '../utils/drawing';
+import {Draft} from "@/src/types/Draft";
 
 export default function Canvas({
   placedLetters,
@@ -26,6 +34,7 @@ export default function Canvas({
   highlight,
   cursorDirection,
   setCursorDirection,
+  draft,
 }: {
   placedLetters: BoardLetters;
   pan: Pan;
@@ -36,6 +45,7 @@ export default function Canvas({
   setCursorPos: (cursor: Position | null) => void;
   cursorDirection: boolean;
   setCursorDirection: (direction: boolean) => void;
+  draft: Draft;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDown, setIsDown] = useState(false);
@@ -78,12 +88,34 @@ export default function Canvas({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [height, width, canvasRef]);
 
+  function isFree(p: Position): boolean{
+    if(inventory.find(i => i.position != null && i.position.x == p.x && i.position.y == p.y))
+      return false
+
+    if(cursorPos != null && cursorPos.x == p.x && cursorPos.y == p.y)
+      return false
+
+    let key = keyFromPos(p)
+    if(placedLetters.has(key))
+      return false
+
+    return true
+  }
+
   useEffect(() => {
     const ctx = canvasRef.current!.getContext('2d');
     if (!ctx || !width || !height) return;
     ctx.clearRect(0, 0, width, height);
 
     drawGrid(ctx, pan, width, height);
+
+    let newDraft: Draft = {
+      cursors: draft.cursors.filter(c => isFree(c.position)),
+      letters: draft.letters.filter(c => isFree(c))
+    }
+
+
+    drawDraft(ctx, newDraft, pan)
     if (hoverPos) drawDarkenTile(ctx, posFloor(hoverPos), pan);
     drawPlacedLetters(ctx, placedLetters, pan, highlight);
     drawPlacedInventoryLetters(ctx, inventory, pan, highlight);

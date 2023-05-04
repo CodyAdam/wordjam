@@ -74,6 +74,7 @@ export default function UserUI({
               <table className='w-full table-auto border-t'>
                 <thead>
                   <tr className='text-md h-10 text-slate-700 md:text-lg'>
+                    <th className='pr-1 text-end'></th>
                     <th className='pl-2 text-start'></th>
                     <th className='text-start'>Username</th>
                     <th className='pr-2 text-end'>Score</th>
@@ -85,6 +86,7 @@ export default function UserUI({
                     if (username === player.username)
                       return (
                         <tr className='h-10  text-blue-800' key={i}>
+                          <td className='rounded-r-md bg-blue-50 pr-1 text-end text-xl'>•</td>
                           <td className='rounded-l-md bg-blue-50 pr-4 pl-2 text-center font-bold'>{i + 1}</td>
                           <td
                             className='max-w-[10rem] overflow-hidden text-ellipsis whitespace-nowrap bg-blue-50 text-start'
@@ -97,6 +99,7 @@ export default function UserUI({
                       );
                     return (
                       <tr className='' key={i}>
+                        <td className={'pr-1 text-end text-xl ' + ((player.connected) ? 'text-green-600' : 'text-white')}>•</td>
                         <td className='h-5 pr-4 pl-2 text-center font-bold'>{i + 1}</td>
                         <td
                           className='max-w-[10rem] overflow-hidden text-ellipsis whitespace-nowrap text-start'
