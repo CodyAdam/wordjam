@@ -6,7 +6,7 @@ import {boardFont} from './fontLoader';
 import {posCeil, posCentered, posFloor, screenToWorld, worldToScreen} from './posHelper';
 import {Draft} from "@/src/types/Draft";
 
-const colorDraft = '#FFA3FC'
+const colorDraft = '#FFA3FC77'
 
 export function drawGrid(ctx: CanvasRenderingContext2D, pan: Pan, width: number, height: number) {
   ctx.beginPath();
