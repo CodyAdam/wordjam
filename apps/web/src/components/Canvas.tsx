@@ -25,27 +25,29 @@ import {
 import {Draft} from "@/src/types/Draft";
 
 export default function Canvas({
-  placedLetters,
-  pan,
-  setPan,
-  inventory,
-  cursorPos,
-  setCursorPos,
-  highlight,
-  cursorDirection,
-  setCursorDirection,
-  draft,
+  placedLetters = new Map(),
+  pan = { offset: { x: 0, y: 0 }, scale: 50, origin: { x: 0, y: 0 } },
+  setPan = () => {},
+  inventory = [],
+  cursorPos = null,
+  setCursorPos = () => {},
+  highlight = null,
+  cursorDirection = true,
+  setCursorDirection = () => {},
+  draft = {letters: [], cursors: []},
+    isInteractive = true,
 }: {
-  placedLetters: BoardLetters;
-  pan: Pan;
-  setPan: (pan: Pan) => void;
-  inventory: InventoryLetter[];
-  cursorPos: Position | null;
-  highlight: null | Highlight;
-  setCursorPos: (cursor: Position | null) => void;
-  cursorDirection: boolean;
-  setCursorDirection: (direction: boolean) => void;
-  draft: Draft;
+  placedLetters?: BoardLetters;
+  pan?: Pan;
+  setPan?: (pan: Pan) => void;
+  inventory?: InventoryLetter[];
+  cursorPos?: Position | null;
+  highlight?: null | Highlight;
+  setCursorPos?: (cursor: Position | null) => void;
+  cursorDirection?: boolean;
+  setCursorDirection?: (direction: boolean) => void;
+  draft?: Draft;
+    isInteractive?: boolean;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDown, setIsDown] = useState(false);
@@ -125,6 +127,16 @@ export default function Canvas({
       else drawCursor(ctx, posCentered(cursorPos), cursorDirection, false, pan);
     }
   }, [height, pan, width, hoverPos, placedLetters, cursorPos, cursorDirection, inventory, highlight]);
+
+
+
+  if (!isInteractive) return (
+      <canvas
+          ref={canvasRef}
+          className='h-full w-full'
+          height={height}
+          width={width}></canvas>
+  )
 
   return (
     <canvas
