@@ -1,0 +1,26 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model db_board_letter {
+  id        Int    @id(map: "PK_797ae506e04c1150b37e5aaf649") @default(autoincrement())
+  placedBy  String @db.VarChar
+  timestamp BigInt
+  letter    String @db.VarChar
+  x         Int
+  y         Int
+}
+
+model db_player {
+  id             Int      @id(map: "PK_0d6d217910e9ea161a55381fdb6") @default(autoincrement())
+  username       String   @db.VarChar
+  token          String   @db.VarChar
+  letters        String[]
+  score          Int
+  cooldownTarget DateTime @db.Timestamp(6)
+}
