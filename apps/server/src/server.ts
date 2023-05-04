@@ -157,10 +157,13 @@ AppDataSource.initialize().then(async () => {
     });
 
     socket.on('disconnect', () => {
-      let player = socketToPlayer.get(socket)!!
-      delete player.draft
-      player.connected = false
-      socketToPlayer.delete(socket)
+      let player = socketToPlayer.get(socket)
+
+      if(player) {
+        delete player.draft
+        player.connected = false
+        socketToPlayer.delete(socket)
+      }
     })
 
     socket.on('onDraft', ({token, draft}: {token: string, draft: Draft}) => {
