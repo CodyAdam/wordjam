@@ -88,13 +88,34 @@ export default function Canvas({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [height, width, canvasRef]);
 
+  function isFree(p: Position): boolean{
+    if(inventory.find(i => i.position != null && i.position.x == p.x && i.position.y == p.y))
+      return false
+
+    if(cursorPos != null && cursorPos.x == p.x && cursorPos.y == p.y)
+      return false
+
+    let key = keyFromPos(p)
+    if(placedLetters.has(key))
+      return false
+
+    return true
+  }
+
   useEffect(() => {
     const ctx = canvasRef.current!.getContext('2d');
     if (!ctx || !width || !height) return;
     ctx.clearRect(0, 0, width, height);
 
     drawGrid(ctx, pan, width, height);
-    drawDraft(ctx, draft, pan)
+
+    let newDraft: Draft = {
+      cursors: draft.cursors.filter(c => isFree(c.position)),
+      letters: draft.letters.filter(c => isFree(c))
+    }
+
+
+    drawDraft(ctx, newDraft, pan)
     if (hoverPos) drawDarkenTile(ctx, posFloor(hoverPos), pan);
     drawPlacedLetters(ctx, placedLetters, pan, highlight);
     drawPlacedInventoryLetters(ctx, inventory, pan, highlight);
