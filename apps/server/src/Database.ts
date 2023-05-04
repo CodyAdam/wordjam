@@ -26,7 +26,7 @@ export class Database {
     }
     async load(): Promise<{players: Player[], letters: BoardLetter[]}> {
         let players = (await this.playerRepo.find()).map((p:DBPlayer): Player => {
-            return p
+            return {...p, connected: false}
         })
         let letters = (await this.letterRepo.find()).map((l: DBBoardLetter): BoardLetter => {
             return {
