@@ -1,7 +1,7 @@
 require('dotenv').config()
 import "reflect-metadata"
 import { Player } from './types/Player';
-import { Server } from 'socket.io';
+import {Server, Socket} from 'socket.io';
 import { GameInstance } from './GameInstance';
 import { generateLetters, generateToken, getDatePlusCooldown } from './Utils';
 import { LoginResponseType } from './types/responses/LoginResponseType';
@@ -10,6 +10,8 @@ import { PlacedResponse } from './types/responses/PlacedResponse';
 import { AddLetterResponse } from './types/responses/AddLetterResponse';
 import { Config } from './Config';
 import {AppDataSource} from "./data-source";
+
+let socketToPlayer: Map<Socket, Player> = new Map()
 
 AppDataSource.initialize().then(async () => {
 
@@ -55,6 +57,7 @@ AppDataSource.initialize().then(async () => {
       socket.emit('onScores', Array.from(gameInstance.players.values()).map((player: Player) => {
         return {username: player.username, score: player.score};
       }));
+      socketToPlayer.set(socket, player)
     });
 
     /**
@@ -96,6 +99,8 @@ AppDataSource.initialize().then(async () => {
       socket.emit('onScores', Array.from(gameInstance.players.values()).map((player: Player) => {
         return {username: player.username, score: player.score};
       }));
+
+      socketToPlayer.set(socket, newPlayer)
 
       console.log('New Player : ' + newPlayer.username);
     });
@@ -141,6 +146,12 @@ AppDataSource.initialize().then(async () => {
       sendScoreToAll();
       socket.emit('onInventory', player.letters);
     });
+
+    socket.on('disconnect', () => {
+      let player = socketToPlayer.get(socket)!!
+      delete player.draft
+      socketToPlayer.delete(socket)
+    })
 
     console.log('New web socket connection');
     socket.emit('onBoard', Array.from(gameInstance.board.board.values()));

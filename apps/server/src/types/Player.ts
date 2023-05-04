@@ -6,5 +6,5 @@ export type Player = {
     letters: string[]
     score: number
     cooldownTarget: Date
-    draft?: Draft|undefined
+    draft?: Draft
 }
