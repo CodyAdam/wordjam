@@ -1,3 +1,5 @@
+import {Draft} from "./types/Draft";
+
 require('dotenv').config()
 import "reflect-metadata"
 import { Player } from './types/Player';
@@ -34,9 +36,14 @@ AppDataSource.initialize().then(async () => {
   console.log('GameInstance created');
 
   let saveRate = parseInt(process.env.SAVE_DELAY_SECONDS || "3600")
+  let draftRate = 5
   setInterval(() => {
     gameInstance.save()
   }, saveRate*1000)
+  setInterval(() => {
+    let draft = gameInstance.getDraft()
+    io.emit('onDraft', draft)
+  }, draftRate*1000)
 
   io.on('connection', (socket) => {
     /**
@@ -151,6 +158,13 @@ AppDataSource.initialize().then(async () => {
       let player = socketToPlayer.get(socket)!!
       delete player.draft
       socketToPlayer.delete(socket)
+    })
+
+    socket.on('onDraft', ({token, draft}: {token: string, draft: Draft}) => {
+      const player = gameInstance.players.get(token);
+      if (player === undefined) return socket.emit('onError', 'Player not found');
+
+      player.draft = draft
     })
 
     console.log('New web socket connection');
