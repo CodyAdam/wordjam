@@ -219,7 +219,7 @@ export default function App() {
 
   useEffect(() => {
     if (appStage !== AppState.InGame) return;
-    
+
     let draft: Draft = {
       letters: [],
       cursors: [],
@@ -238,6 +238,10 @@ export default function App() {
     if (draft.letters.length > 0 || draft.cursors.length > 0)
       socket.emit('onDraft', { token: localStorage.getItem('token'), draft: draft });
   }, [appStage, cursorDirection, cursorPos, inventory, socket]);
+
+  useEffect(() => {
+    if (!isConnected && appStage === AppState.InGame) setAppStage(AppState.AwaitingLogin);
+  }, [appStage, isConnected]);
 
   if (appStage === AppState.AwaitingLogin)
     return (
