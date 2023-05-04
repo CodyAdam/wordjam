@@ -10,7 +10,7 @@ export default function NavBar() {
           <Image className='animate-wiggle' height={40} width={40} src={jamIcon} alt='jam'></Image>
           <h1 className='w-fit text-2xl font-bold text-gray-700 xl:text-5xl'>WordJam</h1>
         </div>
-        <div className='flex min-h-[4rem] w-full items-center justify-center overflow-hidden rounded-xl md:h-full'>
+        <div className='flex min-h-[4rem] w-full items-center justify-center overflow-hidden md:rounded-none rounded-xl md:h-full'>
           <Link
             href='/'
             className='flex h-full w-full items-center justify-center p-1 px-4 md:px-8 text-xl hover:bg-gray-100 md:w-fit xl:px-10 xl:text-2xl xl:font-semibold'
