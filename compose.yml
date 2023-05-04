@@ -12,6 +12,11 @@ services:
     depends_on:
       - db
     restart: always
+  api:
+    image: ghcr.io/codyadam/wordjam/api:main
+    restart: always
+    environment:
+      DATABASE_URL: postgresql://admin:admin@db:5432/wordjam?schema=public
   front:
     image: fgdou/esirjam-front
     restart: always

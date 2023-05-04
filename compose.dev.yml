@@ -20,7 +20,13 @@ services:
     build:
       context: .
       target: FRONT
-
+  api:
+    image: ghcr.io/codyadam/wordjam/api:main
+    restart: always
+    ports:
+      - 3001:3001
+    environment:
+      DATABASE_URL: postgresql://admin:admin@db:5432/wordjam?schema=public
   nginx:
     image: fgdou/esirjam-nginx
     build: nginx
