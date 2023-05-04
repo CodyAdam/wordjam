@@ -290,7 +290,7 @@ export default function App() {
         )}
 
         <main className='relative flex h-full bg-gray-100'>
-          <div className='pointer-events-none absolute left-0 right-0 top-3 z-30 flex select-none flex-col items-center justify-center font-mono text-xl font-bold opacity-70 scale-50 md:scale-100'>
+          <div className='pointer-events-none absolute left-0 right-0 md:top-3 bottom-56 md:bottom-auto z-30 flex select-none flex-col items-center justify-center font-mono text-xl font-bold opacity-70 scale-70 md:scale-100'>
             <h1>BETA VERSION</h1>
             <h2 className='text-sm font-normal'>Ending the 10th of May, 8pm CEST</h2>
           </div>
