@@ -1,21 +1,21 @@
 'use client';
-import {useSocket} from '@/src/hooks/useSocket';
-import {useCallback, useEffect, useState} from 'react';
-import {AppState} from '@/src/lib/AppState';
-import {HIGHLIGHT_FADE_DURATION, SOCKET_URL, TILE_SIZE} from '@/src/lib/constants';
+import { useSocket } from '@/src/hooks/useSocket';
+import { useCallback, useEffect, useState } from 'react';
+import { AppState } from '@/src/lib/AppState';
+import { HIGHLIGHT_FADE_DURATION, SOCKET_URL, TILE_SIZE } from '@/src/lib/constants';
 import UserUI from '@/src/components/UserUI';
 import Login from '@/src/components/Login/Login';
 import Canvas from '@/src/components/Canvas';
-import {useCursor} from '@/src/hooks/useCursor';
-import {BoardLetter, Direction, LoginResponseType, Player} from '@/src/types/api';
-import {BoardLetters, Highlight, InventoryLetter} from '@/src/types/board';
-import {Pan} from '@/src/types/canvas';
-import {toPlaceWord} from '@/src/utils/submitHelper';
-import {toast, ToastContainer} from 'react-toastify';
+import { useCursor } from '@/src/hooks/useCursor';
+import { BoardLetter, Direction, LoginResponseType, Player } from '@/src/types/api';
+import { BoardLetters, Highlight, InventoryLetter } from '@/src/types/board';
+import { Pan } from '@/src/types/canvas';
+import { toPlaceWord } from '@/src/utils/submitHelper';
+import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.min.css';
 import Confetti from 'react-confetti';
-import {keyFromPos} from '@/src/utils/posHelper';
-import {setUsername} from '@/src/utils/user';
+import { keyFromPos } from '@/src/utils/posHelper';
+import { setUsername } from '@/src/utils/user';
 import useWindowSize from '@/src/hooks/useWindowSize';
 import {Draft} from "@/src/types/Draft";
 import NavBar from "@/src/components/NavBar";
@@ -36,7 +36,7 @@ export default function App() {
   const [scores, setScores] = useState<Player[]>([]);
   const { width, height } = useWindowSize();
 
-  const [draft, setDraft] = useState<Draft>({cursors: [], letters: []})
+  const [draft, setDraft] = useState<Draft>({ cursors: [], letters: [] });
 
   const { isConnected, socket } = useSocket(SOCKET_URL, {
     events: {
@@ -92,9 +92,8 @@ export default function App() {
         }, 1000);
       },
       onDraft: (draft: Draft) => {
-        if(appStage != AppState.InGame)
-          return
-        setDraft(draft)
+        if (appStage != AppState.InGame) return;
+        setDraft(draft);
       },
       onUsername: (username: string) => {
         setUsername(username);
@@ -211,29 +210,6 @@ export default function App() {
     };
   }, [appStage, cursorPos, inventory, onSubmit, placeInventoryLetter]);
 
-  setTimeout(() => {
-    if(appStage != AppState.InGame)
-      return
-
-    let draft: Draft = {
-      letters: [],
-      cursors: []
-    }
-
-    if(cursorPos)
-    draft.cursors.push({
-      position: cursorPos,
-      direction: (cursorDirection) ? Direction.RIGHT : Direction.DOWN
-    })
-
-    inventory.forEach(i => {
-      if(i.position)
-        draft.letters.push(i.position)
-    })
-
-    socket.emit('onDraft', {token: localStorage.getItem('token'), draft: draft})
-  }, 5*1000)
-
   function onMoveLetter(from: number, to: number) {
     const newInventory = [...inventory];
     // do not swap, only move
@@ -241,6 +217,32 @@ export default function App() {
     newInventory.splice(to, 0, letter);
     setInventory(newInventory);
   }
+
+  useEffect(() => {
+    if (appStage !== AppState.InGame) return;
+
+    let draft: Draft = {
+      letters: [],
+      cursors: [],
+    };
+
+    if (cursorPos)
+      draft.cursors.push({
+        position: cursorPos,
+        direction: cursorDirection ? Direction.RIGHT : Direction.DOWN,
+      });
+
+    inventory.forEach((i) => {
+      if (i.position) draft.letters.push(i.position);
+    });
+
+    if (draft.letters.length > 0 || draft.cursors.length > 0)
+      socket.emit('onDraft', { token: localStorage.getItem('token'), draft: draft });
+  }, [appStage, cursorDirection, cursorPos, inventory, socket]);
+
+  useEffect(() => {
+    if (!isConnected && appStage === AppState.InGame) setAppStage(AppState.AwaitingLogin);
+  }, [appStage, isConnected]);
 
   if (appStage === AppState.AwaitingLogin)
     return (
@@ -293,7 +295,7 @@ export default function App() {
         )}
 
         <main className='relative flex h-full bg-gray-100'>
-          <div className='pointer-events-none absolute left-0 right-0 top-3 z-30 flex select-none flex-col items-center justify-center font-mono text-xl font-bold'>
+          <div className='scale-70 pointer-events-none absolute left-0 right-0 bottom-56 z-30 flex select-none flex-col items-center justify-center font-mono text-xl font-bold opacity-70 md:top-3 md:bottom-auto md:scale-100'>
             <h1>BETA VERSION</h1>
             <h2 className='text-sm font-normal'>Ending the 10th of May, 8pm CEST</h2>
           </div>
