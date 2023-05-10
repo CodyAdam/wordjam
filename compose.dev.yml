@@ -21,7 +21,8 @@ services:
       context: .
       target: FRONT
   api:
-    image: ghcr.io/codyadam/wordjam/api:main
+    image: fgdou/esirjam-api
+    build: apps/api
     restart: always
     ports:
       - 3001:3001
@@ -35,6 +36,7 @@ services:
     depends_on:
       - front
       - back
+      - api
   db:
     image: postgres:15.2
     volumes:
