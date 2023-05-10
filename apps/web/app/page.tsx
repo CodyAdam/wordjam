@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { AppState } from '@/src/lib/AppState';
 import { HIGHLIGHT_FADE_DURATION, SOCKET_URL, TILE_SIZE } from '@/src/lib/constants';
 import UserUI from '@/src/components/UserUI';
-import Login from '@/src/components/Login';
+import Login from '@/src/components/Login/Login';
 import Canvas from '@/src/components/Canvas';
 import { useCursor } from '@/src/hooks/useCursor';
 import { BoardLetter, Direction, LoginResponseType, Player } from '@/src/types/api';
@@ -17,7 +17,8 @@ import Confetti from 'react-confetti';
 import { keyFromPos } from '@/src/utils/posHelper';
 import { setUsername } from '@/src/utils/user';
 import useWindowSize from '@/src/hooks/useWindowSize';
-import { Draft } from '@/src/types/Draft';
+import {Draft} from "@/src/types/Draft";
+import NavBar from "@/src/components/NavBar";
 
 let cooldownInterval: string | number | NodeJS.Timeout | undefined = undefined;
 let highlightInterval: string | number | NodeJS.Timeout | undefined = undefined;
@@ -245,13 +246,13 @@ export default function App() {
 
   if (appStage === AppState.AwaitingLogin)
     return (
-      <>
-        <main className='relative flex h-full bg-gray-100'>
-          <div className='pointer-events-none absolute left-0 right-0 top-3 z-30 flex select-none flex-col items-center justify-center font-mono text-xl font-bold'>
-            <h1>BETA VERSION</h1>
-            <h2 className='text-sm font-normal'>Ending the 10th of May, 8pm CEST</h2>
-          </div>
-          <Canvas
+      <div className="relative h-full overflow-hidden">
+        <div className="absolute flex h-full w-full flex-col bg-black/20 backdrop-blur-sm p-6 gap-4">
+          <NavBar></NavBar>
+          <Login socket={socket} isConnected={isConnected} />
+        </div>
+
+        <Canvas
             placedLetters={placedLetters}
             pan={pan}
             setPan={(p) => setPan(p)}
@@ -262,9 +263,8 @@ export default function App() {
             cursorDirection={cursorDirection}
             setCursorDirection={setCursorDirection}
             draft={draft}
-          />
-          <Login socket={socket} isConnected={isConnected} />
-        </main>
+        />
+
         <ToastContainer
           position='top-center'
           autoClose={4000}
@@ -278,12 +278,12 @@ export default function App() {
           draggable
           theme='light'
         />
-      </>
+      </div>
     );
 
   if (appStage === AppState.InGame)
     return (
-      <>
+      <div className="relative flex h-full items-center justify-center overflow-hidden">
         {isConfetti && (
           <Confetti
             gravity={0.1}
@@ -343,7 +343,7 @@ export default function App() {
           draggable
           theme='light'
         />
-      </>
+      </div>
     );
 
   return null;
