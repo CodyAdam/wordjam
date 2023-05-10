@@ -61,9 +61,7 @@ AppDataSource.initialize().then(async () => {
       socket.emit('onInventory', player.letters);
       socket.emit('onCooldown', gameInstance.playerCooldown(player.token));
 
-      socket.emit('onScores', Array.from(gameInstance.players.values()).map((player: Player) => {
-        return {username: player.username, score: player.score, connected: player.connected};
-      }));
+      sendScoreToAll()
       socketToPlayer.set(socket, player)
       player.connected = true
     });
@@ -105,9 +103,7 @@ AppDataSource.initialize().then(async () => {
       socket.emit('onToken', newPlayer.token);
       socket.emit('onInventory', newPlayer.letters);
       socket.emit('onCooldown', gameInstance.playerCooldown(newPlayer.token));
-      socket.emit('onScores', Array.from(gameInstance.players.values()).map((player: Player) => {
-        return {username: player.username, score: player.score, connected: player.connected};
-      }));
+      sendScoreToAll();
 
       socketToPlayer.set(socket, newPlayer)
 
@@ -187,7 +183,7 @@ AppDataSource.initialize().then(async () => {
   function sendScoreToAll() {
     io.emit('onScores', Array.from(gameInstance.players.values()).map((player: Player) => {
       return {username: player.username, score: player.score, connected: player.connected};
-    }));
+    }).filter(s => s.score != 0));
   }
 
   if (devMode) {
