@@ -86,8 +86,8 @@ export default function UserUI({
                     if (username === player.username)
                       return (
                         <tr className='h-10  text-blue-800' key={i}>
-                          <td className='rounded-r-md bg-blue-50 pr-1 text-end text-xl'>•</td>
-                          <td className='rounded-l-md bg-blue-50 pr-4 pl-2 text-center font-bold'>{i + 1}</td>
+                          <td className='rounded-l-md bg-blue-50 pr-1 text-end text-xl'>•</td>
+                          <td className='bg-blue-50 pr-4 pl-2 text-center font-bold'>{i + 1}</td>
                           <td
                             className='max-w-[10rem] overflow-hidden text-ellipsis whitespace-nowrap bg-blue-50 text-start'
                             title={player.username}
