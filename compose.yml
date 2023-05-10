@@ -27,6 +27,7 @@ services:
     depends_on:
       - front
       - back
+      - api
     restart: always
   db:
     image: postgres:15.2
