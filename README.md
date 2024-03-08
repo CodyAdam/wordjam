@@ -1,5 +1,11 @@
 # WordJam
+
 WordJam is a Scabble like mass multiplayer game. The goal is to win points by placing words attached to others.
+
+![screenshot](docs/Screenshot_20231011_143839.png)
+![screenshot](docs/Screenshot_20231011_143824.png)
+![screenshot](docs/Screenshot_20231011_143624.png)
+![screenshot](docs/Screenshot_20231011_143755.png)
 
 # Members
 
